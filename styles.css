@@ -69,3 +69,19 @@ main{padding:16px 16px 90px}.card{background:var(--card);border:1px solid var(--
 @media(max-width:360px){.progress-deltas{grid-template-columns:1fr 1fr}.saved-collage{grid-template-columns:80px 1fr}.saved-collage img{width:80px}}
 
 .progress-deltas.two{grid-template-columns:1fr 1fr}
+
+textarea{width:100%;margin-top:6px;padding:14px 13px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);outline:none;resize:vertical;font:inherit}
+textarea:focus{border-color:#abc4ad;box-shadow:0 0 0 4px rgba(95,141,102,.09)}
+.wellness-card{min-height:480px}
+.wellness-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px}
+.wellness-heading span{font-size:12px;color:var(--muted);font-weight:700}
+.wellness-track{height:7px;background:#e4ded4;border-radius:99px;overflow:hidden;margin:10px 0 20px}
+.wellness-track i{display:block;height:100%;width:25%;background:var(--green);border-radius:99px;transition:width .2s ease}
+.wellness-actions{margin-top:20px}
+.readiness-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:18px}
+.readiness-btn{height:48px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font-weight:800}
+.readiness-btn.selected{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 7px 18px rgba(95,141,102,.2)}
+.readiness-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:7px}
+.short-summary{margin-top:16px;border:1px solid var(--line);border-radius:18px;padding:4px 15px;background:#faf7f0}
+.summary-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.summary-row:last-child{border-bottom:0}.summary-row span{color:var(--muted);font-size:12px}.summary-row b{text-align:right;font-size:13px}
