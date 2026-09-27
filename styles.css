@@ -113,3 +113,30 @@ textarea:focus{border-color:#abc4ad;box-shadow:0 0 0 4px rgba(95,141,102,.09)}
 .discount-note b{display:block;color:var(--green-dark);font-size:13px}.discount-note span{display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-top:3px}
 .product-disclaimer{font-size:9px;line-height:1.45;color:var(--muted);margin:12px 0 0}
 @media(max-width:360px){.plan-weight-route b{font-size:14px}.plan-change-grid{grid-template-columns:1fr 1fr 1fr}}
+
+.wellness-movement{margin-top:8px}
+.daily-targets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.daily-targets span{padding:10px 11px;border-radius:14px;background:#f4f8f1;color:var(--green-dark);font-size:11px;font-weight:800;text-align:center}
+
+.nutrition-hero{background:linear-gradient(135deg,#e6f2e2,#fff5e8);border:0}
+.nutrition-hero h3{margin:7px 0 6px;font-size:24px}
+.nutrition-target-box{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.nutrition-target-box span{padding:11px;border-radius:14px;background:#fff9;text-align:center;font-size:12px;font-weight:800;color:var(--green-dark)}
+.meal-step{display:grid;grid-template-columns:74px 1fr;gap:12px;padding:15px 0;border-bottom:1px solid var(--line)}
+.meal-step:last-child{border-bottom:0}.meal-time{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--green-dark);padding-top:2px}
+.meal-copy b{display:block;font-size:15px}.meal-copy span{display:block;font-size:12px;line-height:1.5;margin-top:4px}
+.meal-copy small{display:block;font-size:10px;line-height:1.45;color:var(--muted);margin-top:5px}
+.portion-guide{display:block;width:100%;border-radius:20px;border:1px solid var(--line);margin:14px 0;background:#fff}
+.target-detail{margin:12px 0}.big-target{font-size:28px;font-weight:900;color:var(--green-dark)}.big-target small{font-size:12px;font-weight:700;color:var(--muted)}
+.menu-suggestions{margin-top:12px}.menu-suggestion{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.menu-suggestion:last-child{border-bottom:0}.menu-suggestion b{display:block;font-size:13px}.menu-suggestion small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.menu-suggestion>span{font-size:11px;font-weight:900;color:var(--green-dark)}
+.app-link{display:block;text-align:center;text-decoration:none}
+.hydration-note{display:grid;grid-template-columns:95px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.hydration-note:last-child{border-bottom:0}.hydration-note b{font-size:12px}.hydration-note span{font-size:11px;color:var(--muted);line-height:1.45}
+.plan-health-note{font-size:9px;line-height:1.5;color:var(--muted);padding:0 4px}
+
+.workout-hero{background:linear-gradient(135deg,#e7f0e4,#eef3ff);border:0}.workout-hero h3{margin:7px 0 5px;font-size:23px}
+.exercise-item{display:grid;grid-template-columns:44px 1fr;gap:11px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}.exercise-item:last-child{border-bottom:0}
+.exercise-icon{width:40px;height:40px;border-radius:13px;background:var(--soft);display:grid;place-items:center;font-size:18px}
+.exercise-item b{display:block;font-size:13px}.exercise-item span{display:block;font-size:11px;line-height:1.5;color:var(--muted);margin-top:3px}
+.workout-loop-note{margin-top:12px;padding:11px;border-radius:14px;background:#f4f8f1;font-size:11px;font-weight:800;color:var(--green-dark)}
+@media(max-width:360px){.daily-targets,.nutrition-target-box{grid-template-columns:1fr}.meal-step{grid-template-columns:64px 1fr}.hydration-note{grid-template-columns:80px 1fr}}
