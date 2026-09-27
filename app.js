@@ -478,7 +478,7 @@ function pagePlan(){
 
   '<section class="card">'+
     '<div class="row"><div><div class="eyebrow">Что делать сегодня</div><h3 class="photo-title">План на день</h3></div><span class="pill">Шаг за шагом</span></div>'+
-    planActionCard("🥗","Питание","Утром: Алоэ + коктейль. Днём: белковые перекусы и правильная тарелка. Вечером: лёгкий белковый вариант по плану.","План подстраивается под вашу цель и текущий вес.","nutrition")+
+    planActionCard("🥗","Питание","Утром: Алоэ + Травяной напиток + коктейль. Днём: белковые перекусы и правильная тарелка. Вечером: белок + овощи без гарнира.","Белковая цель пересчитывается автоматически по текущему весу.","nutrition")+
     planActionCard("🏋🏻‍♀️","Движение",(assessment?.minutes_available||10)+" минут · "+(assessment?.training_place||"Дома")+". Начинаем с уровня, который можно повторять регулярно.","Нагрузка растёт постепенно по мере прогресса.","workouts")+
     planActionCard("💧","Вода","Суточный ориентир рассчитывается по текущему весу. Алоэ можно включить в ваш водный ритуал по инструкции продукта.","CR7 Drive — только как спортивный напиток при подходящей нагрузке, не вместо всей воды.","nutrition")+
     planActionCard("🔥","30 дней","Каждый день открывается новая тема. Выполняйте только сегодняшний день — следующие пока закрыты 🔒.","Почему: маленькие ежедневные действия легче превратить в привычку.","marathon")+
@@ -487,7 +487,7 @@ function pagePlan(){
 
   '<section class="card product-plan-card">'+
     '<div class="row"><div><div class="eyebrow">Продукты клуба</div><h3 class="photo-title">Herbalife в вашем плане</h3></div><span class="pill">С консультантом</span></div>'+
-    '<div class="product-plan-row"><div class="product-plan-icon">🥤</div><div><b>Формула 1 / протеиновый коктейль</b><small>Может быть частью структурированного завтрака или другого приёма пищи по вашему плану.</small></div></div>'+
+    '<div class="product-plan-row"><div class="product-plan-icon">🥤</div><div><b>Завтрак клуба</b><small>Алоэ + Травяной напиток + Формула 1. Если белка по расчёту не хватает — консультант может добавить дополнительный белковый компонент.</small></div></div>'+
     '<div class="product-plan-row"><div class="product-plan-icon">🌿</div><div><b>Растительный напиток Алоэ</b><small>Можно включить в водный ритуал по инструкции продукта и рекомендации консультанта.</small></div></div>'+
     '<div class="product-plan-row"><div class="product-plan-icon">⚡</div><div><b>CR7 Drive</b><small>Для тренировочных дней и интенсивной физической нагрузки — использовать согласно инструкции продукта.</small></div></div>'+
     '<div class="discount-note"><b>Ваша скидка на продукты</b><span>15–50% в зависимости от статуса клиента. Точный процент укажет ваш консультант.</span></div>'+
@@ -552,18 +552,12 @@ async function loadPlanProgress(){
 
 function buildNutritionTargets(currentWeight){
   const current=Number(currentWeight||assessment?.starting_weight_kg||0);
-  const target=assessment?.target_weight_kg!=null?Number(assessment.target_weight_kg):null;
-  const weightGoal=(assessment?.goals||[]).some(function(g){return g==="Снижение веса"||g==="Улучшить фигуру"});
-  const muscleGoal=(assessment?.goals||[]).includes("Набор мышечной массы");
-  const proteinWeight=(weightGoal&&target)?target:current;
+  const proteinWeight=current;
 
   let proteinMin=null,proteinMax=null;
-  if(proteinWeight>0&&weightGoal){
-    proteinMin=Math.round(proteinWeight*1.2);
-    proteinMax=Math.round(proteinWeight*1.6);
-  }else if(proteinWeight>0&&muscleGoal){
-    proteinMin=Math.round(proteinWeight*1.6);
-    proteinMax=Math.round(proteinWeight*2.0);
+  if(proteinWeight>0){
+    proteinMin=Math.round(proteinWeight*1.5);
+    proteinMax=Math.round(proteinWeight*1.8);
   }
 
   const waterLiters=current>0 ? Math.round(current*0.03*10)/10 : null;
@@ -592,12 +586,12 @@ function pageNutrition(){
 
   '<section class="card">'+
     '<div class="eyebrow">По порядку</div><h3>Как выглядит день</h3>'+
-    mealStep("Утро","Алоэ + протеиновый коктейль","Растительный напиток Алоэ — по инструкции продукта. Затем протеиновый коктейль. Ягоды или фрукт можно добавить утром, если это вписывается в ваш план.","Не нужно усложнять: сначала выстраиваем стабильный завтрак.")+
+    mealStep("Утро","Алоэ + Травяной напиток + коктейль","Сначала Растительный напиток Алоэ, затем Травяной напиток и протеиновый коктейль. Ягоды или фрукт можно добавить утром. Если по дневному расчёту не хватает белка — добавьте дополнительный белковый компонент, например Протеиновую смесь Формула 3 или другой согласованный с консультантом вариант.","Базовый минимум клуба: Алоэ + чай + коктейль. Дополнительный белок — только если его нужно добрать до вашей дневной цели.")+
     mealStep("Перекус","Белковый перекус","Выберите один белковый вариант: Protein Bites, протеиновый батончик, Formula 1 Express или протеиновые чипсы.","Смысл перекуса — не «добрать сладкое», а помочь удержать структуру питания.")+
     mealStep("Обед","Правильная тарелка","Половина тарелки — овощи/салат, четверть — источник белка, четверть — гарнир.","Если нет весов, используйте ориентир по ладони ниже.")+
     '<img class="portion-guide" src="portion-guide.svg" alt="Правильная тарелка и ориентир порций по руке">'+
     mealStep("Перекус","Ещё один белковый вариант","Если между обедом и ужином большой промежуток — используйте белковый перекус из меню клуба или обычную белковую еду.","Количество перекусов можно уменьшить, если вам комфортно без них.")+
-    mealStep("Ужин","Лёгкий белковый ужин","Вариант 1 — протеиновый коктейль. Вариант 2 — овощи + белок; гарнир можно сделать меньше в менее активный день, но полностью исключать его автоматически не нужно.","Выбираем вариант по голоду, активности и рекомендации консультанта.")+
+    mealStep("Ужин","Белок + овощи, без гарнира","Вариант 1 — протеиновый коктейль. Вариант 2 — мясо, рыба, яйца или другой белковый продукт + овощи/салат. Гарнир вечером в этом плане не используем.","Сохраняем ужин простым: белок + овощи или коктейль.")+
   '</section>'+
 
   '<section class="card">'+
@@ -617,8 +611,8 @@ function pageNutrition(){
   '<section class="card">'+
     '<div class="eyebrow">Водный баланс</div><h3 id="waterTargetTitle">Ваш ориентир</h3>'+
     '<p id="waterTargetText" class="muted">Считаем по текущему весу…</p>'+
-    '<div class="hydration-note"><b>🌿 Алоэ</b><span>Можно включить в водный ритуал по инструкции продукта.</span></div>'+
-    '<div class="hydration-note"><b>⚡ CR7 Drive</b><span>Используйте как спортивный напиток при интенсивной физической нагрузке согласно инструкции; это не замена всей воде за день.</span></div>'+
+    '<div class="hydration-note"><b>🌿 Алоэ</b><span>Можно включить в водный ритуал: Растительный напиток Алоэ в российских материалах Herbalife используется для поддержки водного баланса и пищеварения.</span></div>'+
+    '<div class="hydration-note"><b>⚡ CR7 Drive</b><span>Гипотонический спортивный напиток с электролитами для восполнения водного баланса до и после физической нагрузки. Используйте согласно инструкции продукта.</span></div>'+
   '</section>'+
 
   '<p class="plan-health-note">Ориентиры в приложении предназначены для здоровых взрослых и не заменяют медицинские рекомендации. При заболеваниях почек/сердца, ограничении жидкости, беременности или других особых состояниях план нужно согласовать с врачом.</p>';
@@ -637,11 +631,9 @@ async function loadNutritionTargets(){
     const pd=$("proteinTargetDetail");
     if(pd){
       if(t.proteinMin){
-        const basis=(assessment?.target_weight_kg&&((assessment?.goals||[]).includes("Снижение веса")||(assessment?.goals||[]).includes("Улучшить фигуру")))
-          ? 'Расчёт сделан от целевого веса '+ruNumber(t.proteinWeight)+' кг.'
-          : 'Расчёт сделан от веса '+ruNumber(t.proteinWeight)+' кг.';
+        const basis='Расчёт: текущий вес '+ruNumber(t.proteinWeight)+' кг × 1,5–1,8. После каждого нового замера приложение пересчитывает цель автоматически.';
         pd.innerHTML='<div class="big-target">'+t.proteinMin+'–'+t.proteinMax+' г <small>белка в сутки</small></div>'+
-          '<p class="muted">'+basis+' Это ориентир, а не обязательная медицинская норма.</p>';
+          '<p class="muted">'+basis+'</p>';
       }else{
         pd.innerHTML='<p class="muted">Для вашей цели пока используем простое правило: добавляйте источник белка в каждый основной приём пищи. Точный диапазон консультант сможет настроить отдельно.</p>';
       }
