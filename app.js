@@ -167,7 +167,7 @@ async function bootstrap(){
 }
 
 function hasWeightGoal(){
-  return selectedGoals.includes("Снижение веса");
+  return selectedGoals.includes("Снижение веса") || selectedGoals.includes("Улучшить фигуру");
 }
 
 function goalChoiceHtml(value,label){
@@ -193,9 +193,12 @@ function renderOnboarding(){
       '<h2>Какая у вас цель?</h2>'+
       '<p class="muted">Можно выбрать несколько вариантов.</p>'+
       '<div class="choices" id="shortGoalChoices">'+
-        goalChoiceHtml("Снижение веса","Снижение веса / фигура")+
-        goalChoiceHtml("Улучшить самочувствие","Лучшее самочувствие")+
-        goalChoiceHtml("Набор мышечной массы","Набор мышечной массы / спортивная форма")+
+        goalChoiceHtml("Снижение веса","Снижение веса")+
+        goalChoiceHtml("Улучшить фигуру","Улучшить фигуру")+
+        goalChoiceHtml("Набор мышечной массы","Набор мышечной массы")+
+        goalChoiceHtml("Больше энергии","Больше энергии")+
+        goalChoiceHtml("Улучшить самочувствие","Улучшить самочувствие")+
+        goalChoiceHtml("Наладить питание","Наладить питание")+
       '</div>';
     content.querySelectorAll("[data-short-goal]").forEach(function(btn){
       btn.addEventListener("click",function(){
