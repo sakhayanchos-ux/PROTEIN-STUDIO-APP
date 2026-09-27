@@ -37,7 +37,12 @@ async function chooseTheme(theme){
       theme_preference:theme,
       updated_at:new Date().toISOString()
     }).eq("id",me.id);
-    if(!error)profile.theme_preference=theme;
+    if(error){
+      console.error("Theme save failed",error);
+      if(label)label.textContent="Тема применена на этом телефоне. Серверное сохранение не удалось.";
+    }else{
+      profile.theme_preference=theme;
+    }
   }
 }
 function readConfig(){
