@@ -48,53 +48,22 @@
   </section>
 
   <section id="onboardingScreen" class="auth-screen hidden">
-    <div class="auth-card">
+    <div class="auth-card wellness-card">
       <div class="brand"><span>PROTEIN</span> STUDIO</div>
-      <div class="steps"><i class="on"></i><i></i><i></i><i></i></div>
 
-      <div data-step="1">
-        <div class="eyebrow">Профиль-оценка</div>
-        <h2>Какие у вас цели?</h2>
-        <p class="muted goal-hint">Можно выбрать несколько вариантов</p>
-        <div class="choices" id="goalChoices">
-          <button data-goal="Снижение веса">Снижение веса</button>
-          <button data-goal="Улучшить фигуру">Улучшить фигуру</button>
-          <button data-goal="Набор мышечной массы">Набор мышечной массы</button>
-          <button data-goal="Больше энергии">Больше энергии</button>
-          <button data-goal="Улучшить самочувствие">Улучшить самочувствие</button>
-          <button data-goal="Наладить питание">Наладить питание</button>
-        </div>
-        <button class="btn primary next-step" data-next="2">Продолжить</button>
+      <div class="wellness-heading">
+        <div class="eyebrow">Wellness-оценка</div>
+        <span id="wellnessCounter">Вопрос 1 из 16</span>
       </div>
+      <div class="wellness-track"><i id="wellnessBar"></i></div>
 
-      <div data-step="2" class="hidden">
-        <h2>Стартовые данные</h2>
-        <p class="muted">Только два показателя — чтобы было быстро и удобно.</p>
-        <div class="two-col">
-          <label>Вес, кг<input id="weight" type="number" step="0.1" inputmode="decimal"></label>
-          <label>Талия, см<input id="waist" type="number" step="0.1" inputmode="decimal"></label>
-        </div>
-        <div class="step-actions"><button class="btn ghost back-step" data-prev="1">← Назад</button><button class="btn primary next-step" data-next="3">Продолжить</button></div>
-      </div>
+      <div id="wellnessContent"></div>
 
-      <div data-step="3" class="hidden">
-        <h2>Ваш ритм</h2>
-        <label>Сколько тренировок в неделю сейчас?<input id="workouts" type="number" min="0" max="14" value="0"></label>
-        <label>Сколько минут готовы выделять?
-          <select id="minutes"><option>10</option><option selected>15</option><option>20</option><option>30</option><option>45</option></select>
-        </label>
-        <label>Где удобнее заниматься?
-          <select id="place"><option>Дома</option><option>В клубе</option><option>В зале</option><option>На улице</option></select>
-        </label>
-        <label>Сколько стаканов воды обычно пьёте?<input id="water" type="number" min="0" max="20" value="4"></label>
-        <div class="step-actions"><button class="btn ghost back-step" data-prev="2">← Назад</button><button class="btn primary next-step" data-next="4">Продолжить</button></div>
+      <div class="step-actions wellness-actions">
+        <button class="btn ghost" id="wellnessBackBtn">← Назад</button>
+        <button class="btn primary" id="wellnessNextBtn">Продолжить</button>
       </div>
-
-      <div data-step="4" class="hidden">
-        <h2>Профиль готов 🌿</h2>
-        <p class="muted">Создаём ваш первый персональный план. Позже консультант сможет его корректировать.</p>
-        <div class="step-actions"><button class="btn ghost back-step" data-prev="3">← Назад</button><button class="btn primary" id="finishOnboardingBtn">Создать мой план</button></div><p id="onboardingMessage" class="message"></p>
-      </div>
+      <p id="onboardingMessage" class="message"></p>
     </div>
   </section>
 
