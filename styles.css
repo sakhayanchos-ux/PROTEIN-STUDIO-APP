@@ -140,3 +140,252 @@ textarea:focus{border-color:#abc4ad;box-shadow:0 0 0 4px rgba(95,141,102,.09)}
 .exercise-item b{display:block;font-size:13px}.exercise-item span{display:block;font-size:11px;line-height:1.5;color:var(--muted);margin-top:3px}
 .workout-loop-note{margin-top:12px;padding:11px;border-radius:14px;background:#f4f8f1;font-size:11px;font-weight:800;color:var(--green-dark)}
 @media(max-width:360px){.daily-targets,.nutrition-target-box{grid-template-columns:1fr}.meal-step{grid-template-columns:64px 1fr}.hydration-note{grid-template-columns:80px 1fr}}
+
+
+/* ===== PROTEIN STUDIO · NEON GLASS THEME ===== */
+:root{
+  --bg:#05060d;
+  --card:rgba(14,17,31,.78);
+  --ink:#f5f7ff;
+  --muted:#a8aec4;
+  --green:#78ff63;
+  --green-dark:#a4ff92;
+  --soft:rgba(120,255,99,.12);
+  --line:rgba(151,163,255,.18);
+  --shadow:0 18px 55px rgba(0,0,0,.38),0 0 34px rgba(85,118,255,.07);
+}
+html,body{
+  background:
+    radial-gradient(circle at 10% 8%,rgba(255,0,190,.16),transparent 25%),
+    radial-gradient(circle at 86% 14%,rgba(0,220,255,.15),transparent 24%),
+    radial-gradient(circle at 50% 92%,rgba(115,255,64,.10),transparent 27%),
+    #05060d;
+  color:var(--ink);
+}
+body{position:relative;overflow-x:hidden}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.72;
+  background:
+    linear-gradient(180deg,rgba(255,0,200,.82),rgba(255,0,200,.04) 55%,transparent 82%) 8% -4%/2px 48% no-repeat,
+    linear-gradient(180deg,rgba(0,225,255,.82),rgba(0,225,255,.05) 52%,transparent 80%) 19% 4%/2px 61% no-repeat,
+    linear-gradient(180deg,rgba(119,255,53,.80),rgba(119,255,53,.04) 50%,transparent 78%) 31% -7%/2px 55% no-repeat,
+    linear-gradient(180deg,rgba(255,45,185,.86),rgba(255,45,185,.04) 48%,transparent 80%) 44% 2%/2px 70% no-repeat,
+    linear-gradient(180deg,rgba(70,104,255,.88),rgba(70,104,255,.04) 56%,transparent 84%) 57% -2%/2px 65% no-repeat,
+    linear-gradient(180deg,rgba(255,220,25,.78),rgba(255,220,25,.03) 45%,transparent 76%) 67% 5%/2px 52% no-repeat,
+    linear-gradient(180deg,rgba(0,255,160,.82),rgba(0,255,160,.04) 55%,transparent 80%) 79% -5%/2px 66% no-repeat,
+    linear-gradient(180deg,rgba(255,0,150,.86),rgba(255,0,150,.04) 46%,transparent 78%) 91% 6%/2px 58% no-repeat,
+    radial-gradient(circle at 12% 17%,rgba(255,0,190,.9) 0 3px,transparent 6px),
+    radial-gradient(circle at 23% 31%,rgba(0,225,255,.85) 0 3px,transparent 7px),
+    radial-gradient(circle at 38% 12%,rgba(255,215,35,.9) 0 3px,transparent 7px),
+    radial-gradient(circle at 63% 28%,rgba(125,255,60,.9) 0 3px,transparent 7px),
+    radial-gradient(circle at 84% 38%,rgba(55,125,255,.95) 0 4px,transparent 9px),
+    radial-gradient(circle at 73% 62%,rgba(255,0,190,.82) 0 3px,transparent 8px);
+  filter:drop-shadow(0 0 8px rgba(100,120,255,.25));
+}
+.shell{
+  position:relative;
+  z-index:1;
+  background:transparent;
+}
+.auth-screen{background:transparent}
+.auth-card,.card{
+  background:linear-gradient(145deg,rgba(17,20,39,.88),rgba(11,13,27,.74));
+  border:1px solid rgba(165,177,255,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 18px 50px rgba(0,0,0,.34),
+    0 0 28px rgba(64,113,255,.055);
+  backdrop-filter:blur(18px) saturate(1.2);
+  -webkit-backdrop-filter:blur(18px) saturate(1.2);
+}
+.auth-card{border-radius:30px}
+.brand{
+  color:#fff;
+  text-shadow:0 0 20px rgba(114,255,99,.12);
+}
+.brand span{
+  color:transparent;
+  background:linear-gradient(90deg,#76ff60,#35e8ff);
+  -webkit-background-clip:text;
+  background-clip:text;
+  filter:drop-shadow(0 0 8px rgba(116,255,96,.28));
+}
+h1,h2,h3,.section-title,.drawer-brand,.topbar strong{color:#f7f8ff}
+.muted,.message,label,.drawer-person,.meal-copy small,.exercise-item span,.product-plan-row small,.plan-health-note{color:var(--muted)}
+input,select,textarea{
+  background:rgba(8,11,23,.82);
+  color:#f7f8ff;
+  border-color:rgba(152,167,255,.23);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.01);
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#4ee7ff;
+  box-shadow:0 0 0 3px rgba(78,231,255,.10),0 0 20px rgba(78,231,255,.10);
+}
+input::placeholder,textarea::placeholder{color:#737b96}
+.btn.primary,.primary{
+  background:linear-gradient(100deg,#6bff62,#31e8ff 62%,#6e82ff);
+  color:#05100d;
+  box-shadow:0 0 20px rgba(78,239,255,.18),0 8px 30px rgba(0,0,0,.26);
+  text-shadow:none;
+}
+.btn.ghost,.ghost{
+  background:rgba(104,255,112,.10);
+  color:#b9ffad;
+  border:1px solid rgba(118,255,102,.17);
+}
+.eyebrow{
+  color:#89f8ff;
+  text-shadow:0 0 12px rgba(65,226,255,.32);
+}
+.wellness-track,.steps i{background:rgba(255,255,255,.08)}
+.wellness-track i,.steps i.on{
+  background:linear-gradient(90deg,#7aff62,#39eaff,#bd42ff);
+  box-shadow:0 0 16px rgba(64,232,255,.35);
+}
+.choices button,.readiness-btn{
+  background:rgba(10,13,27,.82);
+  color:#f3f5ff;
+  border-color:rgba(151,163,255,.18);
+}
+.choices button.selected,.readiness-btn.selected{
+  background:linear-gradient(120deg,rgba(110,255,91,.16),rgba(43,224,255,.15),rgba(223,50,255,.12));
+  color:#fff;
+  border-color:rgba(84,236,255,.42);
+  box-shadow:0 0 20px rgba(56,221,255,.11);
+}
+.choices button.selected::after{
+  background:linear-gradient(135deg,#76ff5d,#36e6ff);
+  color:#05100d;
+  box-shadow:0 0 14px rgba(92,240,255,.25);
+}
+.drawer{
+  background:rgba(5,7,16,.94);
+  border-right:1px solid rgba(120,144,255,.20);
+  box-shadow:24px 0 60px rgba(0,0,0,.5),8px 0 35px rgba(35,106,255,.08);
+  backdrop-filter:blur(22px);
+}
+.nav{color:#e9ecff}
+.nav.active{
+  background:linear-gradient(90deg,rgba(120,255,96,.15),rgba(47,225,255,.10));
+  color:#baffae;
+  box-shadow:inset 0 0 0 1px rgba(98,238,255,.12);
+}
+.backdrop{background:rgba(0,0,8,.68);backdrop-filter:blur(3px)}
+.topbar{
+  background:rgba(5,7,16,.82);
+  border-bottom:1px solid rgba(135,153,255,.14);
+  backdrop-filter:blur(20px);
+}
+.menu-btn{
+  background:rgba(16,19,35,.90);
+  border-color:rgba(77,224,255,.25);
+  color:#62edff;
+  box-shadow:0 0 20px rgba(66,218,255,.10);
+}
+.hero,.plan-hero,.nutrition-hero,.workout-hero{
+  background:
+    radial-gradient(circle at 12% 15%,rgba(255,0,180,.14),transparent 32%),
+    radial-gradient(circle at 90% 8%,rgba(0,220,255,.17),transparent 30%),
+    linear-gradient(135deg,rgba(18,23,45,.96),rgba(10,14,29,.92));
+  border:1px solid rgba(113,156,255,.16);
+}
+.hero h1{color:#fff;text-shadow:0 0 24px rgba(81,216,255,.10)}
+.plan-final-goal,.big-target,.meal-time,.menu-suggestion>span,.workout-loop-note,.discount-note b{
+  color:#9cff8d;
+  text-shadow:0 0 12px rgba(115,255,94,.15);
+}
+.pill{
+  background:rgba(65,230,255,.09);
+  color:#8df5ff;
+  border:1px solid rgba(75,230,255,.14);
+}
+.plan-progress-line{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(130,155,255,.12);
+}
+.plan-progress-line i{
+  background:linear-gradient(90deg,#6eff5f,#27e6ff 60%,#d745ff);
+  box-shadow:0 0 18px rgba(57,230,255,.35);
+}
+.plan-progress-meta b{color:#b8ffac}
+.plan-change-grid>div,.progress-deltas>div,.mini,.short-summary{
+  background:rgba(6,9,21,.58);
+  border-color:rgba(144,160,255,.15);
+}
+.plan-action{
+  color:#f5f6ff;
+  border-color:rgba(145,163,255,.13);
+}
+.plan-action-icon,.exercise-icon,.task-icon,.day-num,.product-plan-icon{
+  background:linear-gradient(135deg,rgba(116,255,98,.12),rgba(43,225,255,.10));
+  border:1px solid rgba(90,225,255,.10);
+}
+.plan-action-copy span{color:#eef0fb}
+.plan-action-arrow{color:#62eaff}
+.product-plan-card{
+  background:
+    radial-gradient(circle at 85% 12%,rgba(0,225,255,.09),transparent 35%),
+    linear-gradient(145deg,rgba(14,18,34,.90),rgba(9,13,26,.86));
+}
+.product-plan-row,.meal-step,.menu-suggestion,.exercise-item,.metric,.toggle-row,.saved-collage,.day-row,.hydration-note{
+  border-color:rgba(139,157,255,.12);
+}
+.discount-note,.daily-targets span,.workout-loop-note{
+  background:linear-gradient(120deg,rgba(111,255,93,.10),rgba(54,226,255,.08));
+  border:1px solid rgba(87,227,255,.10);
+}
+.nutrition-target-box span{
+  background:rgba(5,9,21,.60);
+  color:#a9ff9c;
+  border:1px solid rgba(111,255,97,.12);
+}
+.portion-guide{
+  background:#fff;
+  border-color:rgba(83,227,255,.25);
+  box-shadow:0 0 25px rgba(55,219,255,.06);
+}
+.photo-frame{
+  background:rgba(6,9,21,.65);
+  border-color:rgba(71,225,255,.30);
+  color:#98a3be;
+}
+.progress-highlight{
+  background:
+    radial-gradient(circle at 10% 0%,rgba(120,255,95,.12),transparent 36%),
+    linear-gradient(135deg,rgba(12,19,35,.96),rgba(18,12,31,.90));
+  border:1px solid rgba(81,224,255,.12);
+}
+.progress-highlight b{color:#aaff99;text-shadow:0 0 14px rgba(113,255,90,.18)}
+.day-row.current{
+  background:linear-gradient(90deg,rgba(114,255,94,.11),rgba(49,222,255,.08));
+  box-shadow:inset 0 0 0 1px rgba(66,226,255,.10);
+}
+.day-row.current .day-num{
+  background:linear-gradient(135deg,#76ff5e,#35e9ff);
+  color:#06100d;
+  box-shadow:0 0 15px rgba(63,228,255,.25);
+}
+.day-row.locked{opacity:.48}
+.day-row.locked .day-num{background:rgba(255,255,255,.05);color:#7f879e}
+.day-link{
+  color:#98f8ff;
+  background:rgba(56,224,255,.09);
+  border:1px solid rgba(56,224,255,.10);
+}
+.notice{
+  background:rgba(255,186,53,.08);
+  color:#ffd890;
+  border:1px solid rgba(255,184,57,.12);
+}
+.app-link{border:1px solid rgba(100,255,107,.15)}
+.saved-collage img{border-color:rgba(75,227,255,.20);box-shadow:0 0 18px rgba(52,221,255,.06)}
+@media(min-width:700px){
+  body{background:#04050a}
+  .shell{box-shadow:0 0 70px rgba(0,0,0,.55)}
+}
