@@ -1,5 +1,5 @@
 const CONFIG_KEY="protein_studio_supabase_config";
-let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoals=[];
+let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoals=[],progressSummary=null;
 
 const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
@@ -103,6 +103,7 @@ async function bootstrap(){
     profile.consultant_id?sb.from("ps_consultants").select("*").eq("id",profile.consultant_id).maybeSingle():Promise.resolve({data:null})
   ]);
   assessment=a.data;plan=pl.data;consultant=c.data;
+  await sb.rpc("ps_start_marathon");
   showScreen("appScreen");
   $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
   openPage("plan");
@@ -175,6 +176,17 @@ async function finishOnboarding(){
     q=await sb.from("ps_notification_settings").upsert({user_id:me.id,updated_at:new Date().toISOString()});
     if(q.error)throw q.error;
 
+    q=await sb.rpc("ps_start_marathon");
+    if(q.error)throw q.error;
+
+    q=await sb.rpc("ps_save_progress",{
+      p_weight_kg:payload.starting_weight_kg,
+      p_waist_cm:payload.waist_cm,
+      p_hips_cm:payload.hips_cm,
+      p_chest_cm:null
+    });
+    if(q.error)throw q.error;
+
     q=await sb.from("ps_profiles").update({
       onboarding_completed:true,
       updated_at:new Date().toISOString()
@@ -233,46 +245,79 @@ function task(icon,title,sub){return `<div class="task"><div class="task-icon">$
 function pageNutrition(){return `<h2 class="section-title">Питание</h2><section class="card"><b>Питание идёт из «Моего плана»</b><p class="muted">Здесь будут завтрак, перекусы, обед, ужин, вода, рецепты и отметки выполнения. Следующим модулем добавим персональные варианты по профиль-оценке.</p></section>`}
 function pageWorkouts(){return `<h2 class="section-title">Тренировки</h2><section class="card"><b>Тренировка по вашему плану</b><p class="muted">${assessment?.minutes_available||15} минут · ${assessment?.training_place||"Дома"}. Здесь появятся видео упражнений, таймер, повторы и более лёгкие варианты.</p></section>`}
 function pageMarathon(){
-  const current=plan?.current_day||1;
   return `<h2 class="section-title">Марафон</h2>
   <section class="card hero">
     <div class="eyebrow">30 дней PROTEIN STUDIO</div>
-    <h1>День ${current} из 30</h1>
-    <p class="muted">Используем ваш сохранённый набор из 30 тем. Каждый день связан с исходным материалом и будет адаптирован под приложение.</p>
+    <h1 id="marathonCurrentTitle">День 1 из 30</h1>
+    <p class="muted">Новый день открывается после полуночи. Будущие дни закрыты ключиком 🔒.</p>
   </section>
   <section class="card">
-    <h3>Темы 30 дней</h3>
-    <div id="marathonDays"><p class="muted">Загружаем темы…</p></div>
+    <div class="row"><h3>30 дней</h3><span class="pill">1 день = 1 тема</span></div>
+    <div id="marathonDays"><p class="muted">Загружаем дни…</p></div>
   </section>`
 }
 async function loadMarathonDays(){
   const box=$("marathonDays");
   if(!box)return;
-  const {data,error}=await sb.from("ps_marathon_days").select("*").order("day_number");
-  if(error){box.innerHTML='<p class="message">Не удалось загрузить темы.</p>';return}
-  const current=plan?.current_day||1;
-  box.innerHTML=(data||[]).map(d=>`
-    <div class="day-row ${d.day_number===current?'current':''}">
+
+  await sb.rpc("ps_start_marathon");
+  const {data,error}=await sb.rpc("ps_get_marathon_days");
+  if(error){box.innerHTML='<p class="message">Не удалось загрузить марафон: '+escapeHtml(error.message)+'</p>';return}
+
+  const rows=data||[];
+  const todayRow=rows.find(d=>d.is_today) || [...rows].reverse().find(d=>d.unlocked) || rows[0];
+  const currentDay=todayRow?.day_number||1;
+  const title=$("marathonCurrentTitle");
+  if(title)title.textContent=`День ${currentDay} из 30`;
+
+  box.innerHTML=rows.map(d=>`
+    <div class="day-row ${d.is_today?'current':''} ${d.unlocked?'':'locked'}">
       <div class="day-num">${d.day_number}</div>
       <div class="day-copy">
-        <b>${escapeHtml(d.title||('День '+d.day_number))}</b>
-        ${d.summary?`<small>${escapeHtml(d.summary)}</small>`:''}
+        <b>День ${d.day_number}</b>
+        <small>${d.unlocked?(d.is_today?'Открыт сегодня':'Открыт'):'Откроется '+formatShortDate(d.unlock_date)}</small>
       </div>
-      <a class="day-link" href="${d.source_url}" target="_blank" rel="noopener">Открыть</a>
+      ${d.unlocked&&d.source_url
+        ?`<a class="day-link" href="${d.source_url}" target="_blank" rel="noopener">Открыть</a>`
+        :'<span class="day-lock" aria-label="Закрыто">🔒</span>'}
     </div>
   `).join('');
 }
+function formatShortDate(value){
+  if(!value)return "";
+  const [y,m,d]=String(value).split("-");
+  return `${d}.${m}`;
+}
+
 function escapeHtml(v){
   return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
 }
 
 function pageProgress(){
   return `<h2 class="section-title">Прогресс</h2>
+
   <section class="card">
-    <div class="metric"><span>Стартовый вес</span><b>${assessment?.starting_weight_kg||"—"} кг</b></div>
-    <div class="metric"><span>Талия</span><b>${assessment?.waist_cm||"—"} см</b></div>
-    <div class="metric"><span>Бёдра</span><b>${assessment?.hips_cm||"—"} см</b></div>
-    <button class="btn ghost" onclick="alert('Форму новых замеров добавим следующим модулем')">Добавить замер</button>
+    <div class="row">
+      <div>
+        <div class="eyebrow">Результат</div>
+        <h3 class="photo-title">Мои изменения</h3>
+      </div>
+      <span class="pill" id="progressDaysPill">Старт</span>
+    </div>
+    <div id="progressSummaryBox">
+      <p class="muted">Считаем изменения…</p>
+    </div>
+    <button class="btn ghost" id="toggleMeasurementBtn">+ Добавить замер</button>
+    <div id="measurementForm" class="measurement-form hidden">
+      <div class="two-col">
+        <label>Вес, кг<input id="measureWeight" type="number" step="0.1" inputmode="decimal"></label>
+        <label>Талия, см<input id="measureWaist" type="number" step="0.1" inputmode="decimal"></label>
+        <label>Бёдра, см<input id="measureHips" type="number" step="0.1" inputmode="decimal"></label>
+        <label>Грудь, см<input id="measureChest" type="number" step="0.1" inputmode="decimal"></label>
+      </div>
+      <button class="btn primary" id="saveMeasurementBtn">Сохранить сегодняшний замер</button>
+      <p id="measurementMessage" class="message"></p>
+    </div>
   </section>
 
   <section class="card">
@@ -283,7 +328,7 @@ function pageProgress(){
       </div>
       <span class="pill">Приватно</span>
     </div>
-    <p class="muted">Фото хранятся отдельно для вашего аккаунта и не публикуются в сообществе.</p>
+    <p class="muted">Фото ДО и ПОСЛЕ всегда сохраняются в вашем аккаунте.</p>
 
     <div class="photo-grid">
       <div class="photo-slot">
@@ -298,8 +343,18 @@ function pageProgress(){
       </div>
     </div>
 
-    <button class="btn primary" id="makeCollageBtn">Сделать коллаж ДО / ПОСЛЕ</button>
+    <button class="btn primary" id="makeCollageBtn">Создать и сохранить коллаж</button>
     <p id="photoMessage" class="message"></p>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <div>
+        <div class="eyebrow">История</div>
+        <h3 class="photo-title">Мои коллажи</h3>
+      </div>
+    </div>
+    <div id="savedCollages"><p class="muted">Пока сохранённых коллажей нет.</p></div>
   </section>`;
 }
 
@@ -313,7 +368,111 @@ async function bindProgressPhotoActions(){
   beforeInput.addEventListener("change",()=>uploadProgressPhoto("before",beforeInput.files?.[0]));
   afterInput.addEventListener("change",()=>uploadProgressPhoto("after",afterInput.files?.[0]));
   $("makeCollageBtn")?.addEventListener("click",makeBeforeAfterCollage);
-  await loadProgressPhotos();
+
+  $("toggleMeasurementBtn")?.addEventListener("click",()=>{
+    $("measurementForm")?.classList.toggle("hidden");
+  });
+  $("saveMeasurementBtn")?.addEventListener("click",saveMeasurement);
+
+  await Promise.all([loadProgressPhotos(),loadProgressStats(),loadSavedCollages()]);
+}
+
+function inputNumberOrNull(id){
+  const el=$(id);
+  if(!el||el.value.trim()==="")return null;
+  const n=Number(el.value.replace(",","."));
+  return Number.isFinite(n)?n:null;
+}
+
+async function saveMeasurement(){
+  const btn=$("saveMeasurementBtn"),message=$("measurementMessage");
+  const values={
+    p_weight_kg:inputNumberOrNull("measureWeight"),
+    p_waist_cm:inputNumberOrNull("measureWaist"),
+    p_hips_cm:inputNumberOrNull("measureHips"),
+    p_chest_cm:inputNumberOrNull("measureChest")
+  };
+  if(Object.values(values).every(v=>v===null)){
+    message.textContent="Введите хотя бы один показатель.";
+    return;
+  }
+  btn.disabled=true;btn.textContent="Сохраняем…";
+  const {error}=await sb.rpc("ps_save_progress",values);
+  if(error){
+    message.textContent="Не удалось сохранить: "+error.message;
+  }else{
+    message.textContent="Сегодняшний замер сохранён ✓";
+    await loadProgressStats();
+  }
+  btn.disabled=false;btn.textContent="Сохранить сегодняшний замер";
+}
+
+function dateDiffDays(a,b){
+  if(!a||!b)return 0;
+  const A=Date.parse(a+"T00:00:00Z"),B=Date.parse(b+"T00:00:00Z");
+  return Math.max(0,Math.round((B-A)/86400000));
+}
+function ruNumber(v,digits=1){
+  if(v===null||v===undefined||Number.isNaN(Number(v)))return "—";
+  return Number(v).toLocaleString("ru-RU",{maximumFractionDigits:digits,minimumFractionDigits:0});
+}
+function deltaText(v,unit){
+  if(v===null||v===undefined||Number.isNaN(Number(v)))return "—";
+  const n=Number(v);
+  const sign=n>0?"+":n<0?"−":"";
+  return sign+ruNumber(Math.abs(n))+unit;
+}
+
+async function getProgressSummary(){
+  const {data,error}=await sb.from("ps_progress_entries").select("*").eq("user_id",me.id).order("entry_date",{ascending:true});
+  if(error)throw error;
+  const rows=data||[];
+
+  const startDate=(assessment?.completed_at||"").slice(0,10) || plan?.start_date || rows[0]?.entry_date || null;
+  const last=rows.length?rows[rows.length-1]:null;
+  const latestDate=last?.entry_date||startDate;
+
+  const startWeight=assessment?.starting_weight_kg!=null?Number(assessment.starting_weight_kg):null;
+  const startWaist=assessment?.waist_cm!=null?Number(assessment.waist_cm):null;
+  const startHips=assessment?.hips_cm!=null?Number(assessment.hips_cm):null;
+  const startChest=assessment?.chest_cm!=null?Number(assessment.chest_cm):null;
+
+  const latestWeight=last?.weight_kg!=null?Number(last.weight_kg):startWeight;
+  const latestWaist=last?.waist_cm!=null?Number(last.waist_cm):startWaist;
+  const latestHips=last?.hips_cm!=null?Number(last.hips_cm):startHips;
+  const latestChest=last?.chest_cm!=null?Number(last.chest_cm):startChest;
+
+  return {
+    startDate,latestDate,
+    days:dateDiffDays(startDate,latestDate),
+    startWeight,latestWeight,weightChange:(startWeight!=null&&latestWeight!=null)?latestWeight-startWeight:null,
+    startWaist,latestWaist,waistChange:(startWaist!=null&&latestWaist!=null)?latestWaist-startWaist:null,
+    startHips,latestHips,hipsChange:(startHips!=null&&latestHips!=null)?latestHips-startHips:null,
+    startChest,latestChest,chestChange:(startChest!=null&&latestChest!=null)?latestChest-startChest:null
+  };
+}
+
+async function loadProgressStats(){
+  try{
+    progressSummary=await getProgressSummary();
+    const s=progressSummary;
+    const box=$("progressSummaryBox"),pill=$("progressDaysPill");
+    if(pill)pill.textContent=s.days===0?"Сегодня":s.days+" дн.";
+    if(box)box.innerHTML=`
+      <div class="progress-highlight">
+        <small>Вес</small>
+        <b>${deltaText(s.weightChange," кг")}</b>
+        <span>${s.startWeight!=null?ruNumber(s.startWeight)+" → "+ruNumber(s.latestWeight)+" кг":"Нет данных"}</span>
+      </div>
+      <div class="progress-deltas">
+        <div><small>Талия</small><b>${deltaText(s.waistChange," см")}</b></div>
+        <div><small>Бёдра</small><b>${deltaText(s.hipsChange," см")}</b></div>
+        <div><small>Грудь</small><b>${deltaText(s.chestChange," см")}</b></div>
+      </div>`;
+  }catch(err){
+    const box=$("progressSummaryBox");
+    if(box)box.innerHTML='<p class="message">Не удалось посчитать прогресс.</p>';
+  }
 }
 
 async function uploadProgressPhoto(kind,file){
@@ -388,7 +547,7 @@ function imageFromBlob(blob){
   return new Promise((resolve,reject)=>{
     const url=URL.createObjectURL(blob);
     const img=new Image();
-    img.onload=()=>{resolve({img,url})};
+    img.onload=()=>resolve({img,url});
     img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Не удалось открыть фото"))};
     img.src=url;
   });
@@ -403,13 +562,15 @@ function drawCover(ctx,img,x,y,w,h){
 
 async function makeBeforeAfterCollage(){
   const btn=$("makeCollageBtn"),message=$("photoMessage");
-  btn.disabled=true;
-  btn.textContent="Создаём коллаж…";
+  btn.disabled=true;btn.textContent="Создаём и сохраняем…";
   try{
     const blobs=await getProgressPhotoBlobs();
     if(!blobs){message.textContent="Сначала добавьте и фото ДО, и фото ПОСЛЕ.";return}
 
+    progressSummary=await getProgressSummary();
+    const s=progressSummary;
     const [a,b]=await Promise.all([imageFromBlob(blobs.before),imageFromBlob(blobs.after)]);
+
     const canvas=document.createElement("canvas");
     canvas.width=1080;canvas.height=1350;
     const ctx=canvas.getContext("2d");
@@ -418,42 +579,101 @@ async function makeBeforeAfterCollage(){
     ctx.fillStyle="#26362d";
     ctx.font="700 54px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.textAlign="center";
-    ctx.fillText("PROTEIN STUDIO",540,78);
+    ctx.fillText("PROTEIN STUDIO",540,74);
 
-    drawCover(ctx,a.img,0,130,535,1120);
-    drawCover(ctx,b.img,545,130,535,1120);
+    drawCover(ctx,a.img,0,115,535,900);
+    drawCover(ctx,b.img,545,115,535,900);
 
     ctx.fillStyle="rgba(255,255,255,.90)";
-    ctx.fillRect(0,1160,535,90);ctx.fillRect(545,1160,535,90);
+    ctx.fillRect(0,925,535,90);ctx.fillRect(545,925,535,90);
     ctx.fillStyle="#26362d";ctx.font="700 38px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText("ДО",267,1218);ctx.fillText("ПОСЛЕ",812,1218);
+    ctx.fillText("ДО",267,982);ctx.fillText("ПОСЛЕ",812,982);
 
-    ctx.fillStyle="#5f8d66";ctx.font="600 28px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(profile?.full_name||"",540,1310);
+    ctx.fillStyle="#fffdf8";ctx.fillRect(0,1015,1080,335);
+    ctx.fillStyle="#5f8d66";
+    ctx.font="800 54px -apple-system, BlinkMacSystemFont, sans-serif";
+    const weightLine=s.weightChange!=null?`${deltaText(s.weightChange," кг")} за ${s.days} дн.`:`${s.days} дн.`;
+    ctx.fillText(weightLine,540,1100);
+
+    const detailParts=[];
+    if(s.waistChange!=null)detailParts.push("Талия "+deltaText(s.waistChange," см"));
+    if(s.hipsChange!=null)detailParts.push("Бёдра "+deltaText(s.hipsChange," см"));
+    ctx.fillStyle="#26362d";ctx.font="600 30px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(detailParts.join("   •   ")||"Мой прогресс",540,1162);
+
+    ctx.fillStyle="#7b817b";ctx.font="500 26px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(profile?.full_name||"",540,1230);
+    ctx.fillText(`${formatShortDate(s.startDate)} → ${formatShortDate(s.latestDate)}`,540,1274);
 
     URL.revokeObjectURL(a.url);URL.revokeObjectURL(b.url);
 
     const collageBlob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.92));
     if(!collageBlob)throw new Error("Не удалось создать изображение");
-    const file=new File([collageBlob],"protein-studio-before-after.jpg",{type:"image/jpeg"});
 
-    if(navigator.share&&navigator.canShare?.({files:[file]})){
-      await navigator.share({files:[file],title:"PROTEIN STUDIO — До / После"});
-      message.textContent="Коллаж готов ✓";
-    }else{
-      const url=URL.createObjectURL(collageBlob);
-      const aLink=document.createElement("a");
-      aLink.href=url;aLink.download="protein-studio-before-after.jpg";
-      document.body.appendChild(aLink);aLink.click();aLink.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),30000);
-      message.textContent="Коллаж сохранён ✓";
-    }
+    const path=`${me.id}/collages/collage-${Date.now()}.jpg`;
+    const upload=await sb.storage.from("ps-progress-photos").upload(path,collageBlob,{contentType:"image/jpeg",cacheControl:"3600"});
+    if(upload.error)throw upload.error;
+
+    const saved=await sb.from("ps_progress_collages").insert({
+      user_id:me.id,
+      storage_path:path,
+      from_date:s.startDate,
+      to_date:s.latestDate,
+      days_count:s.days,
+      weight_change_kg:s.weightChange,
+      waist_change_cm:s.waistChange,
+      hips_change_cm:s.hipsChange
+    });
+    if(saved.error)throw saved.error;
+
+    message.textContent="Коллаж создан и сохранён в «Мои коллажи» ✓";
+    await loadSavedCollages();
   }catch(err){
     console.error(err);
     message.textContent="Не удалось создать коллаж: "+(err?.message||"попробуйте ещё раз");
   }finally{
-    btn.disabled=false;
-    btn.textContent="Сделать коллаж ДО / ПОСЛЕ";
+    btn.disabled=false;btn.textContent="Создать и сохранить коллаж";
+  }
+}
+
+async function loadSavedCollages(){
+  const box=$("savedCollages");
+  if(!box)return;
+  const {data,error}=await sb.from("ps_progress_collages").select("*").eq("user_id",me.id).order("created_at",{ascending:false});
+  if(error){box.innerHTML='<p class="message">Не удалось загрузить коллажи.</p>';return}
+  if(!(data||[]).length){box.innerHTML='<p class="muted">Пока сохранённых коллажей нет.</p>';return}
+
+  const items=[];
+  for(const row of data){
+    const dl=await sb.storage.from("ps-progress-photos").download(row.storage_path);
+    if(dl.error)continue;
+    const url=URL.createObjectURL(dl.data);
+    items.push({row,url});
+  }
+  box.innerHTML=items.map(({row,url})=>`
+    <div class="saved-collage">
+      <img src="${url}" alt="Коллаж прогресса">
+      <div class="saved-collage-info">
+        <b>${row.weight_change_kg!=null?deltaText(row.weight_change_kg," кг"):"Прогресс"} · ${row.days_count||0} дн.</b>
+        <small>${formatShortDate(row.from_date)} → ${formatShortDate(row.to_date)}</small>
+        <button class="btn ghost share-collage-btn" data-path="${row.storage_path}">Поделиться / сохранить</button>
+      </div>
+    </div>
+  `).join("");
+  box.querySelectorAll(".share-collage-btn").forEach(btn=>btn.addEventListener("click",()=>shareSavedCollage(btn.dataset.path)));
+}
+
+async function shareSavedCollage(path){
+  const dl=await sb.storage.from("ps-progress-photos").download(path);
+  if(dl.error)return alert("Не удалось открыть коллаж.");
+  const file=new File([dl.data],"protein-studio-progress.jpg",{type:"image/jpeg"});
+  if(navigator.share&&navigator.canShare?.({files:[file]})){
+    await navigator.share({files:[file],title:"PROTEIN STUDIO — Мой прогресс"});
+  }else{
+    const url=URL.createObjectURL(dl.data);
+    const a=document.createElement("a");a.href=url;a.download="protein-studio-progress.jpg";
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
   }
 }
 
