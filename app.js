@@ -21,6 +21,12 @@ function setStep(n){
   document.querySelectorAll(".steps i").forEach((el,i)=>el.classList.toggle("on",i<n));
 }
 function numberValue(id){const n=Number($(id).value);return Number.isFinite(n)&&$(id).value!==""?n:null}
+function normalizePhone(value){
+  let digits=String(value||"").replace(/\D/g,"");
+  if(digits.length===11&&digits.startsWith("8"))digits="7"+digits.slice(1);
+  if(digits.length===10)digits="7"+digits;
+  return digits?("+"+digits):"";
+}
 
 async function loadConsultants(){
   if(!sb)return;
@@ -32,15 +38,15 @@ async function registerClient(){
   setMessage("Создаём аккаунт...");
   const full_name=$("regName").value.trim();
   const phone=$("regPhone").value.trim();
-  const email=$("regEmail").value.trim();
+  const normalizedPhone=normalizePhone(phone);
   const password=$("regPassword").value;
   const consultant_id=$("regConsultant").value||null;
-  if(!full_name||!email||password.length<6)return setMessage("Заполните имя, e-mail и пароль минимум из 6 символов.");
+  if(!full_name||normalizedPhone.length<12||password.length<6)return setMessage("Заполните имя, телефон и пароль минимум из 6 символов.");
 
   const {data,error}=await sb.auth.signUp({
-    email,
+    phone:normalizedPhone,
     password,
-    options:{data:{full_name,phone,consultant_id}}
+    options:{data:{full_name,phone:normalizedPhone,consultant_id}}
   });
   if(error)return setMessage(error.message);
   if(!data.user)return setMessage("Не удалось создать аккаунт.");
@@ -48,7 +54,8 @@ async function registerClient(){
   if(!data.session){
     $("registerBox").classList.add("hidden");
     $("loginBox").classList.remove("hidden");
-    return setMessage("Аккаунт создан. Подтвердите e-mail, затем вернитесь сюда и войдите.");
+    $("loginPhone").value=normalizedPhone;
+    return setMessage("Аккаунт создан. Если включено подтверждение телефона, введите код из SMS после его получения.");
   }
 
   me=data.user;
@@ -57,8 +64,9 @@ async function registerClient(){
 }
 async function login(){
   setMessage("Входим...");
-  const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  const phone=normalizePhone($("loginPhone").value),password=$("loginPassword").value;
+  if(phone.length<12)return setMessage("Введите номер телефона.");
+  const {data,error}=await sb.auth.signInWithPassword({phone,password});
   if(error)return setMessage(error.message);
   me=data.user;await bootstrap();
 }
