@@ -33,15 +33,24 @@ async function registerClient(){
   const password=$("regPassword").value;
   const consultant_id=$("regConsultant").value||null;
   if(!full_name||!email||password.length<6)return setMessage("Заполните имя, e-mail и пароль минимум из 6 символов.");
-  const {data,error}=await sb.auth.signUp({email,password});
+
+  const {data,error}=await sb.auth.signUp({
+    email,
+    password,
+    options:{data:{full_name,phone,consultant_id}}
+  });
   if(error)return setMessage(error.message);
-  if(!data.user)return setMessage("Проверьте e-mail и подтвердите регистрацию.");
+  if(!data.user)return setMessage("Не удалось создать аккаунт.");
+
+  if(!data.session){
+    $("registerBox").classList.add("hidden");
+    $("loginBox").classList.remove("hidden");
+    return setMessage("Аккаунт создан. Подтвердите e-mail, затем вернитесь сюда и войдите.");
+  }
+
   me=data.user;
-  const saved=await sb.from("ps_profiles").insert({id:me.id,full_name,phone,consultant_id,role:"client"});
-  if(saved.error)return setMessage(saved.error.message);
-  profile={id:me.id,full_name,phone,consultant_id,role:"client",onboarding_completed:false};
   selectedGoal="";
-  setStep(1);showScreen("onboardingScreen");
+  await bootstrap();
 }
 async function login(){
   setMessage("Входим...");
