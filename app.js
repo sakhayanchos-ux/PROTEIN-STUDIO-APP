@@ -33,15 +33,16 @@ async function chooseTheme(theme){
   const label=$("themeSavedMessage");
   if(label)label.textContent="Тема применена сразу ✓";
   if(me&&profile){
-    const {error}=await sb.from("ps_profiles").update({
+    const {data,error}=await sb.from("ps_profiles").update({
       theme_preference:theme,
       updated_at:new Date().toISOString()
-    }).eq("id",me.id);
+    }).eq("id",me.id).select("theme_preference").single();
     if(error){
       console.error("Theme save failed",error);
       if(label)label.textContent="Тема применена на этом телефоне. Серверное сохранение не удалось.";
     }else{
-      profile.theme_preference=theme;
+      profile.theme_preference=data?.theme_preference||theme;
+      if(label)label.textContent="Тема сохранена ✓";
     }
   }
 }
@@ -162,14 +163,9 @@ async function bootstrap(){
     profile=p.data;
     assessment=a.data||null;
     const localTheme=localStorage.getItem(THEME_KEY);
-    const savedTheme=localTheme||profile.theme_preference||"classic";
+    const profileTheme=THEMES.includes(profile.theme_preference)?profile.theme_preference:null;
+    const savedTheme=profileTheme||localTheme||"classic";
     applyTheme(savedTheme,true);
-    if(localTheme&&profile.theme_preference!==localTheme){
-      sb.from("ps_profiles").update({
-        theme_preference:localTheme,
-        updated_at:new Date().toISOString()
-      }).eq("id",me.id).then(function(){ profile.theme_preference=localTheme; });
-    }
     selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
 
     const needsShortWellness=
