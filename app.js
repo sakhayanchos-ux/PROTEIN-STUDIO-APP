@@ -8,7 +8,7 @@ function showScreen(id){screens.forEach(x=>$(x).classList.toggle("hidden",x!==id
 const THEME_KEY="ps_theme";
 const THEMES=["classic","neon","crystal","flowers"];
 function applyTheme(theme,saveLocal=true){
-  const value=THEMES.includes(theme)?theme:"neon";
+  const value=THEMES.includes(theme)?theme:"classic";
   document.documentElement.dataset.theme=value;
   if(saveLocal)localStorage.setItem(THEME_KEY,value);
   const meta=document.querySelector('meta[name="theme-color"]');
@@ -45,7 +45,7 @@ function readConfig(){
   try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||"null")}catch{return null}
 }
 function initClient(){
-  applyTheme(localStorage.getItem(THEME_KEY)||"neon",false);
+  applyTheme(localStorage.getItem(THEME_KEY)||"classic",false);
   const cfg=readConfig();
   if(!cfg?.url||!cfg?.key){showScreen("setupScreen");return false}
   sb=supabase.createClient(cfg.url,cfg.key);
@@ -156,7 +156,15 @@ async function bootstrap(){
 
     profile=p.data;
     assessment=a.data||null;
-    applyTheme(profile.theme_preference||localStorage.getItem(THEME_KEY)||"neon",true);
+    const localTheme=localStorage.getItem(THEME_KEY);
+    const savedTheme=localTheme||profile.theme_preference||"classic";
+    applyTheme(savedTheme,true);
+    if(localTheme&&profile.theme_preference!==localTheme){
+      sb.from("ps_profiles").update({
+        theme_preference:localTheme,
+        updated_at:new Date().toISOString()
+      }).eq("id",me.id).then(function(){ profile.theme_preference=localTheme; });
+    }
     selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
 
     const needsShortWellness=
