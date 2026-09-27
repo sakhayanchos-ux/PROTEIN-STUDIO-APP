@@ -1,5 +1,5 @@
 const CONFIG_KEY="protein_studio_supabase_config";
-let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoals=[],progressSummary=null;
+let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoals=[],progressSummary=null,onboardingStep=1,onboardingDraft={};
 
 const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
@@ -92,10 +92,20 @@ async function bootstrap(){
   if(!p.data){showScreen("authScreen");$("loginBox").classList.add("hidden");$("registerBox").classList.remove("hidden");return setMessage("Для этого аккаунта ещё нет профиля клиента. Завершите регистрацию.")}
   profile=p.data;
   if(!profile.onboarding_completed){
-    const saved=await sb.from("ps_assessments").select("goals,primary_goal").eq("user_id",me.id).maybeSingle();
-    selectedGoals=saved.data?.goals?.length?saved.data.goals:(saved.data?.primary_goal?[saved.data.primary_goal]:[]);
-    document.querySelectorAll("#goalChoices button").forEach(b=>b.classList.toggle("selected",selectedGoals.includes(b.dataset.goal)));
-    setStep(1);showScreen("onboardingScreen");return
+    const saved=await sb.from("ps_assessments").select("*").eq("user_id",me.id).maybeSingle();
+    assessment=saved.data||null;
+    selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
+    onboardingDraft={
+      weight:assessment?.starting_weight_kg??null,
+      waist:assessment?.waist_cm??null,
+      targetWeight:assessment?.target_weight_kg??null,
+      goalResult:assessment?.goal_result_text||"",
+      readiness:assessment?.readiness_score??null
+    };
+    onboardingStep=1;
+    showScreen("onboardingScreen");
+    renderOnboarding();
+    return
   }
   const [a,pl,c]=await Promise.all([
     sb.from("ps_assessments").select("*").eq("user_id",me.id).maybeSingle(),
@@ -108,28 +118,176 @@ async function bootstrap(){
   $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
   openPage("plan");
 }
-async function finishOnboarding(){
-  if(selectedGoals.length===0)return alert("Выберите хотя бы одну цель.");
 
-  const btn=$("finishOnboardingBtn");
+function hasWeightGoal(){
+  return selectedGoals.includes("Снижение веса");
+}
+
+function goalChoiceHtml(value,label){
+  const selected=selectedGoals.includes(value)?" selected":"";
+  return '<button type="button" class="'+selected+'" data-short-goal="'+value+'">'+label+'</button>';
+}
+
+function renderOnboarding(){
+  const counter=$("wellnessCounter");
+  const bar=$("wellnessBar");
+  const content=$("wellnessContent");
+  const back=$("wellnessBackBtn");
+  const next=$("wellnessNextBtn");
+  if(!counter||!bar||!content||!back||!next)return;
+
+  counter.textContent="Шаг "+onboardingStep+" из 4";
+  bar.style.width=((onboardingStep/4)*100)+"%";
+  back.style.visibility=onboardingStep===1?"hidden":"visible";
+  next.textContent=onboardingStep===4?"Создать мой план":"Продолжить";
+
+  if(onboardingStep===1){
+    content.innerHTML=
+      '<h2>Какая у вас цель?</h2>'+
+      '<p class="muted">Можно выбрать несколько вариантов.</p>'+
+      '<div class="choices" id="shortGoalChoices">'+
+        goalChoiceHtml("Снижение веса","Снижение веса / фигура")+
+        goalChoiceHtml("Улучшить самочувствие","Лучшее самочувствие")+
+        goalChoiceHtml("Набор мышечной массы","Набор мышечной массы / спортивная форма")+
+      '</div>';
+    content.querySelectorAll("[data-short-goal]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        const goal=btn.dataset.shortGoal;
+        if(selectedGoals.includes(goal))selectedGoals=selectedGoals.filter(function(x){return x!==goal});
+        else selectedGoals.push(goal);
+        renderOnboarding();
+      });
+    });
+    return;
+  }
+
+  if(onboardingStep===2){
+    let extra="";
+    if(hasWeightGoal()){
+      extra=
+        '<label>Хочу прийти к весу, кг'+
+          '<input id="shortTargetWeight" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.targetWeight??"")+'">'+
+        '</label>'+
+        '<p class="muted">Например: сейчас 96 кг → цель 75 кг.</p>';
+    }else{
+      extra=
+        '<label>Какого результата вы хотите?'+
+          '<textarea id="shortGoalResult" rows="3" placeholder="Например: больше энергии и лучшее самочувствие">'+escapeHtml(onboardingDraft.goalResult||"")+'</textarea>'+
+        '</label>';
+    }
+
+    content.innerHTML=
+      '<h2>Ваш старт и цель</h2>'+
+      '<p class="muted">Только основные данные для отслеживания результата.</p>'+
+      '<div class="two-col">'+
+        '<label>Сейчас, кг<input id="shortWeight" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.weight??"")+'"></label>'+
+        '<label>Талия, см<input id="shortWaist" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.waist??"")+'"></label>'+
+      '</div>'+extra;
+    return;
+  }
+
+  if(onboardingStep===3){
+    let buttons="";
+    for(let i=1;i<=10;i++){
+      buttons+='<button type="button" class="readiness-btn'+(Number(onboardingDraft.readiness)===i?" selected":"")+'" data-readiness="'+i+'">'+i+'</button>';
+    }
+    content.innerHTML=
+      '<h2>Насколько вы готовы идти к результату?</h2>'+
+      '<p class="muted">1 — пока присматриваюсь, 10 — готов(а) действовать.</p>'+
+      '<div class="readiness-grid">'+buttons+'</div>'+
+      '<div class="readiness-labels"><span>1</span><span>Готовность</span><span>10</span></div>';
+    content.querySelectorAll("[data-readiness]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        onboardingDraft.readiness=Number(btn.dataset.readiness);
+        renderOnboarding();
+      });
+    });
+    return;
+  }
+
+  const weightText=hasWeightGoal()&&onboardingDraft.targetWeight
+    ? ruNumber(onboardingDraft.weight)+" → "+ruNumber(onboardingDraft.targetWeight)+" кг"
+    : ruNumber(onboardingDraft.weight)+" кг";
+
+  content.innerHTML=
+    '<h2>Профиль готов 🌿</h2>'+
+    '<p class="muted">Полную Wellness-оценку вы пройдёте в клубе с консультантом. Здесь сохраняем только основные данные.</p>'+
+    '<div class="short-summary">'+
+      '<div class="summary-row"><span>Цель</span><b>'+escapeHtml(selectedGoals.join(", "))+'</b></div>'+
+      '<div class="summary-row"><span>Вес / цель</span><b>'+weightText+'</b></div>'+
+      '<div class="summary-row"><span>Талия</span><b>'+ruNumber(onboardingDraft.waist)+' см</b></div>'+
+      '<div class="summary-row"><span>Готовность</span><b>'+onboardingDraft.readiness+'/10</b></div>'+
+    '</div>';
+}
+
+function collectOnboardingStep(){
+  if(onboardingStep!==2)return;
+  const w=$("shortWeight");
+  const waist=$("shortWaist");
+  const tw=$("shortTargetWeight");
+  const gr=$("shortGoalResult");
+  if(w)onboardingDraft.weight=w.value===""?null:Number(w.value);
+  if(waist)onboardingDraft.waist=waist.value===""?null:Number(waist.value);
+  if(tw)onboardingDraft.targetWeight=tw.value===""?null:Number(tw.value);
+  if(gr)onboardingDraft.goalResult=gr.value.trim();
+}
+
+function validateOnboardingStep(){
+  if(onboardingStep===1&&!selectedGoals.length){
+    alert("Выберите хотя бы одну цель.");
+    return false;
+  }
+  if(onboardingStep===2){
+    collectOnboardingStep();
+    if(!(Number(onboardingDraft.weight)>0)){
+      alert("Укажите текущий вес.");
+      return false;
+    }
+    if(!(Number(onboardingDraft.waist)>0)){
+      alert("Укажите талию.");
+      return false;
+    }
+    if(hasWeightGoal()&&!(Number(onboardingDraft.targetWeight)>0)){
+      alert("Укажите желаемый вес.");
+      return false;
+    }
+    if(!hasWeightGoal()&&!onboardingDraft.goalResult){
+      alert("Коротко укажите желаемый результат.");
+      return false;
+    }
+  }
+  if(onboardingStep===3&&!(Number(onboardingDraft.readiness)>=1&&Number(onboardingDraft.readiness)<=10)){
+    alert("Выберите готовность от 1 до 10.");
+    return false;
+  }
+  return true;
+}
+
+async function finishOnboarding(){
+  const next=$("wellnessNextBtn");
   const message=$("onboardingMessage");
-  btn.disabled=true;
-  btn.textContent="Создаём...";
-  if(message)message.textContent="Сохраняем профиль и создаём ваш план…";
+  next.disabled=true;
+  next.textContent="Создаём...";
+  if(message)message.textContent="Сохраняем данные и создаём ваш план…";
 
   try{
+    const now=new Date().toISOString();
     const payload={
       user_id:me.id,
       primary_goal:selectedGoals[0],
       goals:selectedGoals,
-      starting_weight_kg:numberValue("weight"),
-      waist_cm:numberValue("waist"),
-      workouts_per_week:numberValue("workouts")||0,
-      minutes_available:numberValue("minutes")||15,
-      training_place:$("place").value,
-      water_glasses_per_day:numberValue("water")||0,
-      completed_at:new Date().toISOString(),
-      updated_at:new Date().toISOString()
+      starting_weight_kg:Number(onboardingDraft.weight),
+      target_weight_kg:hasWeightGoal()?Number(onboardingDraft.targetWeight):null,
+      waist_cm:Number(onboardingDraft.waist),
+      goal_result_text:hasWeightGoal()?null:(onboardingDraft.goalResult||null),
+      readiness_score:Number(onboardingDraft.readiness),
+      wellness_completed_at:now,
+      workouts_per_week:0,
+      minutes_available:15,
+      training_place:"Дома",
+      water_glasses_per_day:4,
+      completed_at:now,
+      updated_at:now
     };
 
     let q=await sb.from("ps_assessments").upsert(payload);
@@ -137,8 +295,11 @@ async function finishOnboarding(){
 
     const planData={
       goals:selectedGoals,
+      target_weight_kg:payload.target_weight_kg,
+      goal_result_text:payload.goal_result_text,
+      readiness_score:payload.readiness_score,
       nutrition:{enabled:true,meals:5},
-      workouts:{enabled:true,minutes:payload.minutes_available,place:payload.training_place},
+      workouts:{enabled:true,minutes:15,place:"Дома"},
       marathon:{enabled:true},
       water:{target:8},
       steps:{target:8000}
@@ -157,7 +318,7 @@ async function finishOnboarding(){
       q=await sb.from("ps_plans").update({
         goal:selectedGoals[0],
         plan_data:planData,
-        updated_at:new Date().toISOString()
+        updated_at:now
       }).eq("id",existing.data.id);
     }else{
       q=await sb.from("ps_plans").insert({
@@ -170,7 +331,7 @@ async function finishOnboarding(){
     }
     if(q.error)throw q.error;
 
-    q=await sb.from("ps_notification_settings").upsert({user_id:me.id,updated_at:new Date().toISOString()});
+    q=await sb.from("ps_notification_settings").upsert({user_id:me.id,updated_at:now});
     if(q.error)throw q.error;
 
     q=await sb.rpc("ps_start_marathon");
@@ -186,7 +347,7 @@ async function finishOnboarding(){
 
     q=await sb.from("ps_profiles").update({
       onboarding_completed:true,
-      updated_at:new Date().toISOString()
+      updated_at:now
     }).eq("id",me.id);
     if(q.error)throw q.error;
 
@@ -195,12 +356,30 @@ async function finishOnboarding(){
   }catch(err){
     console.error(err);
     if(message)message.textContent="Не удалось создать план: "+(err?.message||"попробуйте ещё раз");
-    alert("Не удалось создать план: "+(err?.message||"попробуйте ещё раз"));
   }finally{
-    btn.disabled=false;
-    btn.textContent="Создать мой план";
+    next.disabled=false;
+    next.textContent="Создать мой план";
   }
 }
+
+async function nextOnboarding(){
+  if(!validateOnboardingStep())return;
+  if(onboardingStep<4){
+    onboardingStep++;
+    renderOnboarding();
+  }else{
+    await finishOnboarding();
+  }
+}
+
+function prevOnboarding(){
+  collectOnboardingStep();
+  if(onboardingStep>1){
+    onboardingStep--;
+    renderOnboarding();
+  }
+}
+
 function openPage(page){
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
@@ -706,29 +885,12 @@ $("showRegisterBtn").addEventListener("click",()=>{$("loginBox").classList.add("
 $("showLoginBtn").addEventListener("click",()=>{$("registerBox").classList.add("hidden");$("loginBox").classList.remove("hidden")});
 $("registerBtn").addEventListener("click",registerClient);
 $("loginBtn").addEventListener("click",login);
-$("finishOnboardingBtn").addEventListener("click",finishOnboarding);
 $("menuBtn").addEventListener("click",()=>toggleDrawer(true));
 $("backdrop").addEventListener("click",()=>toggleDrawer(false));
 $("logoutBtn").addEventListener("click",logout);
 document.querySelectorAll(".nav[data-page]").forEach(b=>b.addEventListener("click",()=>openPage(b.dataset.page)));
-document.querySelectorAll("#goalChoices button").forEach(b=>b.addEventListener("click",()=>{
-  const goal=b.dataset.goal;
-  if(selectedGoals.includes(goal)){
-    selectedGoals=selectedGoals.filter(x=>x!==goal);
-    b.classList.remove("selected");
-  }else{
-    selectedGoals.push(goal);
-    b.classList.add("selected");
-  }
-}));
-document.querySelectorAll(".next-step").forEach(b=>b.addEventListener("click",()=>{
-  const n=Number(b.dataset.next);
-  if(n===2&&selectedGoals.length===0)return alert("Выберите хотя бы одну цель.");
-  setStep(n);
-}));
-document.querySelectorAll(".back-step").forEach(b=>b.addEventListener("click",()=>{
-  setStep(Number(b.dataset.prev));
-}));
+$("wellnessNextBtn").addEventListener("click",nextOnboarding);
+$("wellnessBackBtn").addEventListener("click",prevOnboarding);
 
 (async()=>{
   if(!initClient())return;
