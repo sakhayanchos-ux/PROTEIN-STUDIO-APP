@@ -69,13 +69,11 @@
 
       <div data-step="2" class="hidden">
         <h2>Стартовые данные</h2>
+        <p class="muted">Только два показателя — чтобы было быстро и удобно.</p>
         <div class="two-col">
-          <label>Рост, см<input id="height" type="number"></label>
-          <label>Вес, кг<input id="weight" type="number" step="0.1"></label>
-          <label>Талия, см<input id="waist" type="number" step="0.1"></label>
-          <label>Бёдра, см<input id="hips" type="number" step="0.1"></label>
+          <label>Вес, кг<input id="weight" type="number" step="0.1" inputmode="decimal"></label>
+          <label>Талия, см<input id="waist" type="number" step="0.1" inputmode="decimal"></label>
         </div>
-        <label>Размер одежды<input id="clothing" placeholder="например, 48"></label>
         <div class="step-actions"><button class="btn ghost back-step" data-prev="1">← Назад</button><button class="btn primary next-step" data-next="3">Продолжить</button></div>
       </div>
 
