@@ -1,5 +1,5 @@
 const CONFIG_KEY="protein_studio_supabase_config";
-let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoal="";
+let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoals=[];
 
 const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
@@ -70,7 +70,7 @@ async function registerClient(){
   }
 
   me=data.user;
-  selectedGoal="";
+  selectedGoals=[];
   await bootstrap();
 }
 async function login(){
@@ -91,7 +91,12 @@ async function bootstrap(){
   if(p.error)return setMessage(p.error.message);
   if(!p.data){showScreen("authScreen");$("loginBox").classList.add("hidden");$("registerBox").classList.remove("hidden");return setMessage("Для этого аккаунта ещё нет профиля клиента. Завершите регистрацию.")}
   profile=p.data;
-  if(!profile.onboarding_completed){setStep(1);showScreen("onboardingScreen");return}
+  if(!profile.onboarding_completed){
+    const saved=await sb.from("ps_assessments").select("goals,primary_goal").eq("user_id",me.id).maybeSingle();
+    selectedGoals=saved.data?.goals?.length?saved.data.goals:(saved.data?.primary_goal?[saved.data.primary_goal]:[]);
+    document.querySelectorAll("#goalChoices button").forEach(b=>b.classList.toggle("selected",selectedGoals.includes(b.dataset.goal)));
+    setStep(1);showScreen("onboardingScreen");return
+  }
   const [a,pl,c]=await Promise.all([
     sb.from("ps_assessments").select("*").eq("user_id",me.id).maybeSingle(),
     sb.from("ps_plans").select("*").eq("user_id",me.id).eq("status","active").order("created_at",{ascending:false}).limit(1).maybeSingle(),
@@ -103,37 +108,89 @@ async function bootstrap(){
   openPage("plan");
 }
 async function finishOnboarding(){
-  if(!selectedGoal)return alert("Сначала выберите главную цель.");
-  const payload={
-    user_id:me.id,
-    primary_goal:selectedGoal,
-    height_cm:numberValue("height"),
-    starting_weight_kg:numberValue("weight"),
-    waist_cm:numberValue("waist"),
-    hips_cm:numberValue("hips"),
-    clothing_size:$("clothing").value.trim()||null,
-    workouts_per_week:numberValue("workouts")||0,
-    minutes_available:numberValue("minutes")||15,
-    training_place:$("place").value,
-    water_glasses_per_day:numberValue("water")||0,
-    completed_at:new Date().toISOString(),
-    updated_at:new Date().toISOString()
-  };
-  let q=await sb.from("ps_assessments").upsert(payload);
-  if(q.error)return alert(q.error.message);
-  const planData={
-    nutrition:{enabled:true,meals:5},
-    workouts:{enabled:true,minutes:payload.minutes_available,place:payload.training_place},
-    marathon:{enabled:false},
-    water:{target:8},
-    steps:{target:8000}
-  };
-  q=await sb.from("ps_plans").insert({user_id:me.id,title:"Мой план",goal:selectedGoal,duration_days:30,plan_data:planData});
-  if(q.error)return alert(q.error.message);
-  await sb.from("ps_notification_settings").upsert({user_id:me.id});
-  q=await sb.from("ps_profiles").update({onboarding_completed:true,updated_at:new Date().toISOString()}).eq("id",me.id);
-  if(q.error)return alert(q.error.message);
-  await bootstrap();
+  if(selectedGoals.length===0)return alert("Выберите хотя бы одну цель.");
+
+  const btn=$("finishOnboardingBtn");
+  const message=$("onboardingMessage");
+  btn.disabled=true;
+  btn.textContent="Создаём...";
+  if(message)message.textContent="Сохраняем профиль и создаём ваш план…";
+
+  try{
+    const payload={
+      user_id:me.id,
+      primary_goal:selectedGoals[0],
+      goals:selectedGoals,
+      height_cm:numberValue("height"),
+      starting_weight_kg:numberValue("weight"),
+      waist_cm:numberValue("waist"),
+      hips_cm:numberValue("hips"),
+      clothing_size:$("clothing").value.trim()||null,
+      workouts_per_week:numberValue("workouts")||0,
+      minutes_available:numberValue("minutes")||15,
+      training_place:$("place").value,
+      water_glasses_per_day:numberValue("water")||0,
+      completed_at:new Date().toISOString(),
+      updated_at:new Date().toISOString()
+    };
+
+    let q=await sb.from("ps_assessments").upsert(payload);
+    if(q.error)throw q.error;
+
+    const planData={
+      goals:selectedGoals,
+      nutrition:{enabled:true,meals:5},
+      workouts:{enabled:true,minutes:payload.minutes_available,place:payload.training_place},
+      marathon:{enabled:false},
+      water:{target:8},
+      steps:{target:8000}
+    };
+
+    const existing=await sb.from("ps_plans")
+      .select("id")
+      .eq("user_id",me.id)
+      .eq("status","active")
+      .order("created_at",{ascending:false})
+      .limit(1)
+      .maybeSingle();
+    if(existing.error)throw existing.error;
+
+    if(existing.data){
+      q=await sb.from("ps_plans").update({
+        goal:selectedGoals[0],
+        plan_data:planData,
+        updated_at:new Date().toISOString()
+      }).eq("id",existing.data.id);
+    }else{
+      q=await sb.from("ps_plans").insert({
+        user_id:me.id,
+        title:"Мой план",
+        goal:selectedGoals[0],
+        duration_days:30,
+        plan_data:planData
+      });
+    }
+    if(q.error)throw q.error;
+
+    q=await sb.from("ps_notification_settings").upsert({user_id:me.id,updated_at:new Date().toISOString()});
+    if(q.error)throw q.error;
+
+    q=await sb.from("ps_profiles").update({
+      onboarding_completed:true,
+      updated_at:new Date().toISOString()
+    }).eq("id",me.id);
+    if(q.error)throw q.error;
+
+    if(message)message.textContent="Готово 🌿 Открываем «Мой план»…";
+    await bootstrap();
+  }catch(err){
+    console.error(err);
+    if(message)message.textContent="Не удалось создать план: "+(err?.message||"попробуйте ещё раз");
+    alert("Не удалось создать план: "+(err?.message||"попробуйте ещё раз"));
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Создать мой план";
+  }
 }
 function openPage(page){
   toggleDrawer(false);
@@ -145,7 +202,8 @@ function openPage(page){
   if(page==="notifications")bindNotificationToggles();
 }
 function pagePlan(){
-  const goal=assessment?.primary_goal||plan?.goal||"Моя цель";
+  const goalList=assessment?.goals?.length?assessment.goals:[assessment?.primary_goal||plan?.goal||"Моя цель"];
+  const goal=goalList.join(" · ");
   const start=assessment?.starting_weight_kg?assessment.starting_weight_kg+" кг":"—";
   const mins=assessment?.minutes_available||15;
   const place=assessment?.training_place||"по плану";
@@ -202,7 +260,7 @@ async function bindNotificationToggles(){
     $(id)?.addEventListener("change",async e=>{await sb.from("ps_notification_settings").upsert({user_id:me.id,[key]:e.target.checked,updated_at:new Date().toISOString()})});
   }
 }
-function pageProfile(){return `<h2 class="section-title">Профиль</h2><section class="card"><b>${profile?.full_name||""}</b><p class="muted">Цель: ${assessment?.primary_goal||"—"}<br>Консультант: ${consultant?.display_name||"—"}<br>Профиль-оценка: пройдена ✓</p></section>`}
+function pageProfile(){const goals=assessment?.goals?.length?assessment.goals.join(", "):(assessment?.primary_goal||"—");return `<h2 class="section-title">Профиль</h2><section class="card"><b>${profile?.full_name||""}</b><p class="muted">Цели: ${goals}<br>Консультант: ${consultant?.display_name||"—"}<br>Профиль-оценка: пройдена ✓</p></section>`}
 function soon(name){return `<h2 class="section-title">${name}</h2><section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
 const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
@@ -222,13 +280,22 @@ $("backdrop").addEventListener("click",()=>toggleDrawer(false));
 $("logoutBtn").addEventListener("click",logout);
 document.querySelectorAll(".nav[data-page]").forEach(b=>b.addEventListener("click",()=>openPage(b.dataset.page)));
 document.querySelectorAll("#goalChoices button").forEach(b=>b.addEventListener("click",()=>{
-  selectedGoal=b.dataset.goal;
-  document.querySelectorAll("#goalChoices button").forEach(x=>x.classList.toggle("selected",x===b));
+  const goal=b.dataset.goal;
+  if(selectedGoals.includes(goal)){
+    selectedGoals=selectedGoals.filter(x=>x!==goal);
+    b.classList.remove("selected");
+  }else{
+    selectedGoals.push(goal);
+    b.classList.add("selected");
+  }
 }));
 document.querySelectorAll(".next-step").forEach(b=>b.addEventListener("click",()=>{
   const n=Number(b.dataset.next);
-  if(n===2&&!selectedGoal)return alert("Выберите главную цель.");
+  if(n===2&&selectedGoals.length===0)return alert("Выберите хотя бы одну цель.");
   setStep(n);
+}));
+document.querySelectorAll(".back-step").forEach(b=>b.addEventListener("click",()=>{
+  setStep(Number(b.dataset.prev));
 }));
 
 (async()=>{
