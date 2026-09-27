@@ -122,11 +122,8 @@ async function finishOnboarding(){
       user_id:me.id,
       primary_goal:selectedGoals[0],
       goals:selectedGoals,
-      height_cm:numberValue("height"),
       starting_weight_kg:numberValue("weight"),
       waist_cm:numberValue("waist"),
-      hips_cm:numberValue("hips"),
-      clothing_size:$("clothing").value.trim()||null,
       workouts_per_week:numberValue("workouts")||0,
       minutes_available:numberValue("minutes")||15,
       training_place:$("place").value,
@@ -182,7 +179,7 @@ async function finishOnboarding(){
     q=await sb.rpc("ps_save_progress",{
       p_weight_kg:payload.starting_weight_kg,
       p_waist_cm:payload.waist_cm,
-      p_hips_cm:payload.hips_cm,
+      p_hips_cm:null,
       p_chest_cm:null
     });
     if(q.error)throw q.error;
@@ -312,8 +309,6 @@ function pageProgress(){
       <div class="two-col">
         <label>Вес, кг<input id="measureWeight" type="number" step="0.1" inputmode="decimal"></label>
         <label>Талия, см<input id="measureWaist" type="number" step="0.1" inputmode="decimal"></label>
-        <label>Бёдра, см<input id="measureHips" type="number" step="0.1" inputmode="decimal"></label>
-        <label>Грудь, см<input id="measureChest" type="number" step="0.1" inputmode="decimal"></label>
       </div>
       <button class="btn primary" id="saveMeasurementBtn">Сохранить сегодняшний замер</button>
       <p id="measurementMessage" class="message"></p>
@@ -389,8 +384,8 @@ async function saveMeasurement(){
   const values={
     p_weight_kg:inputNumberOrNull("measureWeight"),
     p_waist_cm:inputNumberOrNull("measureWaist"),
-    p_hips_cm:inputNumberOrNull("measureHips"),
-    p_chest_cm:inputNumberOrNull("measureChest")
+    p_hips_cm:null,
+    p_chest_cm:null
   };
   if(Object.values(values).every(v=>v===null)){
     message.textContent="Введите хотя бы один показатель.";
@@ -434,21 +429,14 @@ async function getProgressSummary(){
 
   const startWeight=assessment?.starting_weight_kg!=null?Number(assessment.starting_weight_kg):null;
   const startWaist=assessment?.waist_cm!=null?Number(assessment.waist_cm):null;
-  const startHips=assessment?.hips_cm!=null?Number(assessment.hips_cm):null;
-  const startChest=assessment?.chest_cm!=null?Number(assessment.chest_cm):null;
-
   const latestWeight=last?.weight_kg!=null?Number(last.weight_kg):startWeight;
   const latestWaist=last?.waist_cm!=null?Number(last.waist_cm):startWaist;
-  const latestHips=last?.hips_cm!=null?Number(last.hips_cm):startHips;
-  const latestChest=last?.chest_cm!=null?Number(last.chest_cm):startChest;
 
   return {
     startDate,latestDate,
     days:dateDiffDays(startDate,latestDate),
     startWeight,latestWeight,weightChange:(startWeight!=null&&latestWeight!=null)?latestWeight-startWeight:null,
-    startWaist,latestWaist,waistChange:(startWaist!=null&&latestWaist!=null)?latestWaist-startWaist:null,
-    startHips,latestHips,hipsChange:(startHips!=null&&latestHips!=null)?latestHips-startHips:null,
-    startChest,latestChest,chestChange:(startChest!=null&&latestChest!=null)?latestChest-startChest:null
+    startWaist,latestWaist,waistChange:(startWaist!=null&&latestWaist!=null)?latestWaist-startWaist:null
   };
 }
 
@@ -464,10 +452,9 @@ async function loadProgressStats(){
         <b>${deltaText(s.weightChange," кг")}</b>
         <span>${s.startWeight!=null?ruNumber(s.startWeight)+" → "+ruNumber(s.latestWeight)+" кг":"Нет данных"}</span>
       </div>
-      <div class="progress-deltas">
+      <div class="progress-deltas two">
+        <div><small>Вес</small><b>${deltaText(s.weightChange," кг")}</b></div>
         <div><small>Талия</small><b>${deltaText(s.waistChange," см")}</b></div>
-        <div><small>Бёдра</small><b>${deltaText(s.hipsChange," см")}</b></div>
-        <div><small>Грудь</small><b>${deltaText(s.chestChange," см")}</b></div>
       </div>`;
   }catch(err){
     const box=$("progressSummaryBox");
@@ -597,13 +584,17 @@ async function makeBeforeAfterCollage(){
 
     const detailParts=[];
     if(s.waistChange!=null)detailParts.push("Талия "+deltaText(s.waistChange," см"));
-    if(s.hipsChange!=null)detailParts.push("Бёдра "+deltaText(s.hipsChange," см"));
-    ctx.fillStyle="#26362d";ctx.font="600 30px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(detailParts.join("   •   ")||"Мой прогресс",540,1162);
+    ctx.fillStyle="#26362d";ctx.font="600 34px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(detailParts.join("   •   ")||"Мой прогресс",540,1160);
 
-    ctx.fillStyle="#7b817b";ctx.font="500 26px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(profile?.full_name||"",540,1230);
-    ctx.fillText(`${formatShortDate(s.startDate)} → ${formatShortDate(s.latestDate)}`,540,1274);
+    ctx.fillStyle="#26362d";ctx.font="700 38px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(profile?.full_name||"",540,1218);
+
+    ctx.fillStyle="#5f8d66";ctx.font="600 25px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(consultant?.display_name?("Консультант: "+consultant.display_name):"",540,1257);
+
+    ctx.fillStyle="#7b817b";ctx.font="500 24px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(`${formatShortDate(s.startDate)} → ${formatShortDate(s.latestDate)}`,540,1300);
 
     URL.revokeObjectURL(a.url);URL.revokeObjectURL(b.url);
 
@@ -622,7 +613,7 @@ async function makeBeforeAfterCollage(){
       days_count:s.days,
       weight_change_kg:s.weightChange,
       waist_change_cm:s.waistChange,
-      hips_change_cm:s.hipsChange
+      hips_change_cm:null
     });
     if(saved.error)throw saved.error;
 
