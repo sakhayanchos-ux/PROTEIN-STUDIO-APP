@@ -125,7 +125,7 @@ async function bootstrap(){
       !profile.onboarding_completed ||
       !assessment ||
       !assessment.readiness_score ||
-      (selectedGoals.includes("Снижение веса")&&!assessment.target_weight_kg);
+      ((selectedGoals.includes("Снижение веса")||selectedGoals.includes("Улучшить фигуру"))&&!assessment.target_weight_kg);
 
     if(needsShortWellness){
       onboardingDraft={
@@ -491,7 +491,7 @@ function pagePlan(){
     '<div class="product-plan-row"><div class="product-plan-icon">🌿</div><div><b>Растительный напиток Алоэ</b><small>Можно включить в водный ритуал по инструкции продукта и рекомендации консультанта.</small></div></div>'+
     '<div class="product-plan-row"><div class="product-plan-icon">⚡</div><div><b>CR7 Drive</b><small>Для тренировочных дней и интенсивной физической нагрузки — использовать согласно инструкции продукта.</small></div></div>'+
     '<div class="discount-note"><b>Ваша скидка на продукты</b><span>15–50% в зависимости от статуса клиента. Точный процент укажет ваш консультант.</span></div>'+
-    '<p class="product-disclaimer">БАД. Не является лекарственным средством. Следуйте маркировке продукта и рекомендациям консультанта.</p>'+
+    '<p class="product-disclaimer">Используйте продукты согласно маркировке конкретного продукта и рекомендациям консультанта. При индивидуальных ограничениях учитывайте рекомендации врача.</p>'+
   '</section>';
 }
 
