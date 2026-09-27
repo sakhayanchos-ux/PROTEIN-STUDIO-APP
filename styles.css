@@ -67,3 +67,5 @@ main{padding:16px 16px 90px}.card{background:var(--card);border:1px solid var(--
 .saved-collage-info b{display:block;font-size:14px}.saved-collage-info small{display:block;color:var(--muted);font-size:11px;margin:4px 0 6px}
 .saved-collage-info .btn{margin-top:4px;padding:9px 10px;font-size:11px}
 @media(max-width:360px){.progress-deltas{grid-template-columns:1fr 1fr}.saved-collage{grid-template-columns:80px 1fr}.saved-collage img{width:80px}}
+
+.progress-deltas.two{grid-template-columns:1fr 1fr}
