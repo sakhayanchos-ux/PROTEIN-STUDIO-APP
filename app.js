@@ -78,45 +78,92 @@ async function login(){
   const phone=normalizePhone($("loginPhone").value),password=$("loginPassword").value;
   if(phone.length<12)return setMessage("Введите номер телефона.");
   const email=phoneLoginEmail(phone);
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error)return setMessage(error.message);
-  me=data.user;await bootstrap();
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error)return setMessage(error.message);
+    me=data.user;
+    await bootstrap();
+  }catch(err){
+    console.error(err);
+    setMessage("Не удалось открыть профиль. Попробуйте ещё раз.");
+  }
 }
 async function logout(){await sb.auth.signOut();location.reload()}
 async function bootstrap(){
-  const u=await sb.auth.getUser();
-  me=u.data.user;
-  if(!me){showScreen("authScreen");await loadConsultants();return}
-  const p=await sb.from("ps_profiles").select("*").eq("id",me.id).maybeSingle();
-  if(p.error)return setMessage(p.error.message);
-  if(!p.data){showScreen("authScreen");$("loginBox").classList.add("hidden");$("registerBox").classList.remove("hidden");return setMessage("Для этого аккаунта ещё нет профиля клиента. Завершите регистрацию.")}
-  profile=p.data;
-  if(!profile.onboarding_completed){
-    const saved=await sb.from("ps_assessments").select("*").eq("user_id",me.id).maybeSingle();
-    assessment=saved.data||null;
+  try{
+    if(!me){
+      const session=await sb.auth.getSession();
+      me=session.data.session?.user||null;
+    }
+    if(!me){
+      showScreen("authScreen");
+      await loadConsultants();
+      return;
+    }
+
+    const [p,a]=await Promise.all([
+      sb.from("ps_profiles").select("*").eq("id",me.id).maybeSingle(),
+      sb.from("ps_assessments").select("*").eq("user_id",me.id).maybeSingle()
+    ]);
+
+    if(p.error)throw p.error;
+    if(a.error)throw a.error;
+
+    if(!p.data){
+      showScreen("authScreen");
+      $("loginBox").classList.add("hidden");
+      $("registerBox").classList.remove("hidden");
+      setMessage("Для этого аккаунта ещё нет профиля клиента. Завершите регистрацию.");
+      return;
+    }
+
+    profile=p.data;
+    assessment=a.data||null;
     selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
-    onboardingDraft={
-      weight:assessment?.starting_weight_kg??null,
-      waist:assessment?.waist_cm??null,
-      targetWeight:assessment?.target_weight_kg??null,
-      goalResult:assessment?.goal_result_text||"",
-      readiness:assessment?.readiness_score??null
-    };
-    onboardingStep=1;
-    showScreen("onboardingScreen");
-    renderOnboarding();
-    return
+
+    const needsShortWellness=
+      !profile.onboarding_completed ||
+      !assessment ||
+      !assessment.readiness_score ||
+      (selectedGoals.includes("Снижение веса")&&!assessment.target_weight_kg);
+
+    if(needsShortWellness){
+      onboardingDraft={
+        weight:assessment?.starting_weight_kg??null,
+        waist:assessment?.waist_cm??null,
+        targetWeight:assessment?.target_weight_kg??null,
+        goalResult:assessment?.goal_result_text||"",
+        readiness:assessment?.readiness_score??null
+      };
+      onboardingStep=1;
+      setMessage("");
+      showScreen("onboardingScreen");
+      renderOnboarding();
+      return;
+    }
+
+    const [pl,c]=await Promise.all([
+      sb.from("ps_plans").select("*").eq("user_id",me.id).eq("status","active").order("created_at",{ascending:false}).limit(1).maybeSingle(),
+      profile.consultant_id?sb.from("ps_consultants").select("*").eq("id",profile.consultant_id).maybeSingle():Promise.resolve({data:null,error:null})
+    ]);
+    if(pl.error)throw pl.error;
+    if(c.error)throw c.error;
+
+    plan=pl.data;
+    consultant=c.data;
+
+    const marathon=await sb.rpc("ps_start_marathon");
+    if(marathon.error)console.warn("Marathon start:",marathon.error);
+
+    setMessage("");
+    showScreen("appScreen");
+    $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
+    openPage("plan");
+  }catch(err){
+    console.error("bootstrap failed",err);
+    showScreen("authScreen");
+    setMessage("Не удалось открыть профиль: "+(err?.message||"попробуйте ещё раз."));
   }
-  const [a,pl,c]=await Promise.all([
-    sb.from("ps_assessments").select("*").eq("user_id",me.id).maybeSingle(),
-    sb.from("ps_plans").select("*").eq("user_id",me.id).eq("status","active").order("created_at",{ascending:false}).limit(1).maybeSingle(),
-    profile.consultant_id?sb.from("ps_consultants").select("*").eq("id",profile.consultant_id).maybeSingle():Promise.resolve({data:null})
-  ]);
-  assessment=a.data;plan=pl.data;consultant=c.data;
-  await sb.rpc("ps_start_marathon");
-  showScreen("appScreen");
-  $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
-  openPage("plan");
 }
 
 function hasWeightGoal(){
