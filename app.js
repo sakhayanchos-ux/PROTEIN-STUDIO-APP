@@ -4,11 +4,40 @@ let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selec
 const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
 function showScreen(id){screens.forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+
+const THEME_KEY="ps_theme";
+const THEMES=["classic","neon","crystal","flowers"];
+function applyTheme(theme,saveLocal=true){
+  const value=THEMES.includes(theme)?theme:"neon";
+  document.documentElement.dataset.theme=value;
+  if(saveLocal)localStorage.setItem(THEME_KEY,value);
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta){
+    const colors={classic:"#f4f1e8",neon:"#05060d",crystal:"#f7f3fb",flowers:"#f8f2e8"};
+    meta.setAttribute("content",colors[value]);
+  }
+}
+async function chooseTheme(theme){
+  applyTheme(theme,true);
+  document.querySelectorAll("[data-theme-choice]").forEach(function(btn){
+    btn.classList.toggle("selected",btn.dataset.themeChoice===theme);
+  });
+  const label=$("themeSavedMessage");
+  if(label)label.textContent="Тема применена сразу ✓";
+  if(me&&profile){
+    const {error}=await sb.from("ps_profiles").update({
+      theme_preference:theme,
+      updated_at:new Date().toISOString()
+    }).eq("id",me.id);
+    if(!error)profile.theme_preference=theme;
+  }
+}
 function readConfig(){
   if(window.PROTEIN_STUDIO_CONFIG?.url&&window.PROTEIN_STUDIO_CONFIG?.key)return window.PROTEIN_STUDIO_CONFIG;
   try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||"null")}catch{return null}
 }
 function initClient(){
+  applyTheme(localStorage.getItem(THEME_KEY)||"neon",false);
   const cfg=readConfig();
   if(!cfg?.url||!cfg?.key){showScreen("setupScreen");return false}
   sb=supabase.createClient(cfg.url,cfg.key);
@@ -119,6 +148,7 @@ async function bootstrap(){
 
     profile=p.data;
     assessment=a.data||null;
+    applyTheme(profile.theme_preference||localStorage.getItem(THEME_KEY)||"neon",true);
     selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
 
     const needsShortWellness=
@@ -451,7 +481,7 @@ function prevOnboarding(){
 function openPage(page){
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Сообщество",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Сообщество",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль",themes:"Оформление"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=pages[page]||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
@@ -461,6 +491,7 @@ function openPage(page){
   if(page==="plan")loadPlanProgress();
   if(page==="nutrition")loadNutritionTargets();
   if(page==="workouts")loadWorkoutPlan();
+  if(page==="themes")bindThemePicker();
 }
 function pagePlan(){
   const goalList=assessment?.goals?.length?assessment.goals:[assessment?.primary_goal||plan?.goal||"Моя цель"];
@@ -1168,9 +1199,38 @@ async function bindNotificationToggles(){
     $(id)?.addEventListener("change",async e=>{await sb.from("ps_notification_settings").upsert({user_id:me.id,[key]:e.target.checked,updated_at:new Date().toISOString()})});
   }
 }
+
+function themePreview(type,label,subtitle,emoji){
+  const selected=(document.documentElement.dataset.theme||"neon")===type?" selected":"";
+  return '<button type="button" class="theme-choice'+selected+'" data-theme-choice="'+type+'">'+
+    '<div class="theme-preview '+type+'"><span>'+emoji+'</span><i></i><i></i><i></i></div>'+
+    '<div class="theme-choice-copy"><b>'+label+'</b><small>'+subtitle+'</small></div>'+
+    '<div class="theme-check">✓</div>'+
+  '</button>';
+}
+function pageThemes(){
+  return '<h2 class="section-title">Оформление</h2>'+
+    '<section class="card theme-picker-card">'+
+      '<div class="eyebrow">Выберите свой стиль</div>'+
+      '<h3>Тема приложения</h3>'+
+      '<p class="muted">Нажмите на вариант — всё приложение изменится сразу, без перезагрузки.</p>'+
+      '<div class="theme-grid">'+
+        themePreview("classic","Классика","Светлый бежево-зелёный wellness","🌿")+
+        themePreview("neon","Неон","Тёмный фон и яркое свечение","⚡")+
+        themePreview("crystal","Стразы","Перламутр, блеск и кристаллы","💎")+
+        themePreview("flowers","Цветы","Нежные цветочные акценты","🌸")+
+      '</div>'+
+      '<p id="themeSavedMessage" class="message"></p>'+
+    '</section>';
+}
+function bindThemePicker(){
+  document.querySelectorAll("[data-theme-choice]").forEach(function(btn){
+    btn.addEventListener("click",function(){chooseTheme(btn.dataset.themeChoice)});
+  });
+}
 function pageProfile(){const goals=assessment?.goals?.length?assessment.goals.join(", "):(assessment?.primary_goal||"—");return `<h2 class="section-title">Профиль</h2><section class="card"><b>${profile?.full_name||""}</b><p class="muted">Цели: ${goals}<br>Консультант: ${consultant?.display_name||"—"}<br>Профиль-оценка: пройдена ✓</p></section>`}
 function soon(name){return `<h2 class="section-title">${name}</h2><section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
+const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile,themes:pageThemes};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();
