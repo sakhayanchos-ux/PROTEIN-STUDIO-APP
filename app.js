@@ -497,8 +497,8 @@ async function loadPlanProgress(){
 
     if(target!=null&&start!=null&&current!=null&&start!==target){
       const total=Math.abs(start-target);
-      const moved=Math.abs(start-current);
-      const done=Math.max(0,Math.min(total,moved));
+      const towardGoal=target<start ? (start-current) : (current-start);
+      const done=Math.max(0,Math.min(total,towardGoal));
       const percent=Math.max(0,Math.min(100,Math.round((done/total)*100)));
       const remaining=Math.max(0,Math.abs(current-target));
       const weightChange=current-start;
