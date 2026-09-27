@@ -30,3 +30,10 @@ main{padding:16px 16px 90px}.card{background:var(--card);border:1px solid var(--
 .toggle-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.toggle-row:last-child{border-bottom:0}.toggle-row input{width:22px;height:22px;margin:0}
 .metric{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.metric:last-child{border-bottom:0}.metric span{color:var(--muted);font-size:12px}
 @media(min-width:700px){body{background:#ddd8d0}.shell{box-shadow:0 0 55px rgba(0,0,0,.16)}}
+.goal-hint{margin:0 0 12px}
+.choices button.selected{position:relative;padding-right:46px}
+.choices button.selected::after{content:"✓";position:absolute;right:16px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-size:14px;font-weight:900}
+.step-actions{display:grid;grid-template-columns:.8fr 1.35fr;gap:10px;margin-top:12px}
+.step-actions .btn{margin-top:0}
+.btn:disabled{opacity:.65;cursor:wait}
+@media(max-width:380px){.step-actions{grid-template-columns:1fr}.step-actions .ghost{order:2}}
