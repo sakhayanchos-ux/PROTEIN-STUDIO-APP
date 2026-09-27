@@ -440,34 +440,86 @@ function openPage(page){
   if(page==="notifications")bindNotificationToggles();
   if(page==="marathon")loadMarathonDays();
   if(page==="progress")bindProgressPhotoActions();
+  if(page==="plan")loadPlanProgress();
 }
 function pagePlan(){
   const goalList=assessment?.goals?.length?assessment.goals:[assessment?.primary_goal||plan?.goal||"Моя цель"];
   const goal=goalList.join(" · ");
-  const start=assessment?.starting_weight_kg?assessment.starting_weight_kg+" кг":"—";
-  const mins=assessment?.minutes_available||15;
-  const place=assessment?.training_place||"по плану";
-  return `
-  <section class="card hero">
-    <div class="eyebrow">Ваш персональный маршрут</div>
-    <h1>${goal}</h1>
-    <p class="muted">День ${plan?.current_day||1} из ${plan?.duration_days||30}. Из «Моего плана» идут питание, тренировки, марафон и прогресс.</p>
-    <span class="pill">PROTEIN STUDIO</span>
-  </section>
-  <div class="grid2">
-    <div class="mini"><small>Стартовый вес</small><b>${start}</b></div>
-    <div class="mini"><small>Сегодня</small><b>0%</b></div>
-  </div>
-  <section class="card">
-    <h3>Сегодня</h3>
-    ${task("🥗","Питание","Открыть план питания на сегодня")}
-    ${task("🏋🏻‍♀️","Тренировка",mins+" минут · "+place)}
-    ${task("🔥","Марафон","30 дней · каждый день открывается новая тема")}
-    ${task("💧","Вода","Цель по умолчанию: 8 стаканов")}
-    ${task("🚶🏻‍♀️","Активность","Цель по умолчанию: 8 000 шагов")}
-  </section>`;
+  const targetWeight=assessment?.target_weight_kg!=null?Number(assessment.target_weight_kg):null;
+  const goalResult=assessment?.goal_result_text||"";
+  const finalGoal=targetWeight ? "Цель: "+ruNumber(targetWeight)+" кг" : (goalResult?escapeHtml(goalResult):goal);
+
+  return '<section class="card hero plan-hero">'+
+    '<div class="eyebrow">Мой путь</div>'+
+    '<h1>'+escapeHtml(goal)+'</h1>'+
+    '<p class="plan-final-goal">'+finalGoal+'</p>'+
+    '<div id="planProgressContent"><div class="plan-loading">Считаем ваш прогресс…</div></div>'+
+  '</section>'+
+
+  '<section class="card">'+
+    '<div class="row"><div><div class="eyebrow">Что делать сегодня</div><h3 class="photo-title">План на день</h3></div><span class="pill">Шаг за шагом</span></div>'+
+    planActionCard("🥗","Питание","Держите ритм питания: 3 основных приёма + 1–2 перекуса, если это помогает не пропускать еду и соблюдать план.","Почему: регулярный план питания проще отслеживать и корректировать вместе с консультантом.","nutrition")+
+    planActionCard("🏋🏻‍♀️","Движение","Начните хотя бы с 5–15 минут активности. Важнее регулярность, чем длинная тренировка раз в неделю.","Почему: ежедневное движение — часть пути к вашей цели и прогрессу.","workouts")+
+    planActionCard("💧","Вода","Отмечайте воду в течение дня. Базовый ориентир в приложении — 8 стаканов, затем консультант сможет его скорректировать.","Продуктовая опция: Растительный напиток Алоэ — по инструкции продукта и рекомендации консультанта.","nutrition")+
+    planActionCard("🔥","30 дней","Каждый день открывается новая тема. Выполняйте только сегодняшний день — следующие пока закрыты 🔒.","Почему: маленькие ежедневные действия легче превратить в привычку.","marathon")+
+  '</section>'+
+
+  '<section class="card product-plan-card">'+
+    '<div class="row"><div><div class="eyebrow">Продукты клуба</div><h3 class="photo-title">Herbalife в вашем плане</h3></div><span class="pill">С консультантом</span></div>'+
+    '<div class="product-plan-row"><div class="product-plan-icon">🥤</div><div><b>Формула 1 / протеиновый коктейль</b><small>Может быть частью структурированного завтрака или другого приёма пищи по вашему плану.</small></div></div>'+
+    '<div class="product-plan-row"><div class="product-plan-icon">🌿</div><div><b>Растительный напиток Алоэ</b><small>Можно включить в водный ритуал по инструкции продукта и рекомендации консультанта.</small></div></div>'+
+    '<div class="product-plan-row"><div class="product-plan-icon">⚡</div><div><b>CR7 Drive</b><small>Для тренировочных дней и интенсивной физической нагрузки — использовать согласно инструкции продукта.</small></div></div>'+
+    '<div class="discount-note"><b>Ваша скидка на продукты</b><span>15–50% в зависимости от статуса клиента. Точный процент укажет ваш консультант.</span></div>'+
+    '<p class="product-disclaimer">БАД. Не является лекарственным средством. Следуйте маркировке продукта и рекомендациям консультанта.</p>'+
+  '</section>';
 }
-function task(icon,title,sub){return `<div class="task"><div class="task-icon">${icon}</div><div><b>${title}</b><small>${sub}</small></div></div>`}
+
+function planActionCard(icon,title,body,why,page){
+  return '<button class="plan-action" type="button" data-plan-page="'+page+'">'+
+    '<div class="plan-action-icon">'+icon+'</div>'+
+    '<div class="plan-action-copy"><b>'+title+'</b><span>'+body+'</span><small>'+why+'</small></div>'+
+    '<div class="plan-action-arrow">›</div></button>';
+}
+
+async function loadPlanProgress(){
+  const box=$("planProgressContent");
+  if(!box)return;
+  document.querySelectorAll("[data-plan-page]").forEach(function(btn){
+    btn.addEventListener("click",function(){openPage(btn.dataset.planPage)});
+  });
+  try{
+    const s=await getProgressSummary();
+    const target=assessment?.target_weight_kg!=null?Number(assessment.target_weight_kg):null;
+    const start=s.startWeight;
+    const current=s.latestWeight;
+    const startWaist=s.startWaist;
+    const currentWaist=s.latestWaist;
+
+    if(target!=null&&start!=null&&current!=null&&start!==target){
+      const total=Math.abs(start-target);
+      const moved=Math.abs(start-current);
+      const done=Math.max(0,Math.min(total,moved));
+      const percent=Math.max(0,Math.min(100,Math.round((done/total)*100)));
+      const remaining=Math.max(0,Math.abs(current-target));
+      const weightChange=current-start;
+      const waistChange=(startWaist!=null&&currentWaist!=null)?currentWaist-startWaist:null;
+      box.innerHTML=
+        '<div class="plan-weight-route"><div><small>Старт</small><b>'+ruNumber(start)+' кг</b></div><div class="plan-route-center"><small>Сейчас</small><b>'+ruNumber(current)+' кг</b></div><div><small>Цель</small><b>'+ruNumber(target)+' кг</b></div></div>'+
+        '<div class="plan-progress-line"><i style="width:'+percent+'%"></i></div>'+
+        '<div class="plan-progress-meta"><b>Пройдено '+percent+'%</b><span>Осталось '+ruNumber(remaining)+' кг</span></div>'+
+        '<div class="plan-change-grid"><div><small>Вес</small><b>'+deltaText(weightChange," кг")+'</b></div><div><small>Талия</small><b>'+(waistChange==null?"—":deltaText(waistChange," см"))+'</b></div><div><small>Дней</small><b>'+s.days+'</b></div></div>';
+    }else{
+      const waistChange=(startWaist!=null&&currentWaist!=null)?currentWaist-startWaist:null;
+      box.innerHTML=
+        '<div class="plan-change-grid"><div><small>Текущий вес</small><b>'+(current!=null?ruNumber(current)+" кг":"—")+'</b></div><div><small>Талия</small><b>'+(waistChange==null?"—":deltaText(waistChange," см"))+'</b></div><div><small>Дней</small><b>'+s.days+'</b></div></div>'+
+        '<p class="muted">Для этой цели прогресс будем показывать по вашим замерам и выполнению плана.</p>';
+    }
+  }catch(err){
+    console.error(err);
+    box.innerHTML='<p class="message">Не удалось загрузить прогресс.</p>';
+  }
+}
+
 function pageNutrition(){return `<h2 class="section-title">Питание</h2><section class="card"><b>Питание идёт из «Моего плана»</b><p class="muted">Здесь будут завтрак, перекусы, обед, ужин, вода, рецепты и отметки выполнения. Следующим модулем добавим персональные варианты по профиль-оценке.</p></section>`}
 function pageWorkouts(){return `<h2 class="section-title">Тренировки</h2><section class="card"><b>Тренировка по вашему плану</b><p class="muted">${assessment?.minutes_available||15} минут · ${assessment?.training_place||"Дома"}. Здесь появятся видео упражнений, таймер, повторы и более лёгкие варианты.</p></section>`}
 function pageMarathon(){
