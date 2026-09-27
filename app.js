@@ -4,7 +4,10 @@ let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selec
 const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
 function showScreen(id){screens.forEach(x=>$(x).classList.toggle("hidden",x!==id))}
-function readConfig(){\n  if(window.PROTEIN_STUDIO_CONFIG?.url&&window.PROTEIN_STUDIO_CONFIG?.key)return window.PROTEIN_STUDIO_CONFIG;\n  try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||"null")}catch{return null}\n}
+function readConfig(){
+  if(window.PROTEIN_STUDIO_CONFIG?.url&&window.PROTEIN_STUDIO_CONFIG?.key)return window.PROTEIN_STUDIO_CONFIG;
+  try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||"null")}catch{return null}
+}
 function initClient(){
   const cfg=readConfig();
   if(!cfg?.url||!cfg?.key){showScreen("setupScreen");return false}
