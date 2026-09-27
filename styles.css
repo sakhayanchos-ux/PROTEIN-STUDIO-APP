@@ -48,3 +48,22 @@ main{padding:16px 16px 90px}.card{background:var(--card);border:1px solid var(--
 .photo-slot{min-width:0}.photo-frame{aspect-ratio:3/4;border:1.5px dashed #cfc8bc;border-radius:18px;background:#faf7f0;display:grid;place-items:center;overflow:hidden;color:var(--muted);font-weight:800;font-size:12px}
 .photo-frame img{width:100%;height:100%;object-fit:cover;display:block}.photo-btn{font-size:12px;padding:11px 8px}
 @media(max-width:360px){.photo-grid{grid-template-columns:1fr}}
+
+.day-row.locked{opacity:.62}
+.day-row.locked .day-num{background:#eeeae3;color:#9a958d}
+.day-lock{font-size:18px;line-height:1;padding:7px 9px}
+.progress-highlight{margin:14px 0 12px;padding:18px;border-radius:20px;background:linear-gradient(135deg,#e7f0e4,#f7eee8)}
+.progress-highlight small{display:block;color:var(--muted);font-size:11px}
+.progress-highlight b{display:block;font-size:34px;line-height:1.05;margin:5px 0;color:var(--green-dark)}
+.progress-highlight span{font-size:12px;color:var(--muted)}
+.progress-deltas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.progress-deltas>div{padding:12px 8px;border:1px solid var(--line);border-radius:15px;background:#faf7f0;text-align:center}
+.progress-deltas small{display:block;color:var(--muted);font-size:10px}
+.progress-deltas b{display:block;margin-top:4px;font-size:15px}
+.measurement-form{margin-top:12px;padding-top:6px;border-top:1px solid var(--line)}
+.saved-collage{display:grid;grid-template-columns:94px 1fr;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.saved-collage:last-child{border-bottom:0}
+.saved-collage img{width:94px;aspect-ratio:4/5;object-fit:cover;border-radius:15px;border:1px solid var(--line)}
+.saved-collage-info b{display:block;font-size:14px}.saved-collage-info small{display:block;color:var(--muted);font-size:11px;margin:4px 0 6px}
+.saved-collage-info .btn{margin-top:4px;padding:9px 10px;font-size:11px}
+@media(max-width:360px){.progress-deltas{grid-template-columns:1fr 1fr}.saved-collage{grid-template-columns:80px 1fr}.saved-collage img{width:80px}}
