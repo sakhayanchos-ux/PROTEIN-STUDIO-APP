@@ -587,14 +587,17 @@ async function makeBeforeAfterCollage(){
     ctx.fillStyle="#26362d";ctx.font="600 34px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(detailParts.join("   •   ")||"Мой прогресс",540,1160);
 
-    ctx.fillStyle="#26362d";ctx.font="700 38px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(profile?.full_name||"",540,1218);
+    ctx.fillStyle="#26362d";ctx.font="700 40px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(profile?.full_name||"",540,1205);
 
     ctx.fillStyle="#5f8d66";ctx.font="600 25px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(consultant?.display_name?("Консультант: "+consultant.display_name):"",540,1257);
+    ctx.fillText(consultant?.display_name?("Консультант: "+consultant.display_name):"",540,1247);
 
-    ctx.fillStyle="#7b817b";ctx.font="500 24px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(`${formatShortDate(s.startDate)} → ${formatShortDate(s.latestDate)}`,540,1300);
+    ctx.fillStyle="#6f746f";ctx.font="500 20px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("Все результаты индивидуальны и могут различаться.",540,1288);
+
+    ctx.fillStyle="#8a8f89";ctx.font="500 21px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(`${formatShortDate(s.startDate)} → ${formatShortDate(s.latestDate)}`,540,1325);
 
     URL.revokeObjectURL(a.url);URL.revokeObjectURL(b.url);
 
