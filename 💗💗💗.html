@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Путь от клиента до Супервайзера</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    padding: 30px 10px;
+}
+.container {
+    max-width: 760px;
+    width: 100%;
+    background: #fff;
+    border-radius: 24px;
+    padding: 30px 25px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.07);
+}
+h2 {
+    text-align: center;
+    font-size: 24px;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+}
+.sub {
+    text-align: center;
+    font-size: 15px;
+    color: #6b7280;
+    margin-bottom: 28px;
+}
+.phase {
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    margin: 20px 0 12px 0;
+    width: 100%;
+}
+.phase-green { background: #d1fae5; color: #065f46; }
+.phase-yellow { background: #fef3c7; color: #92400e; }
+.phase-blue { background: #dbeafe; color: #1e40af; }
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 14px 10px;
+    margin-bottom: 6px;
+}
+.circle {
+    background: #2d7a4b;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 40px;
+    min-width: 100px;
+    text-align: center;
+}
+.circle-green { background: #2d7a4b; }
+.circle-yellow { background: #d97706; }
+.circle-blue { background: #2563eb; }
+.arrow { font-size: 20px; color: #9ca3af; font-weight: 300; }
+.footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 14px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 12px;
+    border-radius: 14px;
+}
+.footer strong { color: #1a1a2e; }
+@media (max-width: 600px) {
+    .circle { font-size: 12px; padding: 8px 10px; min-width: 60px; }
+    .arrow { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>🧭 Путь от клиента до Супервайзера</h2>
+    <div class="sub">11 шагов через клубную систему Herbalife</div>
+
+    <!-- ЭТАП 1: ПРИВЛЕЧЕНИЕ -->
+    <div class="phase phase-green">🟢 ЭТАП 1 — ПРИВЛЕЧЕНИЕ</div>
+    <div class="row">
+        <span class="circle circle-green">1. Приглашение на Wellness test</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-green">2. Оценка здоровья</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-green">3. План Herbalife</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-green">4. Контроль</span>
+    </div>
+
+    <!-- ЭТАП 2: ВЕДЕНИЕ -->
+    <div class="phase phase-yellow">🟡 ЭТАП 2 — ВЕДЕНИЕ</div>
+    <div class="row">
+        <span class="circle circle-yellow">5. Обзор 2 нед</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-yellow">6. Встреча с Амбассадором</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-yellow">7. Участник Herbalife</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-yellow">8. Заказ со скидкой</span>
+    </div>
+
+    <!-- ЭТАП 3: РОСТ -->
+    <div class="phase phase-blue">🔵 ЭТАП 3 — РОСТ</div>
+    <div class="row">
+        <span class="circle circle-blue">9. Стажёр-наставник</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-blue">10. Академия</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-blue">11. Супервайзер 50%</span>
+        <span class="arrow">→</span>
+        <span class="circle circle-blue">🏆 Лидер</span>
+    </div>
+
+    <div class="footer">
+        🚀 <strong>Каждый может пройти этот путь.</strong> Система работает. Начни сегодня.
+    </div>
+</div>
+</body>
+</html>
