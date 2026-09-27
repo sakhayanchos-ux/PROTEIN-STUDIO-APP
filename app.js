@@ -14,7 +14,13 @@ function initClient(){
   sb=supabase.createClient(cfg.url,cfg.key);
   return true
 }
-function setMessage(t){$("authMessage").textContent=t||""}
+function setMessage(t){
+  const map={
+    "Email signups are disabled":"В Supabase выключена регистрация через Email. Включите Email provider, подтверждение e-mail оставьте выключенным.",
+    "Invalid login credentials":"Неверный номер телефона или пароль."
+  };
+  $("authMessage").textContent=map[t]||t||"";
+}
 function toggleDrawer(open){$("drawer").classList.toggle("open",open);$("backdrop").classList.toggle("show",open)}
 function setStep(n){
   document.querySelectorAll("[data-step]").forEach(el=>el.classList.toggle("hidden",Number(el.dataset.step)!==n));
