@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#f4f1e8">
   <title>PROTEIN STUDIO</title>
   <link rel="manifest" href="manifest.webmanifest">
+  <script>document.documentElement.dataset.theme=localStorage.getItem("ps_theme")||"neon";</script>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -81,6 +82,7 @@
       <button data-page="consultant" class="nav">💬 Мой консультант</button>
       <button data-page="notifications" class="nav">🔔 Уведомления</button>
       <button data-page="profile" class="nav">👤 Профиль</button>
+      <button data-page="themes" class="nav">🎨 Оформление</button>
       <button id="logoutBtn" class="nav">↩️ Выйти</button>
     </aside>
     <div id="backdrop" class="backdrop"></div>
