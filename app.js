@@ -133,7 +133,9 @@ async function bootstrap(){
         waist:assessment?.waist_cm??null,
         targetWeight:assessment?.target_weight_kg??null,
         goalResult:assessment?.goal_result_text||"",
-        readiness:assessment?.readiness_score??null
+        readiness:assessment?.readiness_score??null,
+        trainingPlace:assessment?.training_place||"Дома",
+        minutes:assessment?.minutes_available??10
       };
       onboardingStep=1;
       setMessage("");
@@ -232,7 +234,18 @@ function renderOnboarding(){
       '<div class="two-col">'+
         '<label>Сейчас, кг<input id="shortWeight" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.weight??"")+'"></label>'+
         '<label>Талия, см<input id="shortWaist" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.waist??"")+'"></label>'+
-      '</div>'+extra;
+      '</div>'+extra+
+      '<div class="two-col wellness-movement">'+
+        '<label>Где удобнее двигаться?<select id="shortTrainingPlace">'+
+          '<option'+(onboardingDraft.trainingPlace==="Дома"?" selected":"")+'>Дома</option>'+
+          '<option'+(onboardingDraft.trainingPlace==="В клубе"?" selected":"")+'>В клубе</option>'+
+          '<option'+(onboardingDraft.trainingPlace==="На улице"?" selected":"")+'>На улице</option>'+
+          '<option'+(onboardingDraft.trainingPlace==="В зале"?" selected":"")+'>В зале</option>'+
+        '</select></label>'+
+        '<label>Сколько минут реально?<select id="shortMinutes">'+
+          [5,10,15,20,30].map(function(n){return '<option value="'+n+'"'+(Number(onboardingDraft.minutes)===n?" selected":"")+'>'+n+' минут</option>'}).join("")+
+        '</select></label>'+
+      '</div>';
     return;
   }
 
@@ -267,6 +280,7 @@ function renderOnboarding(){
       '<div class="summary-row"><span>Вес / цель</span><b>'+weightText+'</b></div>'+
       '<div class="summary-row"><span>Талия</span><b>'+ruNumber(onboardingDraft.waist)+' см</b></div>'+
       '<div class="summary-row"><span>Готовность</span><b>'+onboardingDraft.readiness+'/10</b></div>'+
+      '<div class="summary-row"><span>Движение</span><b>'+escapeHtml(onboardingDraft.trainingPlace||"Дома")+' · '+(onboardingDraft.minutes||10)+' мин</b></div>'+
     '</div>';
 }
 
@@ -276,10 +290,14 @@ function collectOnboardingStep(){
   const waist=$("shortWaist");
   const tw=$("shortTargetWeight");
   const gr=$("shortGoalResult");
+  const tp=$("shortTrainingPlace");
+  const mins=$("shortMinutes");
   if(w)onboardingDraft.weight=w.value===""?null:Number(w.value);
   if(waist)onboardingDraft.waist=waist.value===""?null:Number(waist.value);
   if(tw)onboardingDraft.targetWeight=tw.value===""?null:Number(tw.value);
   if(gr)onboardingDraft.goalResult=gr.value.trim();
+  if(tp)onboardingDraft.trainingPlace=tp.value;
+  if(mins)onboardingDraft.minutes=Number(mins.value)||10;
 }
 
 function validateOnboardingStep(){
@@ -333,8 +351,8 @@ async function finishOnboarding(){
       readiness_score:Number(onboardingDraft.readiness),
       wellness_completed_at:now,
       workouts_per_week:0,
-      minutes_available:15,
-      training_place:"Дома",
+      minutes_available:Number(onboardingDraft.minutes)||10,
+      training_place:onboardingDraft.trainingPlace||"Дома",
       water_glasses_per_day:4,
       completed_at:now,
       updated_at:now
@@ -349,7 +367,7 @@ async function finishOnboarding(){
       goal_result_text:payload.goal_result_text,
       readiness_score:payload.readiness_score,
       nutrition:{enabled:true,meals:5},
-      workouts:{enabled:true,minutes:15,place:"Дома"},
+      workouts:{enabled:true,minutes:payload.minutes_available,place:payload.training_place},
       marathon:{enabled:true},
       water:{target:8},
       steps:{target:8000}
@@ -441,6 +459,8 @@ function openPage(page){
   if(page==="marathon")loadMarathonDays();
   if(page==="progress")bindProgressPhotoActions();
   if(page==="plan")loadPlanProgress();
+  if(page==="nutrition")loadNutritionTargets();
+  if(page==="workouts")loadWorkoutPlan();
 }
 function pagePlan(){
   const goalList=assessment?.goals?.length?assessment.goals:[assessment?.primary_goal||plan?.goal||"Моя цель"];
@@ -458,10 +478,11 @@ function pagePlan(){
 
   '<section class="card">'+
     '<div class="row"><div><div class="eyebrow">Что делать сегодня</div><h3 class="photo-title">План на день</h3></div><span class="pill">Шаг за шагом</span></div>'+
-    planActionCard("🥗","Питание","Держите ритм питания: 3 основных приёма + 1–2 перекуса, если это помогает не пропускать еду и соблюдать план.","Почему: регулярный план питания проще отслеживать и корректировать вместе с консультантом.","nutrition")+
-    planActionCard("🏋🏻‍♀️","Движение","Начните хотя бы с 5–15 минут активности. Важнее регулярность, чем длинная тренировка раз в неделю.","Почему: ежедневное движение — часть пути к вашей цели и прогрессу.","workouts")+
-    planActionCard("💧","Вода","Отмечайте воду в течение дня. Базовый ориентир в приложении — 8 стаканов, затем консультант сможет его скорректировать.","Продуктовая опция: Растительный напиток Алоэ — по инструкции продукта и рекомендации консультанта.","nutrition")+
+    planActionCard("🥗","Питание","Утром: Алоэ + коктейль. Днём: белковые перекусы и правильная тарелка. Вечером: лёгкий белковый вариант по плану.","План подстраивается под вашу цель и текущий вес.","nutrition")+
+    planActionCard("🏋🏻‍♀️","Движение",(assessment?.minutes_available||10)+" минут · "+(assessment?.training_place||"Дома")+". Начинаем с уровня, который можно повторять регулярно.","Нагрузка растёт постепенно по мере прогресса.","workouts")+
+    planActionCard("💧","Вода","Суточный ориентир рассчитывается по текущему весу. Алоэ можно включить в ваш водный ритуал по инструкции продукта.","CR7 Drive — только как спортивный напиток при подходящей нагрузке, не вместо всей воды.","nutrition")+
     planActionCard("🔥","30 дней","Каждый день открывается новая тема. Выполняйте только сегодняшний день — следующие пока закрыты 🔒.","Почему: маленькие ежедневные действия легче превратить в привычку.","marathon")+
+    '<div id="planDailyTargets" class="daily-targets"><span>Белок: считаем…</span><span>Вода: считаем…</span></div>'+
   '</section>'+
 
   '<section class="card product-plan-card">'+
@@ -490,6 +511,14 @@ async function loadPlanProgress(){
   try{
     const s=await getProgressSummary();
     const target=assessment?.target_weight_kg!=null?Number(assessment.target_weight_kg):null;
+    const targets=buildNutritionTargets(s.latestWeight);
+    const dailyTargets=$("planDailyTargets");
+    if(dailyTargets){
+      const proteinText=targets.proteinMin
+        ? ("Белок: "+targets.proteinMin+"–"+targets.proteinMax+" г/сут.")
+        : "Белок: источник в каждом основном приёме";
+      dailyTargets.innerHTML="<span>"+proteinText+"</span><span>Вода: ~"+ruNumber(targets.waterLiters)+" л/сут.</span>";
+    }
     const start=s.startWeight;
     const current=s.latestWeight;
     const startWaist=s.startWaist;
@@ -520,8 +549,182 @@ async function loadPlanProgress(){
   }
 }
 
-function pageNutrition(){return `<h2 class="section-title">Питание</h2><section class="card"><b>Питание идёт из «Моего плана»</b><p class="muted">Здесь будут завтрак, перекусы, обед, ужин, вода, рецепты и отметки выполнения. Следующим модулем добавим персональные варианты по профиль-оценке.</p></section>`}
-function pageWorkouts(){return `<h2 class="section-title">Тренировки</h2><section class="card"><b>Тренировка по вашему плану</b><p class="muted">${assessment?.minutes_available||15} минут · ${assessment?.training_place||"Дома"}. Здесь появятся видео упражнений, таймер, повторы и более лёгкие варианты.</p></section>`}
+
+function buildNutritionTargets(currentWeight){
+  const current=Number(currentWeight||assessment?.starting_weight_kg||0);
+  const target=assessment?.target_weight_kg!=null?Number(assessment.target_weight_kg):null;
+  const weightGoal=(assessment?.goals||[]).some(function(g){return g==="Снижение веса"||g==="Улучшить фигуру"});
+  const muscleGoal=(assessment?.goals||[]).includes("Набор мышечной массы");
+  const proteinWeight=(weightGoal&&target)?target:current;
+
+  let proteinMin=null,proteinMax=null;
+  if(proteinWeight>0&&weightGoal){
+    proteinMin=Math.round(proteinWeight*1.2);
+    proteinMax=Math.round(proteinWeight*1.6);
+  }else if(proteinWeight>0&&muscleGoal){
+    proteinMin=Math.round(proteinWeight*1.6);
+    proteinMax=Math.round(proteinWeight*2.0);
+  }
+
+  const waterLiters=current>0 ? Math.round(current*0.03*10)/10 : null;
+  return {proteinMin,proteinMax,waterLiters,proteinWeight};
+}
+
+function mealStep(time,title,text,note){
+  return '<div class="meal-step">'+
+    '<div class="meal-time">'+time+'</div>'+
+    '<div class="meal-copy"><b>'+title+'</b><span>'+text+'</span>'+(note?'<small>'+note+'</small>':'')+'</div>'+
+  '</div>';
+}
+
+function menuSuggestion(name,protein,note){
+  return '<div class="menu-suggestion"><div><b>'+name+'</b><small>'+note+'</small></div><span>'+protein+' г белка</span></div>';
+}
+
+function pageNutrition(){
+  return '<h2 class="section-title">Питание</h2>'+
+  '<section class="card nutrition-hero">'+
+    '<div class="eyebrow">Ваш персональный план</div>'+
+    '<h3>Питание на каждый день</h3>'+
+    '<p class="muted">База: структурированный завтрак, белковые перекусы, правильная тарелка в обед и понятный ужин.</p>'+
+    '<div id="nutritionTargetBox" class="nutrition-target-box"><span>Считаем белок…</span><span>Считаем воду…</span></div>'+
+  '</section>'+
+
+  '<section class="card">'+
+    '<div class="eyebrow">По порядку</div><h3>Как выглядит день</h3>'+
+    mealStep("Утро","Алоэ + протеиновый коктейль","Растительный напиток Алоэ — по инструкции продукта. Затем протеиновый коктейль. Ягоды или фрукт можно добавить утром, если это вписывается в ваш план.","Не нужно усложнять: сначала выстраиваем стабильный завтрак.")+
+    mealStep("Перекус","Белковый перекус","Выберите один белковый вариант: Protein Bites, протеиновый батончик, Formula 1 Express или протеиновые чипсы.","Смысл перекуса — не «добрать сладкое», а помочь удержать структуру питания.")+
+    mealStep("Обед","Правильная тарелка","Половина тарелки — овощи/салат, четверть — источник белка, четверть — гарнир.","Если нет весов, используйте ориентир по ладони ниже.")+
+    '<img class="portion-guide" src="portion-guide.svg" alt="Правильная тарелка и ориентир порций по руке">'+
+    mealStep("Перекус","Ещё один белковый вариант","Если между обедом и ужином большой промежуток — используйте белковый перекус из меню клуба или обычную белковую еду.","Количество перекусов можно уменьшить, если вам комфортно без них.")+
+    mealStep("Ужин","Лёгкий белковый ужин","Вариант 1 — протеиновый коктейль. Вариант 2 — овощи + белок; гарнир можно сделать меньше в менее активный день, но полностью исключать его автоматически не нужно.","Выбираем вариант по голоду, активности и рекомендации консультанта.")+
+  '</section>'+
+
+  '<section class="card">'+
+    '<div class="row"><div><div class="eyebrow">Белок</div><h3 class="photo-title">Ваш ориентир</h3></div><span class="pill">Автоматически</span></div>'+
+    '<div id="proteinTargetDetail" class="target-detail"><p class="muted">Считаем по вашей цели…</p></div>'+
+    '<div class="menu-suggestions">'+
+      menuSuggestion("Протеиновый коктейль","10","из текущего меню PROTEIN STUDIO")+
+      menuSuggestion("Кофе с протеином","15","удобный белковый напиток")+
+      menuSuggestion("Protein Bites","8","мини-перекус")+
+      menuSuggestion("Протеиновые чипсы","11–12","несладкий перекус")+
+      menuSuggestion("Formula 1 Express","14–16","порционный перекус")+
+      menuSuggestion("H24 Achieve","21","спортивный высокобелковый батончик")+
+    '</div>'+
+    '<a class="btn ghost app-link" href="https://sakhayanchos-ux.github.io/PROTEIN-STUDIO-MENU/" target="_blank" rel="noopener">Открыть меню PROTEIN STUDIO</a>'+
+  '</section>'+
+
+  '<section class="card">'+
+    '<div class="eyebrow">Водный баланс</div><h3 id="waterTargetTitle">Ваш ориентир</h3>'+
+    '<p id="waterTargetText" class="muted">Считаем по текущему весу…</p>'+
+    '<div class="hydration-note"><b>🌿 Алоэ</b><span>Можно включить в водный ритуал по инструкции продукта.</span></div>'+
+    '<div class="hydration-note"><b>⚡ CR7 Drive</b><span>Используйте как спортивный напиток при интенсивной физической нагрузке согласно инструкции; это не замена всей воде за день.</span></div>'+
+  '</section>'+
+
+  '<p class="plan-health-note">Ориентиры в приложении предназначены для здоровых взрослых и не заменяют медицинские рекомендации. При заболеваниях почек/сердца, ограничении жидкости, беременности или других особых состояниях план нужно согласовать с врачом.</p>';
+}
+
+async function loadNutritionTargets(){
+  try{
+    const s=await getProgressSummary();
+    const t=buildNutritionTargets(s.latestWeight);
+    const box=$("nutritionTargetBox");
+    if(box){
+      box.innerHTML='<span>'+(t.proteinMin?('Белок '+t.proteinMin+'–'+t.proteinMax+' г'):'Белок — по структуре приёмов')+'</span>'+
+        '<span>'+(t.waterLiters?('Вода ~'+ruNumber(t.waterLiters)+' л'):'Вода — индивидуально')+'</span>';
+    }
+
+    const pd=$("proteinTargetDetail");
+    if(pd){
+      if(t.proteinMin){
+        const basis=(assessment?.target_weight_kg&&((assessment?.goals||[]).includes("Снижение веса")||(assessment?.goals||[]).includes("Улучшить фигуру")))
+          ? 'Расчёт сделан от целевого веса '+ruNumber(t.proteinWeight)+' кг.'
+          : 'Расчёт сделан от веса '+ruNumber(t.proteinWeight)+' кг.';
+        pd.innerHTML='<div class="big-target">'+t.proteinMin+'–'+t.proteinMax+' г <small>белка в сутки</small></div>'+
+          '<p class="muted">'+basis+' Это ориентир, а не обязательная медицинская норма.</p>';
+      }else{
+        pd.innerHTML='<p class="muted">Для вашей цели пока используем простое правило: добавляйте источник белка в каждый основной приём пищи. Точный диапазон консультант сможет настроить отдельно.</p>';
+      }
+    }
+
+    const wt=$("waterTargetTitle"),wp=$("waterTargetText");
+    if(wt&&t.waterLiters)wt.textContent='Около '+ruNumber(t.waterLiters)+' л жидкости в сутки';
+    if(wp&&t.waterLiters)wp.textContent='Расчётный ориентир: текущий вес × 30 мл/кг. При тренировках, жаре и других условиях потребность меняется.';
+  }catch(err){
+    console.error(err);
+  }
+}
+
+function exerciseItem(icon,title,text){
+  return '<div class="exercise-item"><div class="exercise-icon">'+icon+'</div><div><b>'+title+'</b><span>'+text+'</span></div></div>';
+}
+
+function pageWorkouts(){
+  return '<h2 class="section-title">Тренировки</h2>'+
+  '<section class="card workout-hero">'+
+    '<div class="eyebrow">План из вашей анкеты</div>'+
+    '<h3 id="workoutPlanTitle">Собираем вашу нагрузку…</h3>'+
+    '<p id="workoutPlanIntro" class="muted"></p>'+
+  '</section>'+
+  '<section class="card">'+
+    '<div class="eyebrow">Сегодня</div><h3>Простая тренировка</h3>'+
+    '<div id="workoutExercises"><p class="muted">Подбираем упражнения…</p></div>'+
+  '</section>'+
+  '<section class="card">'+
+    '<div class="eyebrow">Правило прогресса</div>'+
+    '<p class="muted">Начинаем с уровня, который можно повторять регулярно. Когда этот объём становится комфортным — прибавляем несколько минут или усложняем упражнения.</p>'+
+    '<div class="notice">Если во время нагрузки появляется боль в груди, выраженная одышка, головокружение или необычная боль — остановитесь. При хронических заболеваниях и перед интенсивной нагрузкой лучше обсудить допустимый уровень активности с врачом.</div>'+
+  '</section>';
+}
+
+async function loadWorkoutPlan(){
+  try{
+    const s=await getProgressSummary();
+    const weight=Number(s.latestWeight||assessment?.starting_weight_kg||0);
+    const readiness=Number(assessment?.readiness_score||5);
+    const place=assessment?.training_place||"Дома";
+    const minutes=Number(assessment?.minutes_available||10);
+    const lowImpact=(weight>=80||readiness<=5);
+    const title=$("workoutPlanTitle"),intro=$("workoutPlanIntro"),box=$("workoutExercises");
+
+    if(title)title.textContent=minutes+' минут · '+place;
+    if(intro)intro.textContent=lowImpact
+      ? 'Стартуем мягко: без прыжков и резких ударных движений. Вес — только один из факторов; важны также самочувствие и привычка к нагрузке.'
+      : 'Можно начать с короткого смешанного комплекса: ходьба/разминка + простые силовые движения.';
+
+    let items=[];
+    if(place==="На улице"){
+      items=[
+        ["🚶","Ходьба","Начните спокойным темпом 2–3 минуты, затем идите чуть быстрее."],
+        ["⏱️","Интервалы","Чередуйте 1 минуту бодрее и 1 минуту спокойнее."],
+        ["🧍","Финиш","2 минуты спокойной ходьбы и лёгкая разминка."]
+      ];
+    }else if(lowImpact){
+      items=[
+        ["🚶","Шаги на месте","1–2 минуты в удобном темпе, без прыжков."],
+        ["🪑","Встать со стула","Медленно встать и сесть 6–10 раз, держась за опору при необходимости."],
+        ["🧱","Отжимания от стены","6–10 спокойных повторов."],
+        ["↔️","Шаги в сторону","По 6–10 шагов в каждую сторону."],
+        ["🪽","«Самолёт» у опоры","Лёгкое упражнение на баланс: держитесь за опору и отводите ногу назад/в сторону."]
+      ];
+    }else{
+      items=[
+        ["🚶","Разминка","2 минуты ходьбы или шагов на месте."],
+        ["🪑","Присед к стулу","8–12 повторов в комфортной амплитуде."],
+        ["🧱","Отжимания от стены/опоры","8–12 повторов."],
+        ["↔️","Шаги в сторону","10 шагов в каждую сторону."],
+        ["🧘","Спокойная заминка","1–2 минуты дыхания и лёгкой растяжки."]
+      ];
+    }
+
+    const loops=minutes>=20?2:1;
+    if(box)box.innerHTML=items.map(function(x){return exerciseItem(x[0],x[1],x[2])}).join("")+
+      '<div class="workout-loop-note">'+(loops===2?'Пройдите этот круг 2 раза.':'Одного круга на старте достаточно.')+'</div>';
+  }catch(err){
+    console.error(err);
+  }
+}
+
 function pageMarathon(){
   return `<h2 class="section-title">Марафон</h2>
   <section class="card hero">
