@@ -1,6 +1,4 @@
-// Заполняется один раз владельцем приложения.
-// Publishable key предназначен для клиентских приложений и работает вместе с RLS.
 window.PROTEIN_STUDIO_CONFIG = {
-  url: "",
-  key: ""
+  url: "https://xprobrrrpybmzbucakws.supabase.co",
+  key: "sb_publishable_UETDRxFcw79NwwBmvjI4sw_7F5y5B28"
 };
