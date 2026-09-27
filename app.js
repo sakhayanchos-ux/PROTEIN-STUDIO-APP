@@ -142,7 +142,7 @@ async function finishOnboarding(){
       goals:selectedGoals,
       nutrition:{enabled:true,meals:5},
       workouts:{enabled:true,minutes:payload.minutes_available,place:payload.training_place},
-      marathon:{enabled:false},
+      marathon:{enabled:true},
       water:{target:8},
       steps:{target:8000}
     };
@@ -236,7 +236,7 @@ function pagePlan(){
     <h3>Сегодня</h3>
     ${task("🥗","Питание","Открыть план питания на сегодня")}
     ${task("🏋🏻‍♀️","Тренировка",mins+" минут · "+place)}
-    ${task("🔥","Марафон","Подключается к вашему личному плану")}
+    ${task("🔥","Марафон","30 дней · каждый день открывается новая тема")}
     ${task("💧","Вода","Цель по умолчанию: 8 стаканов")}
     ${task("🚶🏻‍♀️","Активность","Цель по умолчанию: 8 000 шагов")}
   </section>`;
