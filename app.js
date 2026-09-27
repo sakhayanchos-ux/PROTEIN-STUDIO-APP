@@ -27,6 +27,10 @@ function normalizePhone(value){
   if(digits.length===10)digits="7"+digits;
   return digits?("+"+digits):"";
 }
+function phoneLoginEmail(phone){
+  const digits=normalizePhone(phone).replace(/\D/g,"");
+  return digits ? ("phone."+digits+"@protein-studio.app") : "";
+}
 
 async function loadConsultants(){
   if(!sb)return;
@@ -43,8 +47,9 @@ async function registerClient(){
   const consultant_id=$("regConsultant").value||null;
   if(!full_name||normalizedPhone.length<12||password.length<6)return setMessage("Заполните имя, телефон и пароль минимум из 6 символов.");
 
+  const technicalEmail=phoneLoginEmail(normalizedPhone);
   const {data,error}=await sb.auth.signUp({
-    phone:normalizedPhone,
+    email:technicalEmail,
     password,
     options:{data:{full_name,phone:normalizedPhone,consultant_id}}
   });
@@ -55,7 +60,7 @@ async function registerClient(){
     $("registerBox").classList.add("hidden");
     $("loginBox").classList.remove("hidden");
     $("loginPhone").value=normalizedPhone;
-    return setMessage("Аккаунт создан. Если включено подтверждение телефона, введите код из SMS после его получения.");
+    return setMessage("Аккаунт создан. Теперь войдите по номеру телефона и паролю.");
   }
 
   me=data.user;
@@ -66,7 +71,8 @@ async function login(){
   setMessage("Входим...");
   const phone=normalizePhone($("loginPhone").value),password=$("loginPassword").value;
   if(phone.length<12)return setMessage("Введите номер телефона.");
-  const {data,error}=await sb.auth.signInWithPassword({phone,password});
+  const email=phoneLoginEmail(phone);
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
   if(error)return setMessage(error.message);
   me=data.user;await bootstrap();
 }
