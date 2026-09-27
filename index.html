@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f1e8">
+  <title>PROTEIN STUDIO</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="shell">
+  <section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <div class="brand"><span>PROTEIN</span> STUDIO</div>
+      <p class="muted">Личный кабинет клиента клуба</p>
+
+      <div id="loginBox">
+        <label>E-mail<input id="loginEmail" type="email" autocomplete="email"></label>
+        <label>Пароль<input id="loginPassword" type="password" autocomplete="current-password"></label>
+        <button class="btn primary" id="loginBtn">Войти</button>
+        <button class="btn ghost" id="showRegisterBtn">Я новый клиент</button>
+      </div>
+
+      <div id="registerBox" class="hidden">
+        <label>Имя и фамилия<input id="regName" autocomplete="name"></label>
+        <label>Телефон<input id="regPhone" autocomplete="tel"></label>
+        <label>E-mail<input id="regEmail" type="email" autocomplete="email"></label>
+        <label>Пароль<input id="regPassword" type="password" autocomplete="new-password"></label>
+        <label>Мой консультант<select id="regConsultant"></select></label>
+        <button class="btn primary" id="registerBtn">Зарегистрироваться</button>
+        <button class="btn ghost" id="showLoginBtn">У меня уже есть аккаунт</button>
+      </div>
+      <p id="authMessage" class="message"></p>
+    </div>
+  </section>
+
+  <section id="setupScreen" class="auth-screen hidden">
+    <div class="auth-card">
+      <div class="brand"><span>PROTEIN</span> STUDIO</div>
+      <h2>Подключение</h2>
+      <p class="muted">Однократно укажите публичные данные Supabase для этого приложения.</p>
+      <label>Supabase URL<input id="setupUrl" placeholder="https://...supabase.co"></label>
+      <label>Publishable key<input id="setupKey" placeholder="sb_publishable_..."></label>
+      <button class="btn primary" id="saveSetupBtn">Сохранить подключение</button>
+    </div>
+  </section>
+
+  <section id="onboardingScreen" class="auth-screen hidden">
+    <div class="auth-card">
+      <div class="brand"><span>PROTEIN</span> STUDIO</div>
+      <div class="steps"><i class="on"></i><i></i><i></i><i></i></div>
+
+      <div data-step="1">
+        <div class="eyebrow">Профиль-оценка</div>
+        <h2>Какая ваша главная цель?</h2>
+        <div class="choices" id="goalChoices">
+          <button data-goal="Снижение веса">Снижение веса</button>
+          <button data-goal="Улучшить фигуру">Улучшить фигуру</button>
+          <button data-goal="Набор мышечной массы">Набор мышечной массы</button>
+          <button data-goal="Больше энергии">Больше энергии</button>
+          <button data-goal="Улучшить самочувствие">Улучшить самочувствие</button>
+          <button data-goal="Наладить питание">Наладить питание</button>
+        </div>
+        <button class="btn primary next-step" data-next="2">Продолжить</button>
+      </div>
+
+      <div data-step="2" class="hidden">
+        <h2>Стартовые данные</h2>
+        <div class="two-col">
+          <label>Рост, см<input id="height" type="number"></label>
+          <label>Вес, кг<input id="weight" type="number" step="0.1"></label>
+          <label>Талия, см<input id="waist" type="number" step="0.1"></label>
+          <label>Бёдра, см<input id="hips" type="number" step="0.1"></label>
+        </div>
+        <label>Размер одежды<input id="clothing" placeholder="например, 48"></label>
+        <button class="btn primary next-step" data-next="3">Продолжить</button>
+      </div>
+
+      <div data-step="3" class="hidden">
+        <h2>Ваш ритм</h2>
+        <label>Сколько тренировок в неделю сейчас?<input id="workouts" type="number" min="0" max="14" value="0"></label>
+        <label>Сколько минут готовы выделять?
+          <select id="minutes"><option>10</option><option selected>15</option><option>20</option><option>30</option><option>45</option></select>
+        </label>
+        <label>Где удобнее заниматься?
+          <select id="place"><option>Дома</option><option>В клубе</option><option>В зале</option><option>На улице</option></select>
+        </label>
+        <label>Сколько стаканов воды обычно пьёте?<input id="water" type="number" min="0" max="20" value="4"></label>
+        <button class="btn primary next-step" data-next="4">Продолжить</button>
+      </div>
+
+      <div data-step="4" class="hidden">
+        <h2>Профиль готов 🌿</h2>
+        <p class="muted">Создаём ваш первый персональный план. Позже консультант сможет его корректировать.</p>
+        <button class="btn primary" id="finishOnboardingBtn">Создать мой план</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="appScreen" class="hidden">
+    <aside id="drawer" class="drawer">
+      <div class="drawer-brand">PROTEIN STUDIO</div>
+      <div id="drawerPerson" class="drawer-person"></div>
+      <button data-page="plan" class="nav active">📋 Мой план</button>
+      <button data-page="nutrition" class="nav">🥗 Питание</button>
+      <button data-page="workouts" class="nav">🏋🏻‍♀️ Тренировки</button>
+      <button data-page="marathon" class="nav">🔥 Марафон</button>
+      <button data-page="progress" class="nav">📈 Прогресс</button>
+      <button data-page="achievements" class="nav">🏆 Достижения</button>
+      <button data-page="community" class="nav">👥 Сообщество</button>
+      <button data-page="consultant" class="nav">💬 Мой консультант</button>
+      <button data-page="notifications" class="nav">🔔 Уведомления</button>
+      <button data-page="profile" class="nav">👤 Профиль</button>
+      <button id="logoutBtn" class="nav">↩️ Выйти</button>
+    </aside>
+    <div id="backdrop" class="backdrop"></div>
+    <header class="topbar">
+      <button id="menuBtn" class="menu-btn">☰</button>
+      <strong id="pageTitle">Мой план</strong>
+    </header>
+    <main id="content"></main>
+  </section>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
