@@ -657,3 +657,60 @@ html[data-theme="flowers"] .theme-preview.flowers::before,
 html[data-theme="flowers"] .theme-preview.flowers::after{
   display:none!important;
 }
+
+
+/* ===== RELIABLE PHOTO THEMES V27 ===== */
+.theme-bg-image{
+  display:none;
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  min-height:100vh;
+  object-fit:cover;
+  object-position:center center;
+  z-index:0;
+  pointer-events:none;
+}
+.theme-bg-image.visible{display:block!important}
+.shell{position:relative;z-index:1}
+html[data-theme="crystal"] body::before,
+html[data-theme="flowers"] body::before{display:none!important}
+
+html[data-theme="crystal"] body,
+html[data-theme="flowers"] body{background:transparent!important}
+
+html[data-theme="crystal"] .shell,
+html[data-theme="flowers"] .shell,
+html[data-theme="crystal"] #appScreen,
+html[data-theme="flowers"] #appScreen,
+html[data-theme="crystal"] main,
+html[data-theme="flowers"] main,
+html[data-theme="crystal"] .auth-screen,
+html[data-theme="flowers"] .auth-screen{
+  background:transparent!important;
+}
+
+html[data-theme="crystal"] .card,
+html[data-theme="crystal"] .auth-card{
+  background:rgba(255,255,255,.74)!important;
+  -webkit-backdrop-filter:blur(7px) saturate(1.08)!important;
+  backdrop-filter:blur(7px) saturate(1.08)!important;
+}
+html[data-theme="flowers"] .card,
+html[data-theme="flowers"] .auth-card{
+  background:rgba(255,252,246,.76)!important;
+  -webkit-backdrop-filter:blur(7px) saturate(1.03)!important;
+  backdrop-filter:blur(7px) saturate(1.03)!important;
+}
+.theme-preview-photo{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:1;
+}
+.theme-preview>span{z-index:2}
+html[data-theme="crystal"] .theme-preview.crystal,
+html[data-theme="flowers"] .theme-preview.flowers{background:none!important}
