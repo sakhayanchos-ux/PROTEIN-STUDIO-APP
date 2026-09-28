@@ -9,7 +9,7 @@
   "description": "Личный кабинет клиента PROTEIN STUDIO",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "scene.png",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
