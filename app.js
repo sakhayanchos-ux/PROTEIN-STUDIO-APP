@@ -5,86 +5,22 @@ const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
 function showScreen(id){screens.forEach(x=>$(x).classList.toggle("hidden",x!==id))}
 
-const THEME_KEY="ps_theme";
-const THEMES=["classic","neon","crystal","flowers"];
-const THEME_META={
-  classic:{color:"#f4f1e8",background:""},
-  neon:{color:"#05060d",background:""},
-  crystal:{color:"#d8d4d2",background:"https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/9908e5d9-df11-436b-aa67-72ff286ccdd0.jpg"},
-  flowers:{color:"#eee3d8",background:"https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/b68ac5fc-5c9b-45d2-82bc-717be6b3e658.jpg"}
-};
+const JEWEL_BACKGROUND="https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/f3bf642a-f9a0-4e86-985d-80c30d2c1e57.jpg";
 
-function currentTheme(){
-  const value=document.documentElement.dataset.theme;
-  return THEMES.includes(value)?value:"classic";
-}
-
-function applyTheme(theme,saveLocal=true){
-  const value=THEMES.includes(theme)?theme:"classic";
-  document.documentElement.dataset.theme=value;
-  if(saveLocal)localStorage.setItem(THEME_KEY,value);
-
+function applyTheme(){
+  document.documentElement.dataset.theme="jewel";
   const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.setAttribute("content",THEME_META[value].color);
-
+  if(meta)meta.setAttribute("content","#fffafc");
   updateThemeAssets();
 }
-
-function portionGuideSrc(){
-  return currentTheme()==="neon" ? "portion-guide-neon.svg?v=32" : "portion-guide.svg?v=32";
-}
-
-function themeBackgroundSrc(theme){
-  return THEME_META[theme]?.background||"";
-}
-
+function portionGuideSrc(){ return "portion-guide.svg?v=40"; }
 function updateThemeAssets(){
   const guide=$("portionGuide");
   if(guide)guide.src=portionGuideSrc();
-
   const bg=$("themeBgImage");
-  const src=themeBackgroundSrc(currentTheme());
   if(bg){
-    if(src){
-      if(bg.getAttribute("src")!==src)bg.setAttribute("src",src);
-      bg.classList.add("visible");
-    }else{
-      bg.classList.remove("visible");
-      bg.removeAttribute("src");
-    }
-  }
-
-  document.querySelectorAll(".theme-preview-photo").forEach(function(img){
-    const src=themeBackgroundSrc(img.dataset.themePhoto);
-    if(src&&img.getAttribute("src")!==src)img.setAttribute("src",src);
-  });
-}
-
-async function chooseTheme(theme){
-  if(!THEMES.includes(theme))return;
-  applyTheme(theme,true);
-
-  document.querySelectorAll("[data-theme-choice]").forEach(function(btn){
-    btn.classList.toggle("selected",btn.dataset.themeChoice===theme);
-  });
-
-  const label=$("themeSavedMessage");
-  if(label)label.textContent="Тема применена сразу ✓";
-
-  if(me&&profile){
-    const {data,error}=await sb.from("ps_profiles")
-      .update({theme_preference:theme,updated_at:new Date().toISOString()})
-      .eq("id",me.id)
-      .select("theme_preference")
-      .single();
-
-    if(error){
-      console.error("Theme save failed",error);
-      if(label)label.textContent="Тема применена на этом телефоне.";
-    }else{
-      profile.theme_preference=data?.theme_preference||theme;
-      if(label)label.textContent="Тема сохранена ✓";
-    }
+    bg.src=JEWEL_BACKGROUND;
+    bg.classList.add("visible");
   }
 }
 
@@ -93,7 +29,7 @@ function readConfig(){
   try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||"null")}catch{return null}
 }
 function initClient(){
-  applyTheme(localStorage.getItem(THEME_KEY)||"classic",false);
+  applyTheme();
   const cfg=readConfig();
   if(!cfg?.url||!cfg?.key){showScreen("setupScreen");return false}
   sb=supabase.createClient(cfg.url,cfg.key);
@@ -204,10 +140,7 @@ async function bootstrap(){
 
     profile=p.data;
     assessment=a.data||null;
-    const localTheme=localStorage.getItem(THEME_KEY);
-    const profileTheme=THEMES.includes(profile.theme_preference)?profile.theme_preference:null;
-    const savedTheme=profileTheme||localTheme||"classic";
-    applyTheme(savedTheme,true);
+    applyTheme();
     selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
 
     const needsShortWellness=
@@ -540,7 +473,7 @@ function prevOnboarding(){
 function openPage(page){
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Сообщество",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль",themes:"Оформление"};
+  const titles={plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Сообщество",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=pages[page]||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
@@ -550,7 +483,6 @@ function openPage(page){
   if(page==="plan")loadPlanProgress();
   if(page==="nutrition")loadNutritionTargets();
   if(page==="workouts")loadWorkoutPlan();
-  if(page==="themes")bindThemePicker();
 }
 function pagePlan(){
   const goalList=assessment?.goals?.length?assessment.goals:[assessment?.primary_goal||plan?.goal||"Моя цель"];
@@ -1259,41 +1191,9 @@ async function bindNotificationToggles(){
   }
 }
 
-function themePreview(type,label,subtitle,emoji){
-  const selected=(document.documentElement.dataset.theme||"classic")===type?" selected":"";
-  const photo=(type==="crystal"||type==="flowers")
-    ? '<img class="theme-preview-photo" data-theme-photo="'+type+'" src="'+themeBackgroundSrc(type)+'" alt="">'
-    : '';
-  return '<button type="button" class="theme-choice'+selected+'" data-theme-choice="'+type+'">'+
-    '<div class="theme-preview '+type+'">'+photo+'<span>'+emoji+'</span><i></i><i></i><i></i></div>'+
-    '<div class="theme-choice-copy"><b>'+label+'</b><small>'+subtitle+'</small></div>'+
-    '<div class="theme-check">✓</div>'+
-  '</button>';
-}
-function pageThemes(){
-  return '<h2 class="section-title">Оформление</h2>'+
-    '<section class="card theme-picker-card">'+
-      '<div class="eyebrow">Выберите свой стиль</div>'+
-      '<h3>Тема приложения</h3>'+
-      '<p class="muted">Нажмите на вариант — всё приложение изменится сразу, без перезагрузки.</p>'+
-      '<div class="theme-grid">'+
-        themePreview("classic","Классика","Светлый бежево-зелёный wellness","🌿")+
-        themePreview("neon","Неон","Тёмный фон и яркое свечение","⚡")+
-        themePreview("crystal","Стразы","Перламутр, блеск и кристаллы","💎")+
-        themePreview("flowers","Цветы","Нежные цветочные акценты","🌸")+
-      '</div>'+
-      '<p id="themeSavedMessage" class="message"></p>'+
-    '</section>';
-}
-function bindThemePicker(){
-  updateThemeAssets();
-  document.querySelectorAll("[data-theme-choice]").forEach(function(btn){
-    btn.addEventListener("click",function(){chooseTheme(btn.dataset.themeChoice)});
-  });
-}
 function pageProfile(){const goals=assessment?.goals?.length?assessment.goals.join(", "):(assessment?.primary_goal||"—");return `<h2 class="section-title">Профиль</h2><section class="card"><b>${profile?.full_name||""}</b><p class="muted">Цели: ${goals}<br>Консультант: ${consultant?.display_name||"—"}<br>Профиль-оценка: пройдена ✓</p></section>`}
 function soon(name){return `<h2 class="section-title">${name}</h2><section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile,themes:pageThemes};
+const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();
