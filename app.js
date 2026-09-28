@@ -10,8 +10,8 @@ const THEMES=["classic","neon","crystal","flowers"];
 const THEME_META={
   classic:{color:"#f4f1e8",background:""},
   neon:{color:"#05060d",background:""},
-  crystal:{color:"#d8d4d2",background:"theme-crystal.svg?v=30"},
-  flowers:{color:"#eee3d8",background:"theme-flowers.svg?v=30"}
+  crystal:{color:"#d8d4d2",background:"theme-crystal.svg?v=31"},
+  flowers:{color:"#eee3d8",background:"theme-flowers.svg?v=31"}
 };
 
 function currentTheme(){
@@ -31,7 +31,7 @@ function applyTheme(theme,saveLocal=true){
 }
 
 function portionGuideSrc(){
-  return currentTheme()==="neon" ? "portion-guide-neon.svg?v=30" : "portion-guide.svg?v=30";
+  return currentTheme()==="neon" ? "portion-guide-neon.svg?v=31" : "portion-guide.svg?v=31";
 }
 
 function themeBackgroundSrc(theme){
