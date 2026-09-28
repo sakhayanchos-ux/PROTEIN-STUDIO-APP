@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
 function showScreen(id){screens.forEach(x=>$(x).classList.toggle("hidden",x!==id))}
 
-const JEWEL_BACKGROUND="https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/312c7b22-dad1-4b4b-b537-1142fe3c3514.png";
+const JEWEL_BACKGROUND="rhinestones.jpg";
 
 function applyTheme(){
   document.documentElement.dataset.theme="jewel";
