@@ -342,3 +342,39 @@ main{padding:22px 22px 90px}
 }
 .nav.active{background:linear-gradient(90deg,rgba(248,220,232,.96),rgba(233,222,245,.96))!important}
 @media(min-width:700px){.theme-bg-image{object-fit:cover!important}}
+
+/* Four saved themes */
+.theme-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.theme-choice{position:relative;overflow:hidden;padding:0 0 12px;border:2px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);font-weight:800;text-align:left}
+.theme-choice>span:not(.theme-preview):not(.theme-check){display:block;padding:0 12px}
+.theme-preview{display:block;height:112px;margin-bottom:10px;background-size:cover;background-position:center}
+.theme-preview-sunset{background-size:100% auto;background-position:center 28%}
+.theme-check{display:none;position:absolute;top:8px;right:8px;padding:4px 8px;border-radius:50%;background:var(--green);color:white}
+.theme-choice[aria-pressed="true"]{border-color:var(--green);box-shadow:0 0 0 2px var(--soft)}
+.theme-choice[aria-pressed="true"] .theme-check{display:block}
+.theme-choice:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+html[data-theme="kpop"]{--bg:#f9d5e5;--card:#fff5fa;--ink:#483040;--muted:#79566d;--green:#b34080;--green-dark:#963466;--soft:#f4cce2;--line:#ddb0cb;--surface:rgba(255,241,249,.95);--panel:rgba(255,249,252,.94);--accent2:#b3c9ed;--theme-image:url("theme-kpop.jpg")}
+html[data-theme="sunset"]{--bg:#e9d8ef;--card:#fff3ee;--ink:#493957;--muted:#75607f;--green:#8a6cab;--green-dark:#72528e;--soft:#e4d5ef;--line:#cebadb;--surface:rgba(251,229,220,.95);--panel:rgba(250,242,255,.94);--accent2:#e8af8d;--theme-image:url("theme-sunset.jpg")}
+html[data-theme="neon"]{--bg:#100c23;--card:#201635;--ink:#fbf4ff;--muted:#d2bcde;--green:#ba69ee;--green-dark:#f0c4ff;--soft:#382448;--line:#784e95;--surface:rgba(31,20,49,.96);--panel:rgba(20,16,37,.96);--accent2:#3189b5;--theme-image:url("theme-neon.jpg")}
+html:not([data-theme="jewel"]) body{background:var(--bg);color:var(--ink)}
+html:not([data-theme="jewel"]) .drawer{background:var(--bg) var(--theme-image) center top/100% auto repeat-y!important}
+html:not([data-theme="jewel"]) :is(.card,#content>.card,.auth-card,.hero,.plan-hero,.nutrition-hero,.workout-hero,.product-plan-card){
+background:var(--surface)!important;border-color:var(--line)!important;color:var(--ink);box-shadow:0 8px 24px #20152a20!important}
+html:not([data-theme="jewel"]) #content>.card:nth-of-type(even){background:var(--panel)!important}
+html:not([data-theme="jewel"]) :is(.topbar,.drawer-brand,.drawer-person,.nav,.menu-btn){
+background:var(--panel)!important;color:var(--ink)!important;border-color:var(--line)!important}
+html:not([data-theme="jewel"]) :is(.brand,.brand span,.topbar strong,.section-title,h1,h2,h3){color:var(--ink)!important}
+html:not([data-theme="jewel"]) :is(input,select,textarea,.choices button,.readiness-btn,.mini,.photo-frame,.short-summary,.progress-deltas>div,.plan-change-grid>div){
+background:var(--panel)!important;color:var(--ink)!important;border-color:var(--line)!important}
+html:not([data-theme="jewel"]) :is(.primary,.readiness-btn.selected){background:linear-gradient(110deg,var(--green),var(--accent2))!important;color:#fff!important}
+html:not([data-theme="jewel"]) :is(.ghost,.nav.active,.choices button.selected,.day-link,.day-row.current,.task-icon,.plan-action-icon,.exercise-icon,.product-plan-icon,.discount-note,.daily-targets span,.workout-loop-note,.nutrition-target-box span,.pill){
+background:var(--soft)!important;color:var(--green-dark)!important;border-color:var(--line)!important}
+html:not([data-theme="jewel"]) :is(.eyebrow,.plan-progress-meta b,.discount-note b,.big-target,.menu-suggestion>span,.plan-action-arrow){color:var(--green-dark)!important}
+html:not([data-theme="jewel"]) .progress-highlight{background:var(--soft)!important;border-color:var(--line)!important}
+html:not([data-theme="jewel"]) .plan-progress-line{background:var(--panel)!important;border-color:var(--line)!important}
+html:not([data-theme="jewel"]) .plan-progress-line i{background:linear-gradient(90deg,var(--green),var(--accent2))!important}
+html[data-theme="neon"] .section-title{background:rgba(16,12,35,.9);padding:10px 14px;border-radius:14px}
+html[data-theme="neon"] :is(.notice,.day-num,.day-row.locked .day-num){background:#382448!important;color:#f4dfff!important}
+html[data-theme="neon"] .theme-choice{background:#201635;color:#fbf4ff}
+html[data-theme="sunset"] .theme-bg-image{height:146dvh;min-height:146vh;object-fit:fill!important}
+html[data-theme="sunset"] .drawer{background-size:auto 146vh!important;background-repeat:no-repeat!important}

@@ -5,24 +5,41 @@ const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
 function showScreen(id){screens.forEach(x=>$(x).classList.toggle("hidden",x!==id))}
 
-const JEWEL_BACKGROUND="rhinestones.jpg";
-
+const THEME_KEY="protein_studio_theme";
+const THEMES={
+  jewel:{name:"Стразы",image:"rhinestones.jpg",color:"#fffafc"},
+  kpop:{name:"K-pop",image:"theme-kpop.jpg",color:"#f9d5e5"},
+  neon:{name:"Неон",image:"theme-neon.jpg",color:"#100c23"},
+  sunset:{name:"Закат",image:"theme-sunset.jpg",color:"#e9d8ef"}
+};
+let selectedTheme="jewel";
+try{const saved=localStorage.getItem(THEME_KEY);if(Object.hasOwn(THEMES,saved))selectedTheme=saved}catch{}
 function applyTheme(){
-  document.documentElement.dataset.theme="jewel";
+  document.documentElement.dataset.theme=selectedTheme;
   const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.setAttribute("content","#fffafc");
+  if(meta)meta.setAttribute("content",THEMES[selectedTheme].color);
   updateThemeAssets();
+  document.querySelectorAll("[data-theme-choice]").forEach(button=>{
+    const active=button.dataset.themeChoice===selectedTheme;
+    button.setAttribute("aria-pressed",String(active));
+  });
 }
-function portionGuideSrc(){ return "portion-guide.svg?v=40"; }
+function portionGuideSrc(){return "portion-guide.svg?v=40"}
 function updateThemeAssets(){
-  const guide=$("portionGuide");
-  if(guide)guide.src=portionGuideSrc();
+  const guide=$("portionGuide");if(guide)guide.src=portionGuideSrc();
   const bg=$("themeBgImage");
-  if(bg){
-    bg.src=JEWEL_BACKGROUND;
-    bg.classList.add("visible");
-  }
+  if(bg){bg.src=THEMES[selectedTheme].image;bg.classList.add("visible")}
 }
+document.addEventListener("click",event=>{
+  const button=event.target.closest("[data-theme-choice]");
+  if(!button||!Object.hasOwn(THEMES,button.dataset.themeChoice))return;
+  selectedTheme=button.dataset.themeChoice;
+  let saved=true;
+  try{localStorage.setItem(THEME_KEY,selectedTheme)}catch{saved=false}
+  applyTheme();
+  const status=$("themeStatus");
+  if(status)status.textContent=saved?"Оформление сохранено на этом устройстве ✓":"Оформление применено. Браузер не разрешил сохранить выбор.";
+});
 
 function readConfig(){
   if(window.PROTEIN_STUDIO_CONFIG?.url&&window.PROTEIN_STUDIO_CONFIG?.key)return window.PROTEIN_STUDIO_CONFIG;
@@ -1191,7 +1208,10 @@ async function bindNotificationToggles(){
   }
 }
 
-function pageProfile(){const goals=assessment?.goals?.length?assessment.goals.join(", "):(assessment?.primary_goal||"—");return `<h2 class="section-title">Профиль</h2><section class="card"><b>${profile?.full_name||""}</b><p class="muted">Цели: ${goals}<br>Консультант: ${consultant?.display_name||"—"}<br>Профиль-оценка: пройдена ✓</p></section>`}
+function pageProfile(){const goals=assessment?.goals?.length?assessment.goals.join(", "):(assessment?.primary_goal||"—");return `<h2 class="section-title">Профиль</h2><section class="card"><b>${profile?.full_name||""}</b><p class="muted">Цели: ${goals}<br>Консультант: ${consultant?.display_name||"—"}<br>Профиль-оценка: пройдена ✓</p></section>
+<section class="card theme-settings"><h3>Оформление</h3><p class="muted">Выберите настроение для своего приложения.</p>
+<div class="theme-options">${Object.entries(THEMES).map(([id,theme])=>`<button type="button" class="theme-choice" data-theme-choice="${id}" aria-pressed="${selectedTheme===id}"><span class="theme-preview theme-preview-${id}" style="background-image:url('${theme.image}')"></span><span>${theme.name}</span><span class="theme-check" aria-hidden="true">✓</span></button>`).join("")}</div>
+<p class="muted" id="themeStatus" role="status">Ваш выбор сохраняется на этом устройстве.</p></section>`}
 function soon(name){return `<h2 class="section-title">${name}</h2><section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
 const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
