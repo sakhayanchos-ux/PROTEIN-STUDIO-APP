@@ -219,14 +219,19 @@ html[data-theme="crystal"] .card,html[data-theme="flowers"] .card,html[data-them
 
 /* CRYSTALS */
 html[data-theme="crystal"]{--bg:#f2eef1;--card:rgba(255,255,255,.94);--ink:#332d3a;--muted:#7c7483;--green:#ad4fb8;--green-dark:#7c348b;--soft:#f4e7f6;--line:#e7dae9;--shadow:0 13px 34px rgba(76,51,79,.14)}
-html[data-theme="crystal"] .card,html[data-theme="crystal"] .auth-card{background:rgba(255,255,255,.94);border-color:#fff;box-shadow:var(--shadow)}
+html[data-theme="crystal"] .card,html[data-theme="crystal"] .auth-card{background:rgba(255,255,255,.86);border-color:#fff;box-shadow:var(--shadow)}
 html[data-theme="crystal"] .topbar{background:rgba(255,255,255,.96);border-color:#eadfed}
-html[data-theme="crystal"] .drawer{background:#fffdfd url("./menu-crystal.svg?v=31") right top/100% 100% no-repeat;border-right-color:#eadfed}
-html[data-theme="crystal"] .drawer .nav{background:rgba(255,255,255,.72);margin-right:34px;width:calc(100% - 34px)}
+html[data-theme="crystal"] .drawer{
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.99) 0%,rgba(255,255,255,.97) 58%,rgba(255,255,255,.72) 72%,rgba(255,255,255,.18) 100%),
+    url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/9908e5d9-df11-436b-aa67-72ff286ccdd0.jpg") right center/cover no-repeat;
+  border-right-color:#eadfed
+}
+html[data-theme="crystal"] .drawer .nav{background:rgba(255,255,255,.82);margin-right:68px;width:calc(100% - 68px)}
 html[data-theme="crystal"] .drawer .nav.active{background:#f3e6f6;color:#743289}
 html[data-theme="crystal"] .primary{background:linear-gradient(100deg,#b866c7,#e38bb5,#69bfe8);color:#fff}
 html[data-theme="crystal"] .ghost{background:#f3e7f6;color:#713584}
-html[data-theme="crystal"] .hero,html[data-theme="crystal"] .plan-hero,html[data-theme="crystal"] .nutrition-hero,html[data-theme="crystal"] .workout-hero{background:rgba(255,255,255,.95);border:1px solid #fff}
+html[data-theme="crystal"] .hero,html[data-theme="crystal"] .plan-hero,html[data-theme="crystal"] .nutrition-hero,html[data-theme="crystal"] .workout-hero{background:rgba(255,255,255,.88);border:1px solid #fff}
 html[data-theme="crystal"] .plan-progress-line i{background:linear-gradient(90deg,#d94d9e,#6ec6e8,#8acb45)}
 html[data-theme="crystal"] .plan-action-arrow{color:#a451b9}
 html[data-theme="crystal"] .day-link,html[data-theme="crystal"] .day-row.current,html[data-theme="crystal"] .discount-note,html[data-theme="crystal"] .daily-targets span,html[data-theme="crystal"] .workout-loop-note{background:#f5e9f8;color:#743289}
@@ -235,14 +240,19 @@ html[data-theme="crystal"] .portion-guide{box-shadow:none}
 
 /* FLOWERS */
 html[data-theme="flowers"]{--bg:#f9f1e6;--card:rgba(255,253,248,.94);--ink:#314034;--muted:#777d72;--green:#739a63;--green-dark:#527747;--soft:#edf3e8;--line:#e9dfd4;--shadow:0 13px 34px rgba(72,84,62,.13)}
-html[data-theme="flowers"] .card,html[data-theme="flowers"] .auth-card{background:rgba(255,253,248,.94);border-color:#fff;box-shadow:var(--shadow)}
+html[data-theme="flowers"] .card,html[data-theme="flowers"] .auth-card{background:rgba(255,253,248,.86);border-color:#fff;box-shadow:var(--shadow)}
 html[data-theme="flowers"] .topbar{background:rgba(255,253,248,.96);border-color:#e9dfd4}
-html[data-theme="flowers"] .drawer{background:#fffaf2 url("./menu-flowers.svg?v=31") right top/100% 100% no-repeat;border-right-color:#e9dfd4}
-html[data-theme="flowers"] .drawer .nav{background:rgba(255,253,248,.74);margin-right:34px;width:calc(100% - 34px)}
+html[data-theme="flowers"] .drawer{
+  background:
+    linear-gradient(90deg,rgba(255,253,248,.99) 0%,rgba(255,253,248,.97) 58%,rgba(255,253,248,.70) 72%,rgba(255,253,248,.14) 100%),
+    url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/b68ac5fc-5c9b-45d2-82bc-717be6b3e658.jpg") right center/cover no-repeat;
+  border-right-color:#e9dfd4
+}
+html[data-theme="flowers"] .drawer .nav{background:rgba(255,253,248,.84);margin-right:68px;width:calc(100% - 68px)}
 html[data-theme="flowers"] .drawer .nav.active{background:#edf3e8;color:#527747}
 html[data-theme="flowers"] .primary{background:linear-gradient(100deg,#789c67,#a0b86c);color:#fff}
 html[data-theme="flowers"] .ghost{background:#edf3e8;color:#527747}
-html[data-theme="flowers"] .hero,html[data-theme="flowers"] .plan-hero,html[data-theme="flowers"] .nutrition-hero,html[data-theme="flowers"] .workout-hero{background:rgba(255,253,248,.95);border:1px solid #fff}
+html[data-theme="flowers"] .hero,html[data-theme="flowers"] .plan-hero,html[data-theme="flowers"] .nutrition-hero,html[data-theme="flowers"] .workout-hero{background:rgba(255,253,248,.88);border:1px solid #fff}
 html[data-theme="flowers"] .plan-progress-line i{background:linear-gradient(90deg,#77a464,#d48fb2,#7bb7df)}
 html[data-theme="flowers"] .plan-action-arrow{color:#739a63}
 html[data-theme="flowers"] .day-link,html[data-theme="flowers"] .day-row.current,html[data-theme="flowers"] .discount-note,html[data-theme="flowers"] .daily-targets span,html[data-theme="flowers"] .workout-loop-note{background:#edf3e8;color:#527747}
@@ -250,3 +260,11 @@ html[data-theme="flowers"] .nutrition-target-box span{background:#fff;color:#527
 html[data-theme="flowers"] .portion-guide{box-shadow:none}
 
 @media(max-width:380px){.theme-grid{grid-template-columns:1fr}}
+
+/* Exact user photo themes v32 */
+html[data-theme="flowers"] .theme-bg-image{object-fit:cover;object-position:center top;opacity:1}
+html[data-theme="crystal"] .theme-bg-image{object-fit:cover;object-position:center center;opacity:1}
+html[data-theme="flowers"] .theme-preview-photo,
+html[data-theme="crystal"] .theme-preview-photo{filter:none!important;opacity:1!important}
+html[data-theme="flowers"] .theme-preview.flowers,
+html[data-theme="crystal"] .theme-preview.crystal{background:none!important}
