@@ -1196,7 +1196,7 @@ function pageNotifications(){
   ${toggle("notifMarathon","🔥 Марафон")}
   ${toggle("notifMeasurements","📈 Замеры")}
   ${toggle("notifConsultant","💬 Консультант")}
-  </section><p class="muted">Сейчас сохраняем предпочтения. Настоящие push-уведомления подключим отдельным этапом.</p>`;
+  </section>`;
 }
 function toggle(id,label){return `<div class="toggle-row"><b>${label}</b><input id="${id}" type="checkbox" checked></div>`}
 async function bindNotificationToggles(){
@@ -1349,7 +1349,6 @@ $("registerBtn").addEventListener("click",registerClient);
 $("loginBtn").addEventListener("click",login);
 $("menuBtn").addEventListener("click",()=>toggleDrawer(true));
 $("backdrop").addEventListener("click",()=>toggleDrawer(false));
-$("logoutBtn").addEventListener("click",logout);
 document.querySelectorAll(".nav[data-page]").forEach(b=>b.addEventListener("click",()=>openPage(b.dataset.page)));
 $("wellnessNextBtn").addEventListener("click",nextOnboarding);
 $("wellnessBackBtn").addEventListener("click",prevOnboarding);
