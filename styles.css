@@ -410,3 +410,44 @@ html[data-theme="sunset"] .drawer{background-size:auto 146vh!important;backgroun
 .consultant-info h3{margin:0 0 14px;font-size:19px}
 .consultant-detail{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
 .consultant-detail:last-child{border-bottom:0}
+
+/* Shared chat */
+.community-chat{--chat-panel:var(--panel,rgba(255,253,255,.96));--chat-bubble:var(--surface,rgba(255,253,255,.96));display:flex;flex-direction:column;height:calc(100dvh - 120px);min-height:360px;gap:10px}
+.community-log{flex:1;min-height:100px;overflow:auto;overscroll-behavior:contain;padding:5px 2px;scrollbar-width:thin}
+.community-composer{flex-shrink:0;background:var(--chat-panel);border:1px solid var(--line);border-radius:20px;padding:12px;box-shadow:var(--shadow)}
+.community-composer textarea{margin:0;max-height:140px;min-height:58px;font-size:16px}
+.community-compose-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px}
+.community-compose-actions .btn{width:auto;margin:0;padding:11px 18px}
+.chat-photo-btn,.chat-text-button,.chat-older{background:var(--soft);color:var(--green-dark);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit}
+.chat-status{font-size:13px;line-height:1.4;margin:8px 0 0;color:var(--ink)}
+.chat-status:empty{display:none}
+.chat-message{margin:0 20px 12px 0;padding:13px;background:var(--chat-bubble);color:var(--ink);border:1px solid var(--line);border-radius:18px 18px 18px 5px}
+.chat-own{margin:0 0 12px 20px;border-radius:18px 18px 5px 18px;border-color:var(--green);background:var(--soft)}
+.chat-message-head{display:flex;align-items:center;gap:7px}
+.chat-message-head b{font-size:13px;display:block;overflow-wrap:anywhere}
+.chat-message-head>div{min-width:0;flex:1}
+.chat-message-head time{font-size:10px;color:var(--muted);max-width:74px;text-align:right}
+.chat-avatar{height:30px;width:30px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;background:var(--soft);color:var(--green-dark);font-weight:800;font-size:11px;border:1px solid var(--line)}
+.chat-role{font-size:10px;color:var(--green-dark)}
+.chat-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;font-size:15px;margin:10px 0}
+.chat-image{display:block;width:100%;max-height:360px;object-fit:contain;border-radius:12px;margin:10px 0;background:var(--bg)}
+.chat-message-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.chat-message-actions button,.chat-pin button{border:1px solid var(--line);border-radius:10px;background:var(--chat-panel);color:var(--ink);font-size:11px;padding:7px 8px;min-height:34px}
+.chat-message-actions .chat-reaction[aria-pressed="true"]{border-color:var(--green);background:var(--soft)}
+.chat-quote{margin-top:10px;border-left:3px solid var(--green);padding:7px 10px;background:var(--chat-panel);border-radius:6px;font-size:12px;overflow-wrap:anywhere}
+.chat-quote b,.chat-quote span{display:block}
+.chat-pins{background:var(--chat-panel);padding:12px;border-radius:14px;border:1px solid var(--line);max-height:180px;overflow:auto}
+.chat-pins summary{font-size:14px;font-weight:700;cursor:pointer}
+.chat-pin{border-top:1px solid var(--line);padding:10px 0;font-size:13px}
+.chat-pin p{white-space:pre-wrap;overflow-wrap:anywhere}
+.chat-empty{background:var(--chat-panel);border-radius:20px;text-align:center;padding:28px 15px;font-size:14px;color:var(--ink)}
+.chat-empty>span{font-size:32px;display:block;margin-bottom:10px}
+.chat-empty b{display:block;font-size:19px}
+.chat-older{display:block;margin:0 auto 12px;font-size:12px}
+#communityReply{font-size:12px;display:flex;justify-content:space-between;gap:8px;padding:8px;background:var(--soft);border-radius:10px;margin-bottom:8px;overflow-wrap:anywhere}
+#communityReply[hidden],#communityAttachment[hidden]{display:none}
+#communityReply button,#communityAttachment button{border:0;border-radius:10px;background:var(--chat-panel);color:var(--ink);font-size:22px;min-width:32px;min-height:32px}
+#communityAttachment{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+#communityAttachment img{width:64px;height:64px;object-fit:contain;border-radius:10px}
+@media(max-width:360px){.chat-message{margin-right:8px}.chat-own{margin-right:0;margin-left:8px}}
+

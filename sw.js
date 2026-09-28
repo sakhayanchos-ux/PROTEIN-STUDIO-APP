@@ -1,12 +1,17 @@
-const CACHE="protein-studio-app-v47";
-const CORE=["./","./index.html","./styles.css","./app.js","./config.js","./manifest.webmanifest","./portion-guide.svg","./rhinestones.jpg","./theme-kpop.jpg","./theme-neon.jpg","./theme-sunset.jpg"];
+const CACHE="protein-studio-app-v48";
+const CORE=["./","./index.html","./styles.css","./app.js","./community.js","./config.js","./manifest.webmanifest","./portion-guide.svg","./rhinestones.jpg","./theme-kpop.jpg","./theme-neon.jpg","./theme-sunset.jpg"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{
-  if(e.request.method!=="GET")return;
+  const url=new URL(e.request.url);
+  if(e.request.method!=="GET"||url.origin!==self.location.origin)return;
+  const allowed=CORE.some(path=>new URL(path,self.registration.scope).pathname===url.pathname);
+  if(!allowed)return;
   e.respondWith(fetch(e.request).then(r=>{
-    const copy=r.clone();
-    caches.open(CACHE).then(c=>c.put(e.request,copy));
+    if(r.ok){
+      const copy=r.clone();
+      e.waitUntil(caches.open(CACHE).then(c=>c.put(e.request,copy)));
+    }
     return r;
-  }).catch(()=>caches.match(e.request)));
+  }).catch(async()=>await caches.match(e.request,{ignoreSearch:true})||Response.error()));
 });
