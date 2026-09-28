@@ -1187,7 +1187,27 @@ async function shareSavedCollage(path){
   }
 }
 
-function pageConsultant(){return `<h2 class="section-title">Мой консультант</h2><section class="card"><b>${consultant?.display_name||"Консультант не выбран"}</b><p class="muted">Здесь будут рекомендации, сообщения и корректировки вашего плана.</p></section>`}
+function pageConsultant(){
+  const name=consultant?.display_name||"Консультант не выбран";
+  const initials=consultant?.display_name?.trim().split(/\s+/).slice(0,2).map(part=>Array.from(part)[0]||"").join("")||"♡";
+  return `<section class="card consultant-hero">
+    <div class="profile-avatar" aria-label="Место для фото консультанта">${escapeHtml(initials)}</div>
+    <div class="consultant-kicker">Мой консультант</div>
+    <h1>${escapeHtml(name)}</h1>
+    <div class="consultant-contact-buttons">
+      <button class="btn primary" type="button" disabled>Написать в WhatsApp</button>
+      <button class="btn ghost" type="button" disabled>Позвонить</button>
+    </div>
+    <p class="consultant-empty">Контакты пока не добавлены</p>
+  </section>
+  <section class="card consultant-info"><h3>О себе</h3><p class="consultant-empty">Здесь будет информация от консультанта</p></section>
+  <section class="card consultant-info"><h3>На связи</h3><p class="consultant-empty">Время для связи пока не указано</p></section>
+  <section class="card consultant-info"><h3>Мой клуб</h3>
+    <div class="consultant-detail"><span>Название</span><b>—</b></div>
+    <div class="consultant-detail"><span>Адрес</span><b>—</b></div>
+    <div class="consultant-detail"><span>Часы работы</span><b>—</b></div>
+  </section>`;
+}
 function pageNotifications(){
   return `<h2 class="section-title">Уведомления</h2><section class="card">
   ${toggle("notifWater","💧 Вода")}

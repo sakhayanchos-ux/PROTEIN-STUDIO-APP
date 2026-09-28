@@ -398,3 +398,15 @@ html[data-theme="sunset"] .drawer{background-size:auto 146vh!important;backgroun
 .profile-login b{font-size:16px;overflow-wrap:anywhere}
 .profile-account h3,.theme-settings h3{margin-top:0}
 @media(max-width:360px){.profile-fields{grid-template-columns:1fr}}
+
+/* Consultant card layout; contacts activate when the admin editor is connected */
+.consultant-hero{text-align:center;padding:28px 20px}
+.consultant-hero h1{font-size:25px;line-height:1.25;margin:8px 0 20px;overflow-wrap:anywhere}
+.consultant-kicker{color:var(--green-dark);font-size:14px;font-weight:700}
+.consultant-contact-buttons{display:grid;gap:8px}
+.consultant-contact-buttons .btn{margin:0}
+.consultant-contact-buttons .btn:disabled{cursor:default;opacity:.55}
+.consultant-empty{font-size:14px;color:var(--muted);line-height:1.5;margin:12px 0 0}
+.consultant-info h3{margin:0 0 14px;font-size:19px}
+.consultant-detail{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.consultant-detail:last-child{border-bottom:0}
