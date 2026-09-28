@@ -21,9 +21,32 @@ function applyTheme(theme,saveLocal=true){
 function portionGuideSrc(){
   return document.documentElement.dataset.theme==="neon" ? "portion-guide-neon.svg" : "portion-guide.svg";
 }
+function themeBackgroundSrc(theme){
+  if(theme==="crystal")return "theme-crystal.webp?v=27";
+  if(theme==="flowers")return "theme-flowers.webp?v=27";
+  return "";
+}
 function updateThemeAssets(){
   const guide=$("portionGuide");
   if(guide)guide.src=portionGuideSrc();
+
+  const theme=document.documentElement.dataset.theme||"classic";
+  const bg=$("themeBgImage");
+  if(bg){
+    const src=themeBackgroundSrc(theme);
+    if(src){
+      bg.src=src;
+      bg.classList.add("visible");
+    }else{
+      bg.removeAttribute("src");
+      bg.classList.remove("visible");
+    }
+  }
+
+  document.querySelectorAll(".theme-preview-photo").forEach(function(img){
+    const t=img.dataset.themePhoto;
+    img.src=themeBackgroundSrc(t);
+  });
 }
 async function chooseTheme(theme){
   applyTheme(theme,true);
@@ -1218,9 +1241,12 @@ async function bindNotificationToggles(){
 }
 
 function themePreview(type,label,subtitle,emoji){
-  const selected=(document.documentElement.dataset.theme||"neon")===type?" selected":"";
+  const selected=(document.documentElement.dataset.theme||"classic")===type?" selected":"";
+  const photo=(type==="crystal"||type==="flowers")
+    ? '<img class="theme-preview-photo" data-theme-photo="'+type+'" src="'+themeBackgroundSrc(type)+'" alt="">'
+    : '';
   return '<button type="button" class="theme-choice'+selected+'" data-theme-choice="'+type+'">'+
-    '<div class="theme-preview '+type+'"><span>'+emoji+'</span><i></i><i></i><i></i></div>'+
+    '<div class="theme-preview '+type+'">'+photo+'<span>'+emoji+'</span><i></i><i></i><i></i></div>'+
     '<div class="theme-choice-copy"><b>'+label+'</b><small>'+subtitle+'</small></div>'+
     '<div class="theme-check">✓</div>'+
   '</button>';
@@ -1241,6 +1267,7 @@ function pageThemes(){
     '</section>';
 }
 function bindThemePicker(){
+  updateThemeAssets();
   document.querySelectorAll("[data-theme-choice]").forEach(function(btn){
     btn.addEventListener("click",function(){chooseTheme(btn.dataset.themeChoice)});
   });
