@@ -10,8 +10,8 @@ const THEMES=["classic","neon","crystal","flowers"];
 const THEME_META={
   classic:{color:"#f4f1e8",background:""},
   neon:{color:"#05060d",background:""},
-  crystal:{color:"#d8d4d2",background:"theme-crystal.svg?v=31"},
-  flowers:{color:"#eee3d8",background:"theme-flowers.svg?v=31"}
+  crystal:{color:"#d8d4d2",background:"https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/9908e5d9-df11-436b-aa67-72ff286ccdd0.jpg"},
+  flowers:{color:"#eee3d8",background:"https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/b68ac5fc-5c9b-45d2-82bc-717be6b3e658.jpg"}
 };
 
 function currentTheme(){
@@ -31,7 +31,7 @@ function applyTheme(theme,saveLocal=true){
 }
 
 function portionGuideSrc(){
-  return currentTheme()==="neon" ? "portion-guide-neon.svg?v=31" : "portion-guide.svg?v=31";
+  return currentTheme()==="neon" ? "portion-guide-neon.svg?v=32" : "portion-guide.svg?v=32";
 }
 
 function themeBackgroundSrc(theme){
