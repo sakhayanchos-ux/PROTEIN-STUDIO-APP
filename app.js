@@ -157,6 +157,7 @@ async function bootstrap(){
 
     profile=p.data;
     assessment=a.data||null;
+    await loadStaffAccess();
     applyTheme();
     selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
 
@@ -166,7 +167,7 @@ async function bootstrap(){
       !assessment.readiness_score ||
       ((selectedGoals.includes("Снижение веса")||selectedGoals.includes("Улучшить фигуру"))&&!assessment.target_weight_kg);
 
-    if(needsShortWellness){
+    if(needsShortWellness&&!staffConsultants.length){
       onboardingDraft={
         weight:assessment?.starting_weight_kg??null,
         waist:assessment?.waist_cm??null,
@@ -199,7 +200,7 @@ async function bootstrap(){
     setMessage("");
     showScreen("appScreen");
     $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
-    openPage("plan");
+    openPage(staffConsultants.length?"admin":"plan");
   }catch(err){
     console.error("bootstrap failed",err);
     showScreen("authScreen");
@@ -488,14 +489,16 @@ function prevOnboarding(){
 }
 
 function openPage(page){
+  adminViewVersion++;
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Сообщество",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={admin:"Панель консультанта",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Сообщество",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=pages[page]||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
   if(page==="profile")bindPersonalProfile();
+  if(page==="admin")bindAdmin();
   if(page==="community")bindCommunity();
   if(page==="notifications")bindNotificationToggles();
   if(page==="marathon")loadMarathonDays();
@@ -1356,7 +1359,7 @@ async function changeProfilePassword(event){
 }
 
 function soon(name){return `<section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
+const pages={admin:pageAdmin,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();

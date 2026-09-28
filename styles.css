@@ -451,3 +451,21 @@ html[data-theme="sunset"] .drawer{background-size:auto 146vh!important;backgroun
 #communityAttachment img{width:64px;height:64px;object-fit:contain;border-radius:10px}
 @media(max-width:360px){.chat-message{margin-right:8px}.chat-own{margin-right:0;margin-left:8px}}
 
+
+.admin-intro h1{font-size:24px;line-height:1.25;margin:10px 0;overflow-wrap:anywhere}
+.admin-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.admin-shortcuts .btn{font-size:13px;padding:12px 8px}
+.admin-small{border:1px solid var(--line);background:var(--soft);color:var(--green-dark);padding:9px;border-radius:12px;font:inherit;font-size:12px}
+.admin-client-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);padding:16px 0}
+.admin-client-row>span:first-child{min-width:0}
+.admin-client-row b{display:block;font-size:15px;overflow-wrap:anywhere}
+.admin-client-row span span{display:block;font-size:12px;color:var(--muted);margin-top:5px}
+.admin-badge{font-size:10px;flex:0 0 90px;border-radius:10px;padding:7px;background:var(--soft);color:var(--green-dark);text-align:center}
+.admin-detail-line{display:flex;justify-content:space-between;gap:15px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.admin-detail-line b{text-align:right;overflow-wrap:anywhere}
+.admin-detail{scroll-margin-top:90px}
+.admin-detail p{line-height:1.6;overflow-wrap:anywhere}
+.admin-measurements{overflow-x:auto}
+.admin-measurements table{width:100%;border-collapse:collapse;font-size:13px}
+.admin-measurements th,.admin-measurements td{text-align:left;padding:10px 5px;border-bottom:1px solid var(--line)}
+#adminStatus:empty{display:none}
