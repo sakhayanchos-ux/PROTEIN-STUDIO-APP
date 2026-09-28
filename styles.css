@@ -141,130 +141,171 @@ textarea:focus{border-color:#abc4ad;box-shadow:0 0 0 4px rgba(95,141,102,.09)}
 .workout-loop-note{margin-top:12px;padding:11px;border-radius:14px;background:#f4f8f1;font-size:11px;font-weight:800;color:var(--green-dark)}
 @media(max-width:360px){.daily-targets,.nutrition-target-box{grid-template-columns:1fr}.meal-step{grid-template-columns:64px 1fr}.hydration-note{grid-template-columns:80px 1fr}}
 
+
 /* =========================================================
-   PROTEIN STUDIO THEMES — CLEAN SYSTEM V31
+   PROTEIN STUDIO — JEWEL DESIGN V40
+   One clean permanent style inspired by the supplied background
    ========================================================= */
+:root{
+  --bg:#fffafc;
+  --card:rgba(255,255,255,.91);
+  --ink:#463d48;
+  --muted:#8b8189;
+  --green:#c65f96;
+  --green-dark:#9f4475;
+  --soft:#fae7ef;
+  --line:rgba(207,180,197,.48);
+  --shadow:0 12px 34px rgba(105,78,98,.12);
 
+  --j-pink:#f7d9e6;
+  --j-blue:#dff1f8;
+  --j-lilac:#eadff6;
+  --j-gold:#f8eccd;
+  --j-mint:#e2f2e7;
+}
+
+html[data-theme="jewel"] body{
+  background:#fffafc;
+  color:var(--ink);
+}
 .theme-bg-image{
-  display:none;position:fixed;inset:0;width:100vw;height:100dvh;min-height:100vh;
-  object-fit:cover;object-position:center top;z-index:0;pointer-events:none;filter:none!important
+  display:block!important;
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  min-height:100vh;
+  object-fit:cover;
+  object-position:center top;
+  z-index:0;
+  pointer-events:none;
+  filter:none!important;
+  opacity:1;
 }
-.theme-bg-image.visible{display:block}
-.shell{position:relative;z-index:1}
+.shell{
+  position:relative;
+  z-index:1;
+  background:linear-gradient(180deg,rgba(255,250,252,.72),rgba(255,250,252,.60))!important;
+}
+.auth-screen{background:transparent!important}
+.auth-card{
+  background:rgba(255,255,255,.92)!important;
+  border:1px solid rgba(255,255,255,.9)!important;
+  box-shadow:0 20px 55px rgba(97,68,91,.16)!important;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.brand{color:#453d48}
+.brand span{color:#c65f96}
+input,select,textarea{
+  background:rgba(255,255,255,.94)!important;
+  border-color:#eadbe3!important;
+  color:var(--ink)!important;
+}
+input:focus,select:focus,textarea:focus{border-color:#d68aaf!important;box-shadow:0 0 0 3px rgba(214,138,175,.15)}
+.primary{
+  background:linear-gradient(100deg,#d96da4,#bd7ec7)!important;
+  color:#fff!important;
+  box-shadow:0 8px 22px rgba(190,95,148,.22);
+}
+.ghost{background:#f9e8ef!important;color:#9f4475!important}
 
-/* Theme picker */
-.theme-picker-card h3{margin:7px 0 5px}
-.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
-.theme-choice{position:relative;border:1px solid var(--line);border-radius:20px;padding:9px;background:var(--card);color:var(--ink);text-align:left;overflow:hidden;transition:.15s}
-.theme-choice:active{transform:scale(.985)}
-.theme-choice.selected{border-color:var(--green);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 42%,transparent)}
-.theme-preview{height:112px;border-radius:15px;position:relative;overflow:hidden;display:grid;place-items:center}
-.theme-preview>span{font-size:34px;position:relative;z-index:3;filter:drop-shadow(0 3px 5px rgba(0,0,0,.18))}
-.theme-preview-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
-.theme-choice-copy{padding:9px 4px 3px}.theme-choice-copy b{display:block;font-size:14px}
-.theme-choice-copy small{display:block;color:var(--muted);font-size:10px;line-height:1.35;margin-top:3px}
-.theme-check{position:absolute;right:15px;top:15px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-size:12px;font-weight:900;opacity:0;transform:scale(.75);transition:.15s;z-index:5}
-.theme-choice.selected .theme-check{opacity:1;transform:scale(1)}
-.theme-preview.classic{background:linear-gradient(135deg,#e4f0df,#f7e9e4)}
-.theme-preview.classic::before{content:"";position:absolute;width:62px;height:62px;border-radius:50%;left:18px;top:18px;background:#b8d7b3}
-.theme-preview.neon{background:#05060d}
-.theme-preview.neon::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 10%,#ff20c8 10% 11%,transparent 11% 28%,#31eaff 28% 29%,transparent 29% 49%,#7cff5f 49% 50%,transparent 50% 70%,#755cff 70% 71%,transparent 71% 89%,#ff42c6 89% 90%,transparent 90%);filter:drop-shadow(0 0 7px #42dcff)}
+.topbar{
+  background:rgba(255,252,253,.92)!important;
+  border-bottom:1px solid rgba(221,199,211,.65)!important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.menu-btn{
+  background:#fff!important;
+  border-color:#eadbe3!important;
+  color:#c65f96!important;
+  box-shadow:0 5px 16px rgba(116,86,106,.08);
+}
+.topbar strong,.section-title,h1,h2,h3{color:#463d48}
 
-/* CLASSIC */
-html[data-theme="classic"]{--bg:#f4f1e8;--card:#fffdf8;--ink:#26362d;--muted:#7b817b;--green:#5f8d66;--green-dark:#3f6747;--soft:#e7f0e4;--line:#e6e0d6;--shadow:0 14px 38px rgba(63,73,64,.10)}
-html[data-theme="classic"] body{background:var(--bg);color:var(--ink)}
-html[data-theme="classic"] .shell{background:var(--bg)}
-html[data-theme="classic"] .plan-action-arrow{color:#5f8d66}
+/* Cards: jewel tones, but pale enough for comfortable reading */
+.card{
+  background:rgba(255,255,255,.91)!important;
+  border:1px solid rgba(255,255,255,.9)!important;
+  box-shadow:var(--shadow)!important;
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+#content>.card:nth-of-type(5n+1){background:rgba(247,217,230,.91)!important}
+#content>.card:nth-of-type(5n+2){background:rgba(223,241,248,.92)!important}
+#content>.card:nth-of-type(5n+3){background:rgba(234,223,246,.92)!important}
+#content>.card:nth-of-type(5n+4){background:rgba(248,236,205,.92)!important}
+#content>.card:nth-of-type(5n){background:rgba(226,242,231,.92)!important}
 
-/* NEON */
-html[data-theme="neon"]{--bg:#05060d;--card:#101425;--ink:#f7f8ff;--muted:#a8aec4;--green:#79ff63;--green-dark:#a8ff99;--soft:#14231d;--line:#28304c;--shadow:0 18px 45px rgba(0,0,0,.35)}
-html[data-theme="neon"] body{color:var(--ink);background:radial-gradient(circle at 15% 12%,rgba(255,35,200,.16),transparent 28%),radial-gradient(circle at 88% 18%,rgba(42,225,255,.14),transparent 26%),radial-gradient(circle at 50% 95%,rgba(122,255,90,.09),transparent 28%),#05060d}
-html[data-theme="neon"] body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.7;background:linear-gradient(180deg,#ff2bc8,transparent 65%) 10% 0/2px 55% no-repeat,linear-gradient(180deg,#27e9ff,transparent 70%) 25% 0/2px 72% no-repeat,linear-gradient(180deg,#79ff5d,transparent 68%) 43% 0/2px 62% no-repeat,linear-gradient(180deg,#795cff,transparent 70%) 62% 0/2px 68% no-repeat,linear-gradient(180deg,#ff43bd,transparent 65%) 82% 0/2px 58% no-repeat}
-html[data-theme="neon"] .shell{background:transparent}
-html[data-theme="neon"] .auth-card,html[data-theme="neon"] .card{background:rgba(14,18,34,.94);border-color:#29314e;box-shadow:var(--shadow)}
-html[data-theme="neon"] h1,html[data-theme="neon"] h2,html[data-theme="neon"] h3,html[data-theme="neon"] .section-title,html[data-theme="neon"] .topbar strong,html[data-theme="neon"] .drawer-brand{color:#f7f8ff}
-html[data-theme="neon"] .brand{color:#fff} html[data-theme="neon"] .brand span{color:#79ff63}
-html[data-theme="neon"] input,html[data-theme="neon"] select,html[data-theme="neon"] textarea{background:#090d19;color:#f7f8ff;border-color:#303956}
-html[data-theme="neon"] .primary{background:linear-gradient(100deg,#75ff61,#35eaff);color:#06100d}
-html[data-theme="neon"] .ghost{background:#17251d;color:#aaff9c}
-html[data-theme="neon"] .choices button,html[data-theme="neon"] .readiness-btn{background:#090d19;color:#f7f8ff;border-color:#303956}
-html[data-theme="neon"] .choices button.selected,html[data-theme="neon"] .readiness-btn.selected{background:#14251e;border-color:#6cff68;color:#fff}
-html[data-theme="neon"] .drawer{background:#080b15;border-right-color:#27304b}
-html[data-theme="neon"] .nav{color:#eef1ff} html[data-theme="neon"] .nav.active{background:#14251e;color:#aaff9c}
-html[data-theme="neon"] .topbar{background:rgba(5,7,15,.94);border-bottom-color:#252d47}
-html[data-theme="neon"] .menu-btn{background:#0d1220;border-color:#2fc9dd;color:#52edff}
-html[data-theme="neon"] .hero,html[data-theme="neon"] .plan-hero,html[data-theme="neon"] .nutrition-hero,html[data-theme="neon"] .workout-hero{background:linear-gradient(135deg,#121a2d,#171225 58%,#0f2020);border:1px solid #2d3653}
-html[data-theme="neon"] .mini,html[data-theme="neon"] .plan-change-grid>div,html[data-theme="neon"] .progress-deltas>div,html[data-theme="neon"] .short-summary{background:#0b1020;border-color:#29314d}
-html[data-theme="neon"] .plan-progress-line{background:#080c17;border-color:#2e3853}
-html[data-theme="neon"] .plan-progress-line i{background:linear-gradient(90deg,#72ff60,#35eaff,#c044ff);box-shadow:0 0 14px #39eaff66}
-html[data-theme="neon"] .plan-action{color:#f5f7ff;border-color:#28304a}
-html[data-theme="neon"] .plan-action-copy span{color:#eef1fb}
-html[data-theme="neon"] .plan-action-arrow{color:#45eaff}
-html[data-theme="neon"] .plan-action-icon,html[data-theme="neon"] .exercise-icon,html[data-theme="neon"] .task-icon,html[data-theme="neon"] .product-plan-icon{background:#10231e}
-html[data-theme="neon"] .product-plan-card{background:#101425}
-html[data-theme="neon"] .daily-targets span,html[data-theme="neon"] .discount-note,html[data-theme="neon"] .workout-loop-note{background:#12251e;border:1px solid #25462f}
-html[data-theme="neon"] .nutrition-target-box span{background:#090d19;color:#a7ff98;border:1px solid #2b4734}
-html[data-theme="neon"] .photo-frame{background:#090d19;border-color:#3d5770}
-html[data-theme="neon"] .progress-highlight{background:linear-gradient(135deg,#11251d,#171225);border:1px solid #2a3549}
-html[data-theme="neon"] .day-row.current{background:#12251e}
-html[data-theme="neon"] .day-link{background:#10252b;color:#7ff6ff}
-html[data-theme="neon"] .notice{background:#2a2212;color:#ffe0a0}
-html[data-theme="neon"] .portion-guide{background:#070913;border-color:#36eaff;box-shadow:0 0 22px #39eaff22}
+.hero,.plan-hero{
+  background:linear-gradient(135deg,rgba(255,243,248,.96),rgba(235,227,249,.94),rgba(224,243,248,.94))!important;
+  border:1px solid rgba(255,255,255,.94)!important;
+}
+.nutrition-hero{
+  background:linear-gradient(135deg,rgba(226,242,231,.96),rgba(248,236,205,.94))!important;
+}
+.workout-hero{
+  background:linear-gradient(135deg,rgba(223,241,248,.96),rgba(234,223,246,.94))!important;
+}
+.product-plan-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.93),rgba(247,217,230,.84))!important;
+}
+.eyebrow{color:#a24b7a!important}
+.pill{
+  background:rgba(255,255,255,.72)!important;
+  border:1px solid rgba(195,144,172,.35)!important;
+  color:#9f4475!important;
+}
+.plan-progress-line{background:rgba(255,255,255,.72)!important;border-color:#eadbe3!important}
+.plan-progress-line i{background:linear-gradient(90deg,#ed7fab,#75c9e8,#b993da,#e6bf55)!important}
+.plan-progress-meta b,.discount-note b,.big-target,.menu-suggestion>span{color:#a24b7a!important}
+.plan-action-arrow{color:#c65f96!important}
+.plan-action-icon,.exercise-icon,.task-icon,.product-plan-icon{
+  background:linear-gradient(135deg,#fae2ec,#e2f2f9)!important;
+}
+.daily-targets span,.workout-loop-note,.discount-note{
+  background:rgba(255,255,255,.60)!important;
+  border:1px solid rgba(213,183,198,.35)!important;
+  color:#8f4a70!important;
+}
+.nutrition-target-box span{background:rgba(255,255,255,.72)!important;color:#8f4a70!important}
+.choices button,.readiness-btn{background:rgba(255,255,255,.90)!important;border-color:#eadbe3!important;color:var(--ink)!important}
+.choices button.selected,.readiness-btn.selected{background:#f7d9e6!important;border-color:#d985ad!important}
+.day-row.current,.day-link{background:#f3e6f8!important;color:#85519d!important}
+.notice{background:#fff2cf!important;color:#7d6838!important}
+.portion-guide{box-shadow:none!important;border-color:rgba(218,196,207,.55)!important}
 
-/* DECORATIVE THEMES COMMON */
-html[data-theme="crystal"] body,html[data-theme="flowers"] body{background:#f5f0eb;color:var(--ink)}
-html[data-theme="crystal"] body::before,html[data-theme="flowers"] body::before{display:none!important}
-html[data-theme="crystal"] .shell,html[data-theme="flowers"] .shell,html[data-theme="crystal"] #appScreen,html[data-theme="flowers"] #appScreen,html[data-theme="crystal"] main,html[data-theme="flowers"] main,html[data-theme="crystal"] .auth-screen,html[data-theme="flowers"] .auth-screen{background:transparent!important}
-html[data-theme="crystal"] .card,html[data-theme="flowers"] .card,html[data-theme="crystal"] .auth-card,html[data-theme="flowers"] .auth-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-
-/* CRYSTALS */
-html[data-theme="crystal"]{--bg:#f2eef1;--card:rgba(255,255,255,.94);--ink:#332d3a;--muted:#7c7483;--green:#ad4fb8;--green-dark:#7c348b;--soft:#f4e7f6;--line:#e7dae9;--shadow:0 13px 34px rgba(76,51,79,.14)}
-html[data-theme="crystal"] .card,html[data-theme="crystal"] .auth-card{background:rgba(255,255,255,.86);border-color:#fff;box-shadow:var(--shadow)}
-html[data-theme="crystal"] .topbar{background:rgba(255,255,255,.96);border-color:#eadfed}
-html[data-theme="crystal"] .drawer{
+/* Drawer uses the same exact jewel background, visible at the edge */
+.drawer{
   background:
-    linear-gradient(90deg,rgba(255,255,255,.99) 0%,rgba(255,255,255,.97) 58%,rgba(255,255,255,.72) 72%,rgba(255,255,255,.18) 100%),
-    url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/9908e5d9-df11-436b-aa67-72ff286ccdd0.jpg") right center/cover no-repeat;
-  border-right-color:#eadfed
+    linear-gradient(90deg,rgba(255,255,255,.985) 0%,rgba(255,255,255,.97) 64%,rgba(255,255,255,.78) 78%,rgba(255,255,255,.18) 100%),
+    url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/f3bf642a-f9a0-4e86-985d-80c30d2c1e57.jpg") right center/cover no-repeat!important;
+  border-right:1px solid rgba(217,194,206,.72)!important;
 }
-html[data-theme="crystal"] .drawer .nav{background:rgba(255,255,255,.82);margin-right:68px;width:calc(100% - 68px)}
-html[data-theme="crystal"] .drawer .nav.active{background:#f3e6f6;color:#743289}
-html[data-theme="crystal"] .primary{background:linear-gradient(100deg,#b866c7,#e38bb5,#69bfe8);color:#fff}
-html[data-theme="crystal"] .ghost{background:#f3e7f6;color:#713584}
-html[data-theme="crystal"] .hero,html[data-theme="crystal"] .plan-hero,html[data-theme="crystal"] .nutrition-hero,html[data-theme="crystal"] .workout-hero{background:rgba(255,255,255,.88);border:1px solid #fff}
-html[data-theme="crystal"] .plan-progress-line i{background:linear-gradient(90deg,#d94d9e,#6ec6e8,#8acb45)}
-html[data-theme="crystal"] .plan-action-arrow{color:#a451b9}
-html[data-theme="crystal"] .day-link,html[data-theme="crystal"] .day-row.current,html[data-theme="crystal"] .discount-note,html[data-theme="crystal"] .daily-targets span,html[data-theme="crystal"] .workout-loop-note{background:#f5e9f8;color:#743289}
-html[data-theme="crystal"] .nutrition-target-box span{background:#fff;color:#743289}
-html[data-theme="crystal"] .portion-guide{box-shadow:none}
-
-/* FLOWERS */
-html[data-theme="flowers"]{--bg:#f9f1e6;--card:rgba(255,253,248,.94);--ink:#314034;--muted:#777d72;--green:#739a63;--green-dark:#527747;--soft:#edf3e8;--line:#e9dfd4;--shadow:0 13px 34px rgba(72,84,62,.13)}
-html[data-theme="flowers"] .card,html[data-theme="flowers"] .auth-card{background:rgba(255,253,248,.86);border-color:#fff;box-shadow:var(--shadow)}
-html[data-theme="flowers"] .topbar{background:rgba(255,253,248,.96);border-color:#e9dfd4}
-html[data-theme="flowers"] .drawer{
-  background:
-    linear-gradient(90deg,rgba(255,253,248,.99) 0%,rgba(255,253,248,.97) 58%,rgba(255,253,248,.70) 72%,rgba(255,253,248,.14) 100%),
-    url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JnxJybheEBr6vyAb5CaaLdLJym/b68ac5fc-5c9b-45d2-82bc-717be6b3e658.jpg") right center/cover no-repeat;
-  border-right-color:#e9dfd4
+.drawer-brand{color:#463d48!important}
+.drawer-person{color:#91848d!important}
+.nav{
+  color:#514650!important;
+  background:rgba(255,255,255,.68);
+  width:calc(100% - 44px);
+  margin-right:44px;
 }
-html[data-theme="flowers"] .drawer .nav{background:rgba(255,253,248,.84);margin-right:68px;width:calc(100% - 68px)}
-html[data-theme="flowers"] .drawer .nav.active{background:#edf3e8;color:#527747}
-html[data-theme="flowers"] .primary{background:linear-gradient(100deg,#789c67,#a0b86c);color:#fff}
-html[data-theme="flowers"] .ghost{background:#edf3e8;color:#527747}
-html[data-theme="flowers"] .hero,html[data-theme="flowers"] .plan-hero,html[data-theme="flowers"] .nutrition-hero,html[data-theme="flowers"] .workout-hero{background:rgba(255,253,248,.88);border:1px solid #fff}
-html[data-theme="flowers"] .plan-progress-line i{background:linear-gradient(90deg,#77a464,#d48fb2,#7bb7df)}
-html[data-theme="flowers"] .plan-action-arrow{color:#739a63}
-html[data-theme="flowers"] .day-link,html[data-theme="flowers"] .day-row.current,html[data-theme="flowers"] .discount-note,html[data-theme="flowers"] .daily-targets span,html[data-theme="flowers"] .workout-loop-note{background:#edf3e8;color:#527747}
-html[data-theme="flowers"] .nutrition-target-box span{background:#fff;color:#527747}
-html[data-theme="flowers"] .portion-guide{box-shadow:none}
+.nav.active{
+  background:linear-gradient(90deg,#f8dce8,#e9def5)!important;
+  color:#9f4475!important;
+}
 
-@media(max-width:380px){.theme-grid{grid-template-columns:1fr}}
+/* Progress / photo areas */
+.photo-frame,.mini,.plan-change-grid>div,.progress-deltas>div,.short-summary{
+  background:rgba(255,255,255,.72)!important;
+  border-color:rgba(219,197,208,.52)!important;
+}
+.progress-highlight{
+  background:linear-gradient(135deg,rgba(247,217,230,.88),rgba(223,241,248,.88))!important;
+  border:1px solid rgba(255,255,255,.9)!important;
+}
 
-/* Exact user photo themes v32 */
-html[data-theme="flowers"] .theme-bg-image{object-fit:cover;object-position:center top;opacity:1}
-html[data-theme="crystal"] .theme-bg-image{object-fit:cover;object-position:center center;opacity:1}
-html[data-theme="flowers"] .theme-preview-photo,
-html[data-theme="crystal"] .theme-preview-photo{filter:none!important;opacity:1!important}
-html[data-theme="flowers"] .theme-preview.flowers,
-html[data-theme="crystal"] .theme-preview.crystal{background:none!important}
+@media(max-width:380px){
+  .nav{width:calc(100% - 34px);margin-right:34px}
+}
