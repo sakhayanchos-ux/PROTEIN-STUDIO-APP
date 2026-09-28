@@ -616,7 +616,7 @@ function menuSuggestion(name,protein,note){
 }
 
 function pageNutrition(){
-  return '<h2 class="section-title">Питание</h2>'+
+  return ''+
   '<section class="card nutrition-hero">'+
     '<div class="eyebrow">Ваш персональный план</div>'+
     '<h3>Питание на каждый день</h3>'+
@@ -692,7 +692,7 @@ function exerciseItem(icon,title,text){
 }
 
 function pageWorkouts(){
-  return '<h2 class="section-title">Тренировки</h2>'+
+  return ''+
   '<section class="card workout-hero">'+
     '<div class="eyebrow">План из вашей анкеты</div>'+
     '<h3 id="workoutPlanTitle">Собираем вашу нагрузку…</h3>'+
@@ -758,7 +758,7 @@ async function loadWorkoutPlan(){
 }
 
 function pageMarathon(){
-  return `<h2 class="section-title">Марафон</h2>
+  return `
   <section class="card hero">
     <div class="eyebrow">30 дней PROTEIN STUDIO</div>
     <h1 id="marathonCurrentTitle">День 1 из 30</h1>
@@ -807,7 +807,7 @@ function escapeHtml(v){
 }
 
 function pageProgress(){
-  return `<h2 class="section-title">Прогресс</h2>
+  return `
 
   <section class="card">
     <div class="row">
@@ -1192,7 +1192,6 @@ function pageConsultant(){
   const initials=consultant?.display_name?.trim().split(/\s+/).slice(0,2).map(part=>Array.from(part)[0]||"").join("")||"♡";
   return `<section class="card consultant-hero">
     <div class="profile-avatar" aria-label="Место для фото консультанта">${escapeHtml(initials)}</div>
-    <div class="consultant-kicker">Мой консультант</div>
     <h1>${escapeHtml(name)}</h1>
     <div class="consultant-contact-buttons">
       <button class="btn primary" type="button" disabled>Написать в WhatsApp</button>
@@ -1209,7 +1208,7 @@ function pageConsultant(){
   </section>`;
 }
 function pageNotifications(){
-  return `<h2 class="section-title">Уведомления</h2><section class="card">
+  return `<section class="card">
   ${toggle("notifWater","💧 Вода")}
   ${toggle("notifNutrition","🥗 Питание")}
   ${toggle("notifWorkouts","🏋🏻‍♀️ Тренировки")}
@@ -1354,7 +1353,7 @@ async function changeProfilePassword(event){
   finally{btn.disabled=false}
 }
 
-function soon(name){return `<h2 class="section-title">${name}</h2><section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
+function soon(name){return `<section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
 const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
