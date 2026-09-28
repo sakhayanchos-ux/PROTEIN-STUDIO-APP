@@ -1,71 +1,90 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1900" viewBox="0 0 900 1900">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 1000">
 <defs>
- <filter id="fs" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#503547" flood-opacity=".26"/></filter>
- <radialGradient id="rPink"><stop stop-color="#ffd8ea"/><stop offset=".45" stop-color="#ef9ac3"/><stop offset="1" stop-color="#ca5d96"/></radialGradient>
- <radialGradient id="rPurple"><stop stop-color="#e8c9ff"/><stop offset=".5" stop-color="#b15ae2"/><stop offset="1" stop-color="#6e229f"/></radialGradient>
- <radialGradient id="rBlue"><stop stop-color="#d7f2ff"/><stop offset=".5" stop-color="#79c8ef"/><stop offset="1" stop-color="#3d91cf"/></radialGradient>
- <radialGradient id="rOrange"><stop stop-color="#fff2c2"/><stop offset=".5" stop-color="#f5ba56"/><stop offset="1" stop-color="#e37d2d"/></radialGradient>
- <radialGradient id="rGreen"><stop stop-color="#e6ffd0"/><stop offset=".5" stop-color="#a8d96a"/><stop offset="1" stop-color="#6ba73a"/></radialGradient>
- <symbol id="daisy" viewBox="-80 -80 160 160">
-   <g fill="currentColor"><ellipse rx="19" ry="58" transform="rotate(0) translate(0 -17)"/><ellipse rx="19" ry="58" transform="rotate(45) translate(0 -17)"/><ellipse rx="19" ry="58" transform="rotate(90) translate(0 -17)"/><ellipse rx="19" ry="58" transform="rotate(135) translate(0 -17)"/></g>
-   <circle r="30" fill="#e3a425"/><circle r="18" fill="#f7cb49"/>
- </symbol>
- <symbol id="rose" viewBox="-90 -90 180 180">
-   <circle r="78" fill="currentColor"/>
-   <g fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="9">
-    <path d="M-55 5C-34-52 43-56 55-5 64 32 26 62-9 53-43 45-55 14-34-9 1-48 55-20 41 18 28 54-33 45-28 6-24-24 22-30 28 0 34 31-12 36-18 12-25-10 10-20 16 1"/>
-   </g>
-   <circle r="13" fill="#fff" opacity=".18"/>
- </symbol>
- <symbol id="pompom" viewBox="-85 -85 170 170">
-   <g fill="currentColor" opacity=".96">
-    <circle cx="-30" cy="-35" r="38"/><circle cx="20" cy="-42" r="42"/><circle cx="48" cy="-3" r="40"/><circle cx="33" cy="41" r="41"/>
-    <circle cx="-16" cy="48" r="42"/><circle cx="-50" cy="18" r="40"/><circle r="47"/>
-   </g><circle r="18" fill="#fff" opacity=".15"/>
- </symbol>
- <symbol id="hydrangea" viewBox="-95 -95 190 190">
-  <g fill="currentColor">
-   <circle cx="-42" cy="-35" r="32"/><circle cx="0" cy="-50" r="34"/><circle cx="43" cy="-33" r="31"/><circle cx="-55" cy="8" r="32"/><circle cx="-17" cy="2" r="35"/><circle cx="27" cy="7" r="34"/><circle cx="58" cy="15" r="29"/><circle cx="-37" cy="48" r="31"/><circle cx="7" cy="49" r="34"/><circle cx="43" cy="43" r="28"/>
-  </g><g fill="#fff" opacity=".24"><circle cx="-42" cy="-35" r="7"/><circle cx="0" cy="-50" r="7"/><circle cx="43" cy="-33" r="7"/><circle cx="-17" cy="2" r="7"/><circle cx="27" cy="7" r="7"/><circle cx="7" cy="49" r="7"/></g>
- </symbol>
+  <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffaf1"/><stop offset="1" stop-color="#f7f0e6"/></linearGradient>
+  <linearGradient id="rosePink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffb5ce"/><stop offset=".6" stop-color="#eb77a6"/><stop offset="1" stop-color="#c64f80"/></linearGradient>
+  <linearGradient id="rosePurple" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8b3ff"/><stop offset=".6" stop-color="#9f65d8"/><stop offset="1" stop-color="#7340a3"/></linearGradient>
+  <linearGradient id="peach" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd1a0"/><stop offset=".6" stop-color="#f5a35c"/><stop offset="1" stop-color="#dc7c32"/></linearGradient>
+  <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c7eaff"/><stop offset=".6" stop-color="#79c4e6"/><stop offset="1" stop-color="#4aa3cd"/></linearGradient>
+  <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c6e78f"/><stop offset=".6" stop-color="#82b95d"/><stop offset="1" stop-color="#4f873c"/></linearGradient>
+  <filter id="softShadow"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#8a6a67" flood-opacity=".18"/></filter>
+  <symbol id="rose" viewBox="-45 -45 90 90">
+    <circle r="34" fill="currentColor" opacity=".95"/>
+    <path d="M0-29C16-29 29-16 29 0S16 29 0 29-29 16-29 0-16-29 0-29Zm0 8C-11-21-21-11-21 0S-11 21 0 21 21 11 21 0 11-21 0-21Zm0 8C7-13 13-7 13 0S7 13 0 13-13 7-13 0-7-13 0-13Z" fill="#fff" opacity=".24"/>
+  </symbol>
+  <symbol id="daisy" viewBox="-45 -45 90 90">
+    <g fill="currentColor">
+      <ellipse rx="10" ry="28" transform="rotate(0) translate(0 -14)"/>
+      <ellipse rx="10" ry="28" transform="rotate(45) translate(0 -14)"/>
+      <ellipse rx="10" ry="28" transform="rotate(90) translate(0 -14)"/>
+      <ellipse rx="10" ry="28" transform="rotate(135) translate(0 -14)"/>
+    </g>
+    <circle r="13" fill="#f7c64a"/>
+  </symbol>
+  <symbol id="pom" viewBox="-44 -44 88 88">
+    <g fill="currentColor" opacity=".96">
+      <circle cx="-15" cy="-16" r="17"/><circle cx="9" cy="-17" r="17"/><circle cx="19" cy="4" r="17"/>
+      <circle cx="8" cy="20" r="17"/><circle cx="-15" cy="18" r="17"/><circle cx="-22" cy="-3" r="17"/><circle r="18"/>
+    </g>
+    <circle r="8" fill="#fff" opacity=".22"/>
+  </symbol>
+  <symbol id="leafPair" viewBox="-40 -30 80 60">
+    <path d="M0 0C-10-28-38-22-35-4-32 13-13 15 0 0Z" fill="url(#leaf)"/>
+    <path d="M0 0C10-28 38-22 35-4 32 13 13 15 0 0Z" fill="url(#leaf)"/>
+  </symbol>
 </defs>
-<rect width="900" height="1900" fill="#e9dfd4"/>
-<g filter="url(#fs)">
- <use href="#pompom" x="60" y="60" width="210" height="210" style="color:#efa2b9"/>
- <use href="#rose" x="255" y="30" width="230" height="230" style="color:#9851db"/>
- <use href="#daisy" x="480" y="30" width="205" height="205" style="color:#e8a5cc"/>
- <use href="#rose" x="690" y="70" width="230" height="230" style="color:#9ad06d"/>
- <use href="#pompom" x="-30" y="245" width="225" height="225" style="color:#9ddb69"/>
- <use href="#rose" x="150" y="245" width="230" height="230" style="color:#c0d08e"/>
- <use href="#pompom" x="365" y="220" width="240" height="240" style="color:#d79ad1"/>
- <use href="#rose" x="600" y="240" width="265" height="265" style="color:#eda75f"/>
- <use href="#hydrangea" x="-15" y="435" width="230" height="230" style="color:#76baf0"/>
- <use href="#hydrangea" x="175" y="420" width="245" height="245" style="color:#9fc7e8"/>
- <use href="#daisy" x="390" y="405" width="245" height="245" style="color:#f5f4ef"/>
- <use href="#rose" x="620" y="435" width="235" height="235" style="color:#c36ce1"/>
- <use href="#daisy" x="-45" y="650" width="225" height="225" style="color:#ec83ad"/>
- <use href="#rose" x="145" y="645" width="260" height="260" style="color:#efa6c8"/>
- <use href="#rose" x="400" y="625" width="280" height="280" style="color:#f4a449"/>
- <use href="#rose" x="690" y="640" width="210" height="210" style="color:#8250bd"/>
- <use href="#daisy" x="-35" y="855" width="245" height="245" style="color:#e7d572"/>
- <use href="#rose" x="165" y="850" width="250" height="250" style="color:#8d3ad0"/>
- <use href="#hydrangea" x="400" y="845" width="230" height="230" style="color:#91c1e9"/>
- <use href="#daisy" x="615" y="840" width="250" height="250" style="color:#e4d680"/>
- <use href="#pompom" x="-40" y="1060" width="245" height="245" style="color:#d99bc9"/>
- <use href="#pompom" x="175" y="1050" width="250" height="250" style="color:#eeb0bd"/>
- <use href="#rose" x="400" y="1030" width="250" height="250" style="color:#a8cf80"/>
- <use href="#daisy" x="625" y="1040" width="245" height="245" style="color:#e997bd"/>
- <use href="#pompom" x="-55" y="1260" width="250" height="250" style="color:#efa06f"/>
- <use href="#hydrangea" x="165" y="1250" width="235" height="235" style="color:#83bae8"/>
- <use href="#hydrangea" x="390" y="1250" width="255" height="255" style="color:#8ebee6"/>
- <use href="#rose" x="630" y="1230" width="270" height="270" style="color:#efaa46"/>
- <use href="#pompom" x="-35" y="1470" width="250" height="250" style="color:#94ca5e"/>
- <use href="#daisy" x="170" y="1460" width="245" height="245" style="color:#e89bba"/>
- <use href="#hydrangea" x="390" y="1450" width="255" height="255" style="color:#8cc2e9"/>
- <use href="#rose" x="635" y="1460" width="245" height="245" style="color:#9853c8"/>
- <use href="#pompom" x="-45" y="1690" width="245" height="245" style="color:#ef9f82"/>
- <use href="#hydrangea" x="170" y="1680" width="245" height="245" style="color:#82bfea"/>
- <use href="#rose" x="405" y="1660" width="260" height="260" style="color:#f5a447"/>
- <use href="#pompom" x="650" y="1675" width="240" height="240" style="color:#d79dd0"/>
+<rect width="520" height="1000" fill="url(#cream)"/>
+<circle cx="260" cy="450" r="260" fill="#fff" opacity=".18"/>
+
+<!-- top corners -->
+<g filter="url(#softShadow)">
+  <g transform="translate(35 55) scale(1.15)" color="#eb77a6"><use href="#rose"/></g>
+  <g transform="translate(88 40) scale(.85)" color="#9f65d8"><use href="#rose"/></g>
+  <g transform="translate(135 73) scale(.72)" color="#79c4e6"><use href="#pom"/></g>
+  <g transform="translate(470 50) scale(1.05)" color="#f5a35c"><use href="#rose"/></g>
+  <g transform="translate(425 36) scale(.78)" color="#ffb5ce"><use href="#daisy"/></g>
+  <g transform="translate(383 78) scale(.72)" color="#9f65d8"><use href="#pom"/></g>
+</g>
+
+<!-- left floral border -->
+<g filter="url(#softShadow)">
+  <g transform="translate(28 205) scale(.92)" color="#79c4e6"><use href="#daisy"/></g>
+  <g transform="translate(76 258) scale(.75)" color="#eb77a6"><use href="#rose"/></g>
+  <g transform="translate(25 350) scale(.95)" color="#9f65d8"><use href="#pom"/></g>
+  <g transform="translate(75 445) scale(.7)" color="#f5a35c"><use href="#rose"/></g>
+  <g transform="translate(25 540) scale(.92)" color="#ffb5ce"><use href="#daisy"/></g>
+  <g transform="translate(76 635) scale(.75)" color="#79c4e6"><use href="#pom"/></g>
+  <g transform="translate(25 745) scale(.98)" color="#eb77a6"><use href="#rose"/></g>
+  <g transform="translate(77 850) scale(.72)" color="#9f65d8"><use href="#daisy"/></g>
+  <g transform="translate(29 950) scale(.9)" color="#f5a35c"><use href="#pom"/></g>
+</g>
+
+<!-- right floral border -->
+<g filter="url(#softShadow)">
+  <g transform="translate(490 190) scale(.88)" color="#9f65d8"><use href="#rose"/></g>
+  <g transform="translate(442 285) scale(.75)" color="#79c4e6"><use href="#daisy"/></g>
+  <g transform="translate(490 390) scale(.95)" color="#f5a35c"><use href="#pom"/></g>
+  <g transform="translate(444 485) scale(.7)" color="#eb77a6"><use href="#rose"/></g>
+  <g transform="translate(490 585) scale(.92)" color="#79c4e6"><use href="#daisy"/></g>
+  <g transform="translate(444 680) scale(.75)" color="#9f65d8"><use href="#pom"/></g>
+  <g transform="translate(490 785) scale(.96)" color="#ffb5ce"><use href="#rose"/></g>
+  <g transform="translate(443 885) scale(.74)" color="#f5a35c"><use href="#daisy"/></g>
+</g>
+
+<!-- greenery -->
+<g opacity=".8">
+  <g transform="translate(58 126) rotate(-20) scale(.8)"><use href="#leafPair"/></g>
+  <g transform="translate(462 120) rotate(22) scale(.75)"><use href="#leafPair"/></g>
+  <g transform="translate(62 710) rotate(-30) scale(.7)"><use href="#leafPair"/></g>
+  <g transform="translate(458 735) rotate(28) scale(.75)"><use href="#leafPair"/></g>
+  <g transform="translate(55 915) rotate(-20) scale(.65)"><use href="#leafPair"/></g>
+  <g transform="translate(462 955) rotate(18) scale(.7)"><use href="#leafPair"/></g>
+</g>
+
+<!-- a few drifting petals near edges -->
+<g fill="#e78fb1" opacity=".65">
+  <ellipse cx="116" cy="175" rx="5" ry="9" transform="rotate(24 116 175)"/>
+  <ellipse cx="403" cy="245" rx="5" ry="9" transform="rotate(-28 403 245)"/>
+  <ellipse cx="111" cy="600" rx="5" ry="9" transform="rotate(-20 111 600)"/>
+  <ellipse cx="410" cy="820" rx="5" ry="9" transform="rotate(20 410 820)"/>
 </g>
 </svg>
