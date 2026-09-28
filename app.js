@@ -7,68 +7,87 @@ function showScreen(id){screens.forEach(x=>$(x).classList.toggle("hidden",x!==id
 
 const THEME_KEY="ps_theme";
 const THEMES=["classic","neon","crystal","flowers"];
+const THEME_META={
+  classic:{color:"#f4f1e8",background:""},
+  neon:{color:"#05060d",background:""},
+  crystal:{color:"#d8d4d2",background:"theme-crystal.svg?v=30"},
+  flowers:{color:"#eee3d8",background:"theme-flowers.svg?v=30"}
+};
+
+function currentTheme(){
+  const value=document.documentElement.dataset.theme;
+  return THEMES.includes(value)?value:"classic";
+}
+
 function applyTheme(theme,saveLocal=true){
   const value=THEMES.includes(theme)?theme:"classic";
   document.documentElement.dataset.theme=value;
   if(saveLocal)localStorage.setItem(THEME_KEY,value);
+
   const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta){
-    const colors={classic:"#f4f1e8",neon:"#05060d",crystal:"#f7f3fb",flowers:"#f8f2e8"};
-    meta.setAttribute("content",colors[value]);
-  }
+  if(meta)meta.setAttribute("content",THEME_META[value].color);
+
   updateThemeAssets();
 }
+
 function portionGuideSrc(){
-  return document.documentElement.dataset.theme==="neon" ? "portion-guide-neon.svg" : "portion-guide.svg";
+  return currentTheme()==="neon" ? "portion-guide-neon.svg?v=30" : "portion-guide.svg?v=30";
 }
+
 function themeBackgroundSrc(theme){
-  if(theme==="crystal")return "theme-crystal.webp?v=27";
-  if(theme==="flowers")return "theme-flowers.webp?v=27";
-  return "";
+  return THEME_META[theme]?.background||"";
 }
+
 function updateThemeAssets(){
   const guide=$("portionGuide");
   if(guide)guide.src=portionGuideSrc();
 
-  const theme=document.documentElement.dataset.theme||"classic";
   const bg=$("themeBgImage");
+  const src=themeBackgroundSrc(currentTheme());
   if(bg){
-    const src=themeBackgroundSrc(theme);
     if(src){
-      bg.src=src;
+      if(bg.getAttribute("src")!==src)bg.setAttribute("src",src);
       bg.classList.add("visible");
     }else{
-      bg.removeAttribute("src");
       bg.classList.remove("visible");
+      bg.removeAttribute("src");
     }
   }
 
   document.querySelectorAll(".theme-preview-photo").forEach(function(img){
-    const t=img.dataset.themePhoto;
-    img.src=themeBackgroundSrc(t);
+    const src=themeBackgroundSrc(img.dataset.themePhoto);
+    if(src&&img.getAttribute("src")!==src)img.setAttribute("src",src);
   });
 }
+
 async function chooseTheme(theme){
+  if(!THEMES.includes(theme))return;
   applyTheme(theme,true);
+
   document.querySelectorAll("[data-theme-choice]").forEach(function(btn){
     btn.classList.toggle("selected",btn.dataset.themeChoice===theme);
   });
+
   const label=$("themeSavedMessage");
   if(label)label.textContent="Тема применена сразу ✓";
+
   if(me&&profile){
-    const {data,error}=await sb.from("ps_profiles").update({
-      theme_preference:theme,
-      updated_at:new Date().toISOString()
-    }).eq("id",me.id).select("theme_preference").single();
+    const {data,error}=await sb.from("ps_profiles")
+      .update({theme_preference:theme,updated_at:new Date().toISOString()})
+      .eq("id",me.id)
+      .select("theme_preference")
+      .single();
+
     if(error){
       console.error("Theme save failed",error);
-      if(label)label.textContent="Тема применена на этом телефоне. Серверное сохранение не удалось.";
+      if(label)label.textContent="Тема применена на этом телефоне.";
     }else{
       profile.theme_preference=data?.theme_preference||theme;
       if(label)label.textContent="Тема сохранена ✓";
     }
   }
 }
+
 function readConfig(){
   if(window.PROTEIN_STUDIO_CONFIG?.url&&window.PROTEIN_STUDIO_CONFIG?.key)return window.PROTEIN_STUDIO_CONFIG;
   try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||"null")}catch{return null}
