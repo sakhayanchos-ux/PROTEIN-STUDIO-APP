@@ -494,6 +494,7 @@ function openPage(page){
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=pages[page]||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
+  if(page==="profile")bindPersonalProfile();
   if(page==="notifications")bindNotificationToggles();
   if(page==="marathon")loadMarathonDays();
   if(page==="progress")bindProgressPhotoActions();
@@ -1208,10 +1209,131 @@ async function bindNotificationToggles(){
   }
 }
 
-function pageProfile(){const goals=assessment?.goals?.length?assessment.goals.join(", "):(assessment?.primary_goal||"—");return `<h2 class="section-title">Профиль</h2><section class="card"><b>${profile?.full_name||""}</b><p class="muted">Цели: ${goals}<br>Консультант: ${consultant?.display_name||"—"}<br>Профиль-оценка: пройдена ✓</p></section>
-<section class="card theme-settings"><h3>Оформление</h3><p class="muted">Выберите настроение для своего приложения.</p>
-<div class="theme-options">${Object.entries(THEMES).map(([id,theme])=>`<button type="button" class="theme-choice" data-theme-choice="${id}" aria-pressed="${selectedTheme===id}"><span class="theme-preview theme-preview-${id}" style="background-image:url('${theme.image}')"></span><span>${theme.name}</span><span class="theme-check" aria-hidden="true">✓</span></button>`).join("")}</div>
-<p class="muted" id="themeStatus" role="status">Ваш выбор сохраняется на этом устройстве.</p></section>`}
+
+let profileAvatarURL=null;
+function profileToday(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")}
+function pageProfile(){
+  const name=profile?.full_name||"Мой профиль";
+  const initials=name.trim().split(/\s+/).slice(0,2).map(x=>Array.from(x)[0]||"").join("");
+  return `<section class="card profile-hero">
+  <div class="profile-avatar" id="profileAvatar" aria-label="Фото профиля">${escapeHtml(initials)}</div>
+  <h1 id="profileDisplayName">${escapeHtml(name)}</h1>
+  <p id="profileDisplayBio" class="profile-bio">${escapeHtml(profile?.bio||"")}</p>
+  <div class="profile-photo-actions"><button type="button" class="btn ghost" id="profilePhotoBtn">Изменить фото</button><button type="button" class="btn ghost" id="removeProfilePhotoBtn" ${profile?.avatar_path?"":"hidden"}>Убрать фото</button></div>
+  <input class="hidden" id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp">
+  <p id="avatarMessage" class="profile-status" role="status"></p></section>
+  <section class="card"><h3>Личные данные</h3>
+  <form id="personalForm">
+  <label for="personalName">Имя и фамилия</label><input id="personalName" required maxlength="100" autocomplete="name" value="${escapeHtml(name)}">
+  <label for="personalBio">О себе</label><textarea id="personalBio" maxlength="160" rows="2">${escapeHtml(profile?.bio||"")}</textarea>
+  <label for="personalPhone">Телефон для связи</label><input id="personalPhone" type="tel" inputmode="tel" autocomplete="tel" value="${escapeHtml(profile?.phone||"")}">
+  <div class="profile-fields"><div><label for="personalBirthday">Дата рождения</label><input id="personalBirthday" type="date" min="1900-01-01" max="${profileToday()}" value="${escapeHtml(profile?.birth_date||"")}"></div>
+  <div><label for="personalHeight">Рост, см</label><input id="personalHeight" type="number" inputmode="decimal" min="50" max="250" step="0.1" value="${escapeHtml(profile?.height_cm??"")}"></div></div>
+  <button class="btn primary" id="savePersonalBtn">Сохранить</button><p class="profile-status" id="personalMessage" role="status"></p>
+  </form></section>
+  <section class="card theme-settings"><h3>Оформление</h3>
+  <div class="theme-options">${Object.entries(THEMES).map(([id,theme])=>`<button type="button" class="theme-choice" data-theme-choice="${id}" aria-pressed="${selectedTheme===id}"><span class="theme-preview theme-preview-${id}" style="background-image:url('${theme.image}')"></span><span>${theme.name}</span><span class="theme-check" aria-hidden="true">✓</span></button>`).join("")}</div>
+  <p class="profile-status" id="themeStatus" role="status"></p></section>
+  <section class="card profile-account"><h3>Аккаунт</h3>
+  <div class="profile-login"><span>Номер для входа</span><b>${escapeHtml(me?.email?.match(/^phone\.([0-9]+)@/)?.[1]? "+"+me.email.match(/^phone\.([0-9]+)@/)[1] : me?.phone||me?.email||"")}</b></div>
+  <details><summary>Изменить пароль</summary><form id="profilePasswordForm">
+  <label for="profileCurrentPassword">Текущий пароль</label><input id="profileCurrentPassword" type="password" autocomplete="current-password" required>
+  <label for="profileNewPassword">Новый пароль</label><input id="profileNewPassword" type="password" autocomplete="new-password" minlength="8" required>
+  <label for="profileConfirmPassword">Повторите новый пароль</label><input id="profileConfirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+  <button class="btn primary" id="savePasswordBtn">Сохранить пароль</button><p class="profile-status" id="passwordMessage" role="status"></p>
+  </form></details><button type="button" class="btn ghost" id="profileLogoutBtn">Выйти из аккаунта</button></section>`;
+}
+function bindPersonalProfile(){
+  $("personalForm").addEventListener("submit",savePersonalProfile);
+  $("profilePasswordForm").addEventListener("submit",changeProfilePassword);
+  $("profilePhotoBtn").addEventListener("click",()=>$("profilePhotoInput").click());
+  $("profilePhotoInput").addEventListener("change",e=>saveProfileAvatar(e.target.files?.[0]));
+  $("removeProfilePhotoBtn").addEventListener("click",()=>saveProfileAvatar(null,true));
+  $("profileLogoutBtn").addEventListener("click",async()=>{
+    const btn=$("profileLogoutBtn");btn.disabled=true;
+    const {error}=await sb.auth.signOut();
+    if(error){btn.disabled=false;btn.textContent="Не удалось выйти. Повторить";return}
+    if(profileAvatarURL)URL.revokeObjectURL(profileAvatarURL);
+    location.reload();
+  });
+  loadProfileAvatar();
+}
+async function savePersonalProfile(event){
+  event.preventDefault();
+  const btn=$("savePersonalBtn"),message=$("personalMessage");
+  const full_name=$("personalName").value.trim(),bio=$("personalBio").value.trim();
+  const rawPhone=$("personalPhone").value.trim(),phone=rawPhone?normalizePhone(rawPhone):null;
+  const birth_date=$("personalBirthday").value||null;
+  const height_cm=$("personalHeight").value===""?null:Number($("personalHeight").value);
+  if(!full_name||full_name.length>100){message.textContent="Введите имя и фамилию.";return}
+  if(rawPhone&&!/^\+7\d{10}$/.test(phone)){message.textContent="Введите телефон в формате +7 999 000-00-00.";return}
+  if(birth_date&&(birth_date<"1900-01-01"||birth_date>profileToday())){message.textContent="Проверьте дату рождения.";return}
+  if(height_cm!==null&&(!Number.isFinite(height_cm)||height_cm<50||height_cm>250)){message.textContent="Рост должен быть от 50 до 250 см.";return}
+  btn.disabled=true;message.textContent="Сохраняем…";
+  try{
+    const {data,error}=await sb.from("ps_profiles").update({full_name,bio,phone,birth_date,height_cm,updated_at:new Date().toISOString()}).eq("id",me.id).select("*").single();
+    if(error||!data)throw error||new Error("Профиль не найден");
+    profile=data;
+    if($("profileDisplayName"))$("profileDisplayName").textContent=profile.full_name;
+    if($("profileDisplayBio"))$("profileDisplayBio").textContent=profile.bio||"";
+    if(!profile.avatar_path)await loadProfileAvatar();
+    $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
+    message.textContent="Сохранено ✓";
+  }catch{message.textContent="Не удалось сохранить. Проверьте интернет и попробуйте снова."}
+  finally{btn.disabled=false}
+}
+async function loadProfileAvatar(){
+  const frame=$("profileAvatar"),path=profile?.avatar_path,uid=me?.id;
+  if(!frame)return;
+  if(profileAvatarURL){URL.revokeObjectURL(profileAvatarURL);profileAvatarURL=null}
+  if(!path){frame.textContent=(profile?.full_name||"").trim().split(/\s+/).slice(0,2).map(x=>Array.from(x)[0]||"").join("");return}
+  if(!path.startsWith(uid+"/"))return;
+  const {data,error}=await sb.storage.from("ps-progress-photos").download(path);
+  if(error||!data||!frame.isConnected||me?.id!==uid)return;
+  profileAvatarURL=URL.createObjectURL(data);
+  const img=document.createElement("img");img.src=profileAvatarURL;img.alt="Фото профиля";frame.replaceChildren(img);
+}
+async function saveProfileAvatar(file,remove=false){
+  if(!remove&&!file)return;
+  const message=$("avatarMessage"),btn=$("profilePhotoBtn"),removeBtn=$("removeProfilePhotoBtn");
+  if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>10*1024*1024)){message.textContent="Выберите JPG, PNG или WEBP до 10 МБ.";return}
+  btn.disabled=true;removeBtn.disabled=true;message.textContent="Сохраняем…";
+  const uid=me.id,oldPath=profile.avatar_path;let newPath=null,committed=false;
+  try{
+    if(file){
+      newPath=uid+"/avatar-"+crypto.randomUUID()+"."+({ "image/jpeg":"jpg","image/png":"png","image/webp":"webp"}[file.type]);
+      const upload=await sb.storage.from("ps-progress-photos").upload(newPath,file,{contentType:file.type});
+      if(upload.error)throw upload.error;
+    }
+    const {data,error}=await sb.from("ps_profiles").update({avatar_path:newPath,updated_at:new Date().toISOString()}).eq("id",uid).select("*").single();
+    if(error||!data)throw error||new Error("Не сохранено");
+    committed=true;profile=data;
+    if(oldPath?.startsWith(uid+"/avatar-"))await sb.storage.from("ps-progress-photos").remove([oldPath]);
+    await loadProfileAvatar();removeBtn.hidden=!newPath;message.textContent=remove?"Фото удалено":"Фото сохранено ✓";
+  }catch{
+    if(newPath&&!committed)await sb.storage.from("ps-progress-photos").remove([newPath]);
+    message.textContent="Не удалось сохранить фото. Попробуйте снова.";
+  }finally{btn.disabled=false;removeBtn.disabled=false;if($("profilePhotoInput"))$("profilePhotoInput").value=""}
+}
+async function changeProfilePassword(event){
+  event.preventDefault();
+  const form=$("profilePasswordForm"),message=$("passwordMessage"),btn=$("savePasswordBtn");
+  const current=$("profileCurrentPassword").value,password=$("profileNewPassword").value,confirm=$("profileConfirmPassword").value;
+  if(password.length<8){message.textContent="Новый пароль — минимум 8 символов.";return}
+  if(password!==confirm){message.textContent="Новые пароли не совпадают.";return}
+  if(password===current){message.textContent="Выберите другой пароль.";return}
+  btn.disabled=true;message.textContent="Сохраняем…";
+  try{
+    const uid=me.id;
+    const verified=await sb.auth.signInWithPassword({... (me.email?{email:me.email}:{phone:me.phone}),password:current});
+    if(verified.error||verified.data.user?.id!==uid){message.textContent="Проверьте текущий пароль.";return}
+    const {error}=await sb.auth.updateUser({password});
+    if(error){message.textContent=/weak|short|length/i.test(error.message)?"Выберите более сложный пароль.":"Не удалось изменить пароль. Войдите заново и повторите.";return}
+    form.reset();message.textContent="Пароль изменён ✓";
+  }catch{message.textContent="Нет связи. Попробуйте снова."}
+  finally{btn.disabled=false}
+}
+
 function soon(name){return `<h2 class="section-title">${name}</h2><section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
 const pages={plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:pageMarathon,progress:pageProgress,achievements:()=>soon("Достижения"),community:()=>soon("Сообщество"),consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
