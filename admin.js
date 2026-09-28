@@ -11,6 +11,7 @@ function pageAdmin(){
  if(!staffConsultants.length)return '<section class="card"><h3>Доступ не подключён</h3><p>Панель доступна консультантам.</p></section>';
  return '<section class="card admin-intro"><div class="eyebrow">Рабочий кабинет</div><h1>'+escapeHtml(staffConsultants.map(x=>x.display_name).join(" · "))+'</h1>'+
  '<div class="admin-shortcuts"><button class="btn primary" id="adminChat">Общий чат</button><button class="btn ghost" id="adminClientView">Клиентский экран</button></div></section>'+
+ consultantCardForm()+
  '<section class="card"><div class="row"><h3>Мои клиенты <span id="adminClientCount"></span></h3><button class="admin-small" id="adminRefresh">Обновить</button></div>'+
  '<label for="adminSearch">Поиск по имени или телефону</label><input id="adminSearch" type="search" autocomplete="off">'+
  '<p id="adminStatus" role="status"></p><div id="adminClientList"></div></section><div id="adminClientDetail"></div>';
@@ -18,6 +19,7 @@ function pageAdmin(){
 function bindAdmin(){
  const version=++adminViewVersion;
  if(!staffConsultants.length)return;
+ bindConsultantCardEditor();
  $("adminChat").addEventListener("click",()=>openPage("community"));
  $("adminClientView").addEventListener("click",()=>openPage("plan"));
  $("adminRefresh").addEventListener("click",()=>loadAdminClients(version));

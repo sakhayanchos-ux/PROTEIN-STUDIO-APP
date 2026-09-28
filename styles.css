@@ -469,3 +469,11 @@ html[data-theme="sunset"] .drawer{background-size:auto 146vh!important;backgroun
 .admin-measurements table{width:100%;border-collapse:collapse;font-size:13px}
 .admin-measurements th,.admin-measurements td{text-align:left;padding:10px 5px;border-bottom:1px solid var(--line)}
 #adminStatus:empty{display:none}
+
+.consultant-editor fieldset{border:0;padding:0;margin:0;min-width:0}
+.consultant-editor label{font-size:14px;color:var(--ink)}
+.consultant-editor .profile-avatar{margin-top:16px}
+.consultant-remove-photo{display:flex;align-items:center;gap:10px}
+.consultant-remove-photo input{width:20px;height:20px;margin:0}
+.consultant-bio{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.6}
+.consultant-detail b{overflow-wrap:anywhere;text-align:right}

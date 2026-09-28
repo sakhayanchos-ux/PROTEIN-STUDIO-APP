@@ -1,5 +1,5 @@
-const CACHE="protein-studio-app-v49";
-const CORE=["./","./index.html","./styles.css","./app.js","./community.js","./admin.js","./config.js","./manifest.webmanifest","./portion-guide.svg","./rhinestones.jpg","./theme-kpop.jpg","./theme-neon.jpg","./theme-sunset.jpg"];
+const CACHE="protein-studio-app-v50";
+const CORE=["./","./index.html","./styles.css","./app.js","./community.js","./admin.js","./consultant-card.js","./config.js","./manifest.webmanifest","./portion-guide.svg","./rhinestones.jpg","./theme-kpop.jpg","./theme-neon.jpg","./theme-sunset.jpg"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{
