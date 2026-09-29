@@ -96,7 +96,7 @@ function consultantCardHtml(c){
  const club=c.club_name||c.club_address||c.club_hours;
  return '<section class="card consultant-hero"><div class="profile-avatar" id="clientConsultantPhoto">♡</div><h1>'+escapeHtml(name)+'</h1>'+
  '<div class="consultant-contact-buttons">'+
- (wa?'<a class="btn primary app-link" href="https://wa.me/'+wa.slice(1)+'" target="_blank" rel="noopener">Написать</a>':"")+
+ '<button class="btn primary" id="writeConsultant">Написать консультанту</button>'+
  (phone?'<a class="btn ghost app-link" href="tel:'+phone+'">Позвонить</a>':"")+'</div></section>'+about+
  (c.contact_hours?'<section class="card consultant-info"><h3>На связи</h3><p class="consultant-bio">'+escapeHtml(c.contact_hours)+'</p></section>':"")+
  (club?'<section class="card consultant-info"><h3>'+escapeHtml(c.club_name||"Мой клуб")+'</h3>'+
@@ -109,7 +109,7 @@ async function loadClientConsultantCard(){
  try{
   const {data,error}=await sb.from("ps_consultants").select("*").eq("id",profile.consultant_id).eq("active",true).single();
   if(error)throw error;if(!box.isConnected)return;
-  consultant=data;box.innerHTML=consultantCardHtml(data);
+  consultant=data;box.innerHTML=consultantCardHtml(data);$('writeConsultant').onclick=()=>openClientDialog();
   await showConsultantPhoto($("clientConsultantPhoto"),data.avatar_path,data.display_name);
  }catch{
   if(box.isConnected){
@@ -118,4 +118,5 @@ async function loadClientConsultantCard(){
   }
  }
 }
+
 

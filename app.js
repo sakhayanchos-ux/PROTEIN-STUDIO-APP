@@ -128,7 +128,7 @@ async function login(){
     setMessage("Не удалось открыть профиль. Попробуйте ещё раз.");
   }
 }
-async function logout(){await sb.auth.signOut();location.reload()}
+async function logout(){await detachPushOnLogout();await sb.auth.signOut();location.reload()}
 async function bootstrap(){
   try{
     if(!me){
@@ -203,7 +203,7 @@ async function bootstrap(){
     setMessage("");
     showScreen("appScreen");
     $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
-    openPage(staffConsultants.length?"coachPlan":"plan");
+    openPage(staffConsultants.length?"coachPlan":"plan");consumePushRoute();
     startJourneyUpdates();
     if(!staffConsultants.length)getJourney().then(showNewReward).catch(()=>{});
   }catch(err){
@@ -494,6 +494,7 @@ function prevOnboarding(){
 }
 
 function openPage(page){
+  appRoute=page;stopDirect();
   document.getElementById("rewardDialog")?.remove();
   if(isStaffWorkspace()&&["plan","nutrition","water","progress","consultant"].includes(page)){if(page==="progress")coachTab="result";page="coachPlan";}
   if(!isStaffWorkspace()&&["admin","staffCard","coachPlan","myQR"].includes(page))page="plan";
@@ -501,7 +502,7 @@ function openPage(page){
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
@@ -509,7 +510,8 @@ function openPage(page){
   if(page==="consultant")loadClientConsultantCard();
   if(page==="admin")bindAdmin();
   if(page==="community")bindCommunity();
-  if(page==="notifications"){bindNotificationToggles();loadJourneyNotifications();}
+  if(page==="messages")bindMessages();
+  if(page==="notifications"){bindNotificationToggles();loadJourneyNotifications();bindPush();}
   if(page==="coachPlan")bindCoachPlan();
   if(page==="myQR")bindMyQR();
   if(page==="staffCard")bindConsultantCardEditor();
@@ -520,7 +522,7 @@ function openPage(page){
   if(page==="progress")bindProgressPhotoActions();
   if(page==="plan")loadPlanProgress();
   if(page==="nutrition"||page==="water"){loadNutritionTargets();if(page==="water")$("waterTargetTitle")?.closest("section")?.scrollIntoView({block:"start"})}
-  if(page==="workouts"){if(!isStaffWorkspace())loadWorkoutPlan();loadWorkoutLibrary()}
+  if(page==="workouts"){loadWorkoutLibrary()}
 }
 function pagePlan(){
   const goalList=assessment?.goals?.length?assessment.goals:[assessment?.primary_goal||plan?.goal||"Моя цель"];
@@ -628,12 +630,12 @@ function buildNutritionTargets(currentWeight){
 function mealStep(time,title,text,note){
   return '<div class="meal-step">'+
     '<div class="meal-time">'+time+'</div>'+
-    '<div class="meal-copy"><b>'+title+'</b><span>'+text+'</span>'+(note?'<small>'+note+'</small>':'')+'</div>'+
+    '<div class="meal-copy"><b>'+title+'</b><span>'+text+'</span>'+''+'</div>'+
   '</div>';
 }
 
 function menuSuggestion(name,protein,note){
-  return '<div class="menu-suggestion"><div><b>'+name+'</b><small>'+note+'</small></div><span>'+protein+' г белка</span></div>';
+  return '<div class="menu-suggestion"><div><b>'+name+'</b></div><span>'+protein+' г белка</span></div>';
 }
 
 function pageNutrition(){
@@ -656,12 +658,12 @@ function pageNutrition(){
   '</section>'+
 
   '<section class="card">'+
-    '<div class="row"><div><div class="eyebrow">Белок</div><h3 class="photo-title">Ваш ориентир</h3></div><span class="pill">Автоматически</span></div>'+
+    '<h3>Белок</h3>'+
     '<div id="proteinTargetDetail" class="target-detail"><p class="muted">Считаем по вашей цели…</p></div>'+
     '<div class="menu-suggestions">'+
       menuSuggestion("Протеиновый коктейль","10","из текущего меню PROTEIN STUDIO")+
       menuSuggestion("Кофе с протеином","15","удобный белковый напиток")+
-      menuSuggestion("Protein Bites","8","мини-перекус")+
+      menuSuggestion("Protein Bites · 1 шт.","4","")+
       menuSuggestion("Протеиновые чипсы","11–12","несладкий перекус")+
       menuSuggestion("Formula 1 Express","14–16","порционный перекус")+
       menuSuggestion("H24 Achieve","21","спортивный высокобелковый батончик")+
@@ -676,7 +678,7 @@ function pageNutrition(){
     '<div class="hydration-note"><b>⚡ CR7 Drive</b><span>Гипотонический спортивный напиток с электролитами для восполнения водного баланса до и после физической нагрузки. Используйте согласно инструкции продукта.</span></div>'+
   '</section>'+
 
-  '<p class="plan-health-note">Ориентиры в приложении предназначены для здоровых взрослых и не заменяют медицинские рекомендации. При заболеваниях почек/сердца, ограничении жидкости, беременности или других особых состояниях план нужно согласовать с врачом.</p>';
+  '<p class="plan-health-note">Ориентиры индивидуальны и не заменяют рекомендации врача. При заболеваниях почек/сердца, ограничении жидкости и беременности согласуйте план с врачом.</p>';
 }
 
 async function loadNutritionTargets(){
@@ -692,7 +694,7 @@ async function loadNutritionTargets(){
     const pd=$("proteinTargetDetail");
     if(pd){
       if(t.proteinMin){
-        const basis='Расчёт: текущий вес '+ruNumber(t.proteinWeight)+' кг × 1,5–1,8. После каждого нового замера приложение пересчитывает цель автоматически.';
+        const basis='Рассчитано по текущему весу';
         pd.innerHTML='<div class="big-target">'+t.proteinMin+'–'+t.proteinMax+' г <small>белка в сутки</small></div>'+
           '<p class="muted">'+basis+'</p>';
       }else{
@@ -702,83 +704,13 @@ async function loadNutritionTargets(){
 
     const wt=$("waterTargetTitle"),wp=$("waterTargetText");
     if(wt&&t.waterLiters)wt.textContent='Около '+ruNumber(t.waterLiters)+' л жидкости в сутки';
-    if(wp&&t.waterLiters)wp.textContent='Расчётный ориентир: текущий вес × 30 мл/кг. При тренировках, жаре и других условиях потребность меняется.';
+    if(wp&&t.waterLiters)wp.textContent='';
   }catch(err){
     console.error(err);
   }
 }
 
-function exerciseItem(icon,title,text){
-  return '<div class="exercise-item"><div class="exercise-icon">'+icon+'</div><div><b>'+title+'</b><span>'+text+'</span></div></div>';
-}
-
-function pageWorkouts(){
-  if(isStaffWorkspace())return workoutLibraryHtml()+workoutEditorHtml();
-  return ''+
-  '<section class="card workout-hero">'+
-    '<div class="eyebrow">План из вашей анкеты</div>'+
-    '<h3 id="workoutPlanTitle">Собираем вашу нагрузку…</h3>'+
-    '<p id="workoutPlanIntro" class="muted"></p>'+
-  '</section>'+
-  '<section class="card">'+
-    '<div class="eyebrow">Сегодня</div><h3>Простая тренировка</h3>'+
-    '<div id="workoutExercises"><p class="muted">Подбираем упражнения…</p></div>'+
-  '</section>'+
-  '<section class="card">'+
-    '<div class="eyebrow">Правило прогресса</div>'+
-    '<p class="muted">Начинаем с уровня, который можно повторять регулярно. Когда этот объём становится комфортным — прибавляем несколько минут или усложняем упражнения.</p>'+
-    '<div class="notice">Если во время нагрузки появляется боль в груди, выраженная одышка, головокружение или необычная боль — остановитесь. При хронических заболеваниях и перед интенсивной нагрузкой лучше обсудить допустимый уровень активности с врачом.</div>'+
-  '</section>'+workoutLibraryHtml();
-}
-
-async function loadWorkoutPlan(){
-  try{
-    const s=await getProgressSummary();
-    const weight=Number(s.latestWeight||assessment?.starting_weight_kg||0);
-    const readiness=Number(assessment?.readiness_score||5);
-    const place=assessment?.training_place||"Дома";
-    const minutes=Number(assessment?.minutes_available||10);
-    const lowImpact=(weight>=80||readiness<=5);
-    const title=$("workoutPlanTitle"),intro=$("workoutPlanIntro"),box=$("workoutExercises");
-
-    if(title)title.textContent=minutes+' минут · '+place;
-    if(intro)intro.textContent=lowImpact
-      ? 'Стартуем мягко: без прыжков и резких ударных движений. Вес — только один из факторов; важны также самочувствие и привычка к нагрузке.'
-      : 'Можно начать с короткого смешанного комплекса: ходьба/разминка + простые силовые движения.';
-
-    let items=[];
-    if(place==="На улице"){
-      items=[
-        ["🚶","Ходьба","Начните спокойным темпом 2–3 минуты, затем идите чуть быстрее."],
-        ["⏱️","Интервалы","Чередуйте 1 минуту бодрее и 1 минуту спокойнее."],
-        ["🧍","Финиш","2 минуты спокойной ходьбы и лёгкая разминка."]
-      ];
-    }else if(lowImpact){
-      items=[
-        ["🚶","Шаги на месте","1–2 минуты в удобном темпе, без прыжков."],
-        ["🪑","Встать со стула","Медленно встать и сесть 6–10 раз, держась за опору при необходимости."],
-        ["🧱","Отжимания от стены","6–10 спокойных повторов."],
-        ["↔️","Шаги в сторону","По 6–10 шагов в каждую сторону."],
-        ["🪽","«Самолёт» у опоры","Лёгкое упражнение на баланс: держитесь за опору и отводите ногу назад/в сторону."]
-      ];
-    }else{
-      items=[
-        ["🚶","Разминка","2 минуты ходьбы или шагов на месте."],
-        ["🪑","Присед к стулу","8–12 повторов в комфортной амплитуде."],
-        ["🧱","Отжимания от стены/опоры","8–12 повторов."],
-        ["↔️","Шаги в сторону","10 шагов в каждую сторону."],
-        ["🧘","Спокойная заминка","1–2 минуты дыхания и лёгкой растяжки."]
-      ];
-    }
-
-    const loops=minutes>=20?2:1;
-    if(box)box.innerHTML=items.map(function(x){return exerciseItem(x[0],x[1],x[2])}).join("")+
-      '<div class="workout-loop-note">'+(loops===2?'Пройдите этот круг 2 раза.':'Одного круга на старте достаточно.')+'</div>';
-  }catch(err){
-    console.error(err);
-  }
-}
-
+function pageWorkouts(){return workoutLibraryHtml()+(isStaffWorkspace()?workoutEditorHtml():'<p class="plan-health-note">При боли в груди, выраженной одышке или головокружении остановитесь. При хронических заболеваниях согласуйте нагрузку с врачом.</p>')}
 
 function formatShortDate(value){
   if(!value)return "";
@@ -1177,7 +1109,7 @@ async function shareSavedCollage(path){
 
 function pageConsultant(){return '<div id="clientConsultantCard"><section class="card">Загружаем карточку…</section></div>'}
 function pageNotifications(){
-  return `<section class="card"><div id="journeyNotifications">Загружаем…</div></section><section class="card">
+  return pushMarkup()+`<section class="card"><div id="journeyNotifications">Загружаем…</div></section><section class="card">
   ${toggle("notifWater","💧 Вода")}
   ${toggle("notifNutrition","🥗 Питание")}
   ${toggle("notifWorkouts","🏋🏻‍♀️ Тренировки")}
@@ -1240,7 +1172,7 @@ function bindPersonalProfile(){
   $("profileLogoutBtn").addEventListener("click",async()=>{
     const btn=$("profileLogoutBtn");btn.disabled=true;
     clearInterval(journeyTimer);
-    const {error}=await sb.auth.signOut();
+    await detachPushOnLogout();const {error}=await sb.auth.signOut();
     if(error){btn.disabled=false;btn.textContent="Не удалось выйти. Повторить";return}
     if(profileAvatarURL)URL.revokeObjectURL(profileAvatarURL);
     location.reload();
@@ -1324,7 +1256,7 @@ async function changeProfilePassword(event){
 }
 
 function soon(name){return `<section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
+const pages={messages:pageMessages,coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();

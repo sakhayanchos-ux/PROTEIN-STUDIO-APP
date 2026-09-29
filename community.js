@@ -95,7 +95,8 @@ async function loadCommunity(s,older=false,forceBottom=false){
    if(!signed.error)for(const item of signed.data||[])if(item.signedUrl)s.urls.set(item.path,{url:item.signedUrl,expires:Date.now()+3300000});
   }
   if(!communityActive(s))return;
-  s.reactions=reactions;renderCommunity(s);
+  await loadChatPeople([...s.rows,...s.pins].map(m=>m.author_id));if(!communityActive(s))return;s.reactions=reactions;renderCommunity(s);
+  if(!clientPreview&&!document.hidden&&s.rows.length){await checked(sb.rpc("ps_mark_chat_read",{p_channel:"community",p_until:s.rows.at(-1).created_at}));refreshBadges()}
   $("communityRetry").classList.add("hidden");
   if($("communityStatus").dataset.loadError){communityMessage("");delete $("communityStatus").dataset.loadError}
   if(older)log.scrollTop=oldTop+log.scrollHeight-oldHeight;else if(bottom)log.scrollTop=log.scrollHeight;else log.scrollTop=oldTop;
@@ -120,7 +121,7 @@ function renderCommunity(s){
    const time=stamp.toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
    const photo=m.image_path?s.urls.get(m.image_path)?.url:null;
    return '<article class="chat-message '+(own?"chat-own":"")+'" id="chat-'+m.id+'">'+
-    '<div class="chat-message-head"><span class="chat-avatar" aria-hidden="true">'+escapeHtml(initials)+'</span><div><b>'+escapeHtml(m.author_name)+'</b>'+(m.author_is_consultant?'<span class="chat-role">Консультант</span>':"")+'</div><time datetime="'+escapeHtml(m.created_at)+'">'+escapeHtml(time)+'</time></div>'+
+    '<div class="chat-message-head">'+chatAvatar(m.author_id,m.author_name)+'<div><b>'+escapeHtml(m.author_name)+'</b>'+(m.author_is_consultant?'<span class="chat-role">Консультант</span>':"")+'</div><time datetime="'+escapeHtml(m.created_at)+'">'+escapeHtml(time)+'</time></div>'+
     (m.reply_to?'<div class="chat-quote">'+(parent?'<b>'+escapeHtml(parent.author_name)+'</b><span>'+escapeHtml((parent.body||"Фото").slice(0,140))+'</span>':"Ответ на более раннее сообщение")+'</div>':"")+
     (m.body?'<p class="chat-body">'+escapeHtml(m.body)+'</p>':"")+
     (m.image_path?(photo?'<a href="'+escapeHtml(photo)+'" target="_blank" rel="noopener"><img class="chat-image" loading="lazy" src="'+escapeHtml(photo)+'" alt="Фото в сообщении"></a>':'<p class="chat-photo-error">Фото недоступно</p>'):"")+
@@ -208,4 +209,5 @@ async function sendCommunityMessage(event){
   if(communityActive(s)){btn.disabled=false;btn.textContent=s.pending?"Повторить":"Отправить";$("communityPhotoBtn").disabled=!!s.pending;$("communityText").disabled=!!s.pending}
  }
 }
+
 
