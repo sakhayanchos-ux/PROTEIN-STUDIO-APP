@@ -79,9 +79,10 @@ function phoneLoginEmail(phone){
 
 async function loadConsultants(){
   if(!sb)return;
-  const {data,error}=await sb.from("ps_consultants").select("id,display_name").eq("active",true).order("display_name");
+  const {data,error}=await sb.from("ps_consultants").select("id,display_name,referral_code").eq("active",true).order("display_name");
   if(error)return setMessage("Не удалось загрузить консультантов");
-  $("regConsultant").innerHTML=(data||[]).map(x=>`<option value="${x.id}">${x.display_name}</option>`).join("");
+  $("regConsultant").innerHTML=(data||[]).map(x=>`<option value="${x.id}">${escapeHtml(x.display_name)}</option>`).join("");
+  await applyIncomingRegistration(data||[]);
 }
 async function registerClient(){
   setMessage("Создаём аккаунт...");
@@ -89,7 +90,7 @@ async function registerClient(){
   const phone=$("regPhone").value.trim();
   const normalizedPhone=normalizePhone(phone);
   const password=$("regPassword").value;
-  const consultant_id=$("regConsultant").value||null;
+  const consultant_id=pendingCoachInvitation?null:$("regConsultant").value||null;
   if(!full_name||normalizedPhone.length<12||password.length<6)return setMessage("Заполните имя, телефон и пароль минимум из 6 символов.");
 
   const technicalEmail=phoneLoginEmail(normalizedPhone);
@@ -140,6 +141,7 @@ async function bootstrap(){
       return;
     }
 
+    await acceptPendingCoachInvitation();
     const [p,a]=await Promise.all([
       sb.from("ps_profiles").select("*").eq("id",me.id).maybeSingle(),
       sb.from("ps_assessments").select("*").eq("user_id",me.id).maybeSingle()
@@ -201,7 +203,7 @@ async function bootstrap(){
     setMessage("");
     showScreen("appScreen");
     $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
-    openPage(staffConsultants.length?"admin":"plan");
+    openPage(staffConsultants.length?"coachPlan":"plan");
     startJourneyUpdates();
     if(!staffConsultants.length)getJourney().then(showNewReward).catch(()=>{});
   }catch(err){
@@ -493,30 +495,32 @@ function prevOnboarding(){
 
 function openPage(page){
   document.getElementById("rewardDialog")?.remove();
-  if(staffConsultants.length&&["plan","nutrition","water","progress","consultant"].includes(page))page="admin";
-  if(!staffConsultants.length&&["admin","staffCard"].includes(page))page="plan";
+  if(isStaffWorkspace()&&["plan","nutrition","water","progress","consultant"].includes(page)){if(page==="progress")coachTab="result";page="coachPlan";}
+  if(!isStaffWorkspace()&&["admin","staffCard","coachPlan","myQR"].includes(page))page="plan";
   adminViewVersion++;
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
-  const fn=(staffConsultants.length&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
+  const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
   if(page==="profile")bindPersonalProfile();
   if(page==="consultant")loadClientConsultantCard();
   if(page==="admin")bindAdmin();
   if(page==="community")bindCommunity();
   if(page==="notifications"){bindNotificationToggles();loadJourneyNotifications();}
+  if(page==="coachPlan")bindCoachPlan();
+  if(page==="myQR")bindMyQR();
   if(page==="staffCard")bindConsultantCardEditor();
   if(page==="topics")loadTopics();
-  if(staffConsultants.length&&["marathon","achievements"].includes(page)){loadStaffCollection(page);if(page==="marathon")loadTaskSettings()}
+  if(isStaffWorkspace()&&["marathon","achievements"].includes(page)){loadStaffCollection(page);if(page==="marathon")loadTaskSettings()}
   else if(page==="marathon")loadMarathonTracker();
   else if(page==="achievements")loadAchievements();
   if(page==="progress")bindProgressPhotoActions();
   if(page==="plan")loadPlanProgress();
   if(page==="nutrition"||page==="water"){loadNutritionTargets();if(page==="water")$("waterTargetTitle")?.closest("section")?.scrollIntoView({block:"start"})}
-  if(page==="workouts"){if(!staffConsultants.length)loadWorkoutPlan();loadWorkoutLibrary()}
+  if(page==="workouts"){if(!isStaffWorkspace())loadWorkoutPlan();loadWorkoutLibrary()}
 }
 function pagePlan(){
   const goalList=assessment?.goals?.length?assessment.goals:[assessment?.primary_goal||plan?.goal||"Моя цель"];
@@ -709,7 +713,7 @@ function exerciseItem(icon,title,text){
 }
 
 function pageWorkouts(){
-  if(staffConsultants.length)return workoutLibraryHtml()+workoutEditorHtml();
+  if(isStaffWorkspace())return workoutLibraryHtml()+workoutEditorHtml();
   return ''+
   '<section class="card workout-hero">'+
     '<div class="eyebrow">План из вашей анкеты</div>'+
@@ -803,8 +807,8 @@ function pageProgress(){
     <button class="btn ghost" id="toggleMeasurementBtn">+ Добавить замер</button>
     <div id="measurementForm" class="measurement-form hidden">
       <div class="two-col">
-        <label>Вес, кг<input id="measureWeight" type="number" step="0.1" inputmode="decimal"></label>
-        <label>Талия, см<input id="measureWaist" type="number" step="0.1" inputmode="decimal"></label>
+        <label>Вес, кг<input id="measureWeight" type="number" min="25" max="400" step="0.1" inputmode="decimal"></label>
+        <label>Талия, см<input id="measureWaist" type="number" min="30" max="250" step="0.1" inputmode="decimal"></label>
       </div>
       <button class="btn primary" id="saveMeasurementBtn">Сохранить сегодняшний замер</button>
       <p id="measurementMessage" class="message"></p>
@@ -887,6 +891,7 @@ async function saveMeasurement(){
     message.textContent="Введите хотя бы один показатель.";
     return;
   }
+  if((values.p_weight_kg!==null&&(values.p_weight_kg<25||values.p_weight_kg>400))||(values.p_waist_cm!==null&&(values.p_waist_cm<30||values.p_waist_cm>250))){message.textContent="Проверьте вес и талию.";return;}
   btn.disabled=true;btn.textContent="Сохраняем…";
   const {error}=await sb.rpc("ps_save_progress",values);
   if(error){
@@ -894,6 +899,7 @@ async function saveMeasurement(){
   }else{
     message.textContent="Сегодняшний замер сохранён ✓";
     await loadProgressStats();
+    if($("coachWeightRoute"))await refreshCoachResult();
   }
   btn.disabled=false;btn.textContent="Сохранить сегодняшний замер";
 }
@@ -921,12 +927,14 @@ async function getProgressSummary(){
 
   const startDate=(assessment?.completed_at||"").slice(0,10) || plan?.start_date || rows[0]?.entry_date || null;
   const last=rows.length?rows[rows.length-1]:null;
+  const lastWeight=[...rows].reverse().find(r=>r.weight_kg!=null);
+  const lastWaist=[...rows].reverse().find(r=>r.waist_cm!=null);
   const latestDate=last?.entry_date||startDate;
 
   const startWeight=assessment?.starting_weight_kg!=null?Number(assessment.starting_weight_kg):null;
   const startWaist=assessment?.waist_cm!=null?Number(assessment.waist_cm):null;
-  const latestWeight=last?.weight_kg!=null?Number(last.weight_kg):startWeight;
-  const latestWaist=last?.waist_cm!=null?Number(last.waist_cm):startWaist;
+  const latestWeight=lastWeight?.weight_kg!=null?Number(lastWeight.weight_kg):startWeight;
+  const latestWaist=lastWaist?.waist_cm!=null?Number(lastWaist.waist_cm):startWaist;
 
   return {
     startDate,latestDate,
@@ -1316,7 +1324,7 @@ async function changeProfilePassword(event){
 }
 
 function soon(name){return `<section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
+const pages={coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();
@@ -1328,6 +1336,9 @@ $("showRegisterBtn").addEventListener("click",()=>{$("loginBox").classList.add("
 $("showLoginBtn").addEventListener("click",()=>{$("registerBox").classList.add("hidden");$("loginBox").classList.remove("hidden")});
 $("registerBtn").addEventListener("click",registerClient);
 $("loginBtn").addEventListener("click",login);
+$("clientPreviewNav").addEventListener("click",enterClientPreview);
+$("returnCoachBtn").addEventListener("click",exitClientPreview);
+$("clearInvitationBtn").addEventListener("click",clearIncomingInvitation);
 $("menuBtn").addEventListener("click",()=>toggleDrawer(true));
 $("backdrop").addEventListener("click",()=>toggleDrawer(false));
 document.querySelectorAll(".nav[data-page]").forEach(b=>b.addEventListener("click",()=>openPage(b.dataset.page)));
@@ -1341,4 +1352,5 @@ $("wellnessBackBtn").addEventListener("click",prevOnboarding);
   if(data.session){me=data.session.user;await bootstrap()}else showScreen("authScreen");
   if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 })();
+
 

@@ -2,7 +2,7 @@ let staffConsultants=[];
 let adminRows=[];
 let adminViewVersion=0;
 async function loadStaffAccess(){
- const {data,error}=await sb.from("ps_consultants").select("id,display_name").eq("user_id",me.id).eq("active",true);
+ const {data,error}=await sb.from("ps_consultants").select("id,display_name,referral_code").eq("user_id",me.id).eq("active",true);
  if(error)throw error;
  staffConsultants=data||[];
  staffNavigation();
@@ -51,10 +51,9 @@ function renderAdminClients(){
 async function fetchAdminRows(){
   let rows=[],offset=0;
   while(true){
-   const {data,error}=await sb.from("ps_profiles")
-    .select("id,full_name,phone,bio,birth_date,height_cm,onboarding_completed,created_at,consultant_id")
-    .in("consultant_id",staffConsultants.map(c=>c.id)).order("created_at",{ascending:false}).order("id").range(offset,offset+199);
+   const {data,error}=await sb.rpc("ps_my_clients",{p_offset:offset});
    if(error)throw error;rows.push(...data);if(data.length<200)break;offset+=200;
   }
  return rows.filter(p=>p.id!==me.id);
 }
+

@@ -1,10 +1,11 @@
 function staffNavigation(){
- const staff=!!staffConsultants.length;
+ const staff=isStaffWorkspace();
  document.querySelectorAll('.nav[data-page]').forEach(b=>{
   const p=b.dataset.page;
-  b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant'].includes(p):['admin','staffCard'].includes(p));
+  b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant'].includes(p):['admin','staffCard','coachPlan','myQR'].includes(p));
  });
  $('adminNav').textContent='🗂 Клиенты';
+ $('clientPreviewNav').classList.toggle('hidden',!staff);
 }
 function safeTopicUrl(value){try{const u=new URL(value);return u.protocol==='https:'?escapeHtml(u.href):''}catch{return ''}}
 function dateLabel(value){return value?escapeHtml(new Date(value.length===10?value+'T12:00:00':value).toLocaleDateString('ru-RU')):'—'}
@@ -54,3 +55,4 @@ async function loadStaffCollection(page){
  box.querySelectorAll('[data-client]').forEach(b=>b.onclick=()=>loadAdminClientDetail(b.dataset.client,version));
  }catch{if(box.isConnected)box.innerHTML='<p>Не удалось загрузить данные.</p><button class="btn ghost" id="staffRetry">Повторить</button>';const retry=$('staffRetry');if(retry)retry.onclick=()=>loadStaffCollection(page)}
 }
+

@@ -7,8 +7,9 @@
   <title>PROTEIN STUDIO</title>
   <link rel="manifest" href="manifest.webmanifest">
   <script>(()=>{let t="jewel";try{const s=localStorage.getItem("protein_studio_theme");if(["jewel","kpop","neon","sunset","blackgold"].includes(s))t=s}catch{}document.documentElement.dataset.theme=t})()</script>
-  <link rel="stylesheet" href="styles.css?v=52">
-  <link rel="stylesheet" href="journey.css?v=52">
+  <link rel="stylesheet" href="styles.css?v=53">
+  <link rel="stylesheet" href="journey.css?v=53">
+  <link rel="stylesheet" href="coach.css?v=53">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -19,6 +20,7 @@
       <div class="brand"><span>PROTEIN</span> STUDIO</div>
       <p class="muted">Личный кабинет PROTEIN STUDIO</p>
 
+      <div id="invitationNotice" class="notice hidden"><p id="invitationNoticeText"></p><button class="btn ghost" id="clearInvitationBtn">Продолжить без приглашения</button></div>
       <div id="loginBox">
         <label>Телефон<input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 999 000-00-00"></label>
         <label>Пароль<input id="loginPassword" type="password" autocomplete="current-password"></label>
@@ -74,6 +76,7 @@
     <aside id="drawer" class="drawer">
       <div class="drawer-brand">PROTEIN STUDIO</div>
       <div id="drawerPerson" class="drawer-person"></div>
+      <button data-page="coachPlan" class="nav hidden">📋 Мой план</button>
       <button data-page="admin" id="adminNav" class="nav hidden">🗂 Панель консультанта</button>
       <button data-page="staffCard" class="nav hidden">💬 О себе</button>
       <button data-page="plan" class="nav active">📋 Мой план</button>
@@ -85,6 +88,8 @@
       <button data-page="community" class="nav">👥 Группа поддержки</button>
       <button data-page="consultant" class="nav">💬 Мой консультант</button>
       <button data-page="notifications" class="nav">🔔 Уведомления</button>
+      <button data-page="myQR" class="nav hidden">▦ Мои QR-коды</button>
+      <button id="clientPreviewNav" class="nav hidden">👁 Клиентская версия</button>
       <button data-page="profile" class="nav">👤 Профиль</button>
     </aside>
     <div id="backdrop" class="backdrop"></div>
@@ -92,17 +97,22 @@
       <button id="menuBtn" class="menu-btn">☰</button>
       <strong id="pageTitle">Мой план</strong>
     </header>
+    <div id="clientPreviewBar" class="preview-bar hidden"><b>Клиентская версия · предпросмотр</b><span>Без сохранения изменений</span><button class="btn primary" id="returnCoachBtn">Вернуться в кабинет консультанта</button></div>
     <main id="content"></main>
   </section>
 </div>
-<script src="config.js?v=52"></script>
-<script src="community.js?v=52"></script>
-<script src="consultant-card.js?v=52"></script>
-<script src="admin.js?v=52"></script>
-<script src="workspace.js?v=52"></script>
-<script src="journey.js?v=52"></script>
-<script src="workout-library.js?v=52"></script>
-<script src="app.js?v=52"></script>
+<script src="config.js?v=53"></script>
+<script src="community.js?v=53"></script>
+<script src="consultant-card.js?v=53"></script>
+<script src="admin.js?v=53"></script>
+<script src="workspace.js?v=53"></script>
+<script src="journey.js?v=53"></script>
+<script src="workout-library.js?v=53"></script>
+<script src="vendor/qrcode.js?v=53"></script>
+<script src="coach.js?v=53"></script>
+<script src="invitations.js?v=53"></script>
+<script src="app.js?v=53"></script>
 </body>
 </html>
+
 
