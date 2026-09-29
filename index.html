@@ -6,8 +6,9 @@
   <meta name="theme-color" content="#f4f1e8">
   <title>PROTEIN STUDIO</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <script>(()=>{let t="jewel";try{const s=localStorage.getItem("protein_studio_theme");if(["jewel","kpop","neon","sunset"].includes(s))t=s}catch{}document.documentElement.dataset.theme=t})()</script>
-  <link rel="stylesheet" href="styles.css?v=50">
+  <script>(()=>{let t="jewel";try{const s=localStorage.getItem("protein_studio_theme");if(["jewel","kpop","neon","sunset","blackgold"].includes(s))t=s}catch{}document.documentElement.dataset.theme=t})()</script>
+  <link rel="stylesheet" href="styles.css?v=52">
+  <link rel="stylesheet" href="journey.css?v=52">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -16,7 +17,7 @@
   <section id="authScreen" class="auth-screen">
     <div class="auth-card">
       <div class="brand"><span>PROTEIN</span> STUDIO</div>
-      <p class="muted">Личный кабинет клиента клуба</p>
+      <p class="muted">Личный кабинет PROTEIN STUDIO</p>
 
       <div id="loginBox">
         <label>Телефон<input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 999 000-00-00"></label>
@@ -74,13 +75,14 @@
       <div class="drawer-brand">PROTEIN STUDIO</div>
       <div id="drawerPerson" class="drawer-person"></div>
       <button data-page="admin" id="adminNav" class="nav hidden">🗂 Панель консультанта</button>
+      <button data-page="staffCard" class="nav hidden">💬 О себе</button>
       <button data-page="plan" class="nav active">📋 Мой план</button>
-      <button data-page="nutrition" class="nav">🥗 Питание</button>
       <button data-page="workouts" class="nav">🏋🏻‍♀️ Тренировки</button>
       <button data-page="marathon" class="nav">🔥 Марафон</button>
+      <button data-page="topics" class="nav">📖 Темы</button>
       <button data-page="progress" class="nav">📈 Прогресс</button>
       <button data-page="achievements" class="nav">🏆 Достижения</button>
-      <button data-page="community" class="nav">👥 Сообщество</button>
+      <button data-page="community" class="nav">👥 Группа поддержки</button>
       <button data-page="consultant" class="nav">💬 Мой консультант</button>
       <button data-page="notifications" class="nav">🔔 Уведомления</button>
       <button data-page="profile" class="nav">👤 Профиль</button>
@@ -93,10 +95,14 @@
     <main id="content"></main>
   </section>
 </div>
-<script src="config.js?v=50"></script>
-<script src="community.js?v=50"></script>
-<script src="consultant-card.js?v=50"></script>
-<script src="admin.js?v=50"></script>
-<script src="app.js?v=50"></script>
+<script src="config.js?v=52"></script>
+<script src="community.js?v=52"></script>
+<script src="consultant-card.js?v=52"></script>
+<script src="admin.js?v=52"></script>
+<script src="workspace.js?v=52"></script>
+<script src="journey.js?v=52"></script>
+<script src="workout-library.js?v=52"></script>
+<script src="app.js?v=52"></script>
 </body>
 </html>
+
