@@ -1,0 +1,41 @@
+let staffChatState=null,requestedStaffThread=null;
+function canStaffChat(){return !clientPreview&&(staffConsultants.length>0||['consultant','admin'].includes(profile?.role))}
+function pageStaffChat(){return '<div id="staffChatView">Загружаем…</div>'}
+function stopStaffChat(){if(staffChatState){clearInterval(staffChatState.timer);if(staffChatState.channel)sb.removeChannel(staffChatState.channel);staffChatState=null}}
+async function bindStaffChat(){const box=$('staffChatView');if(!box||!canStaffChat())return;try{
+ const people=await checked(sb.rpc('ps_staff_directory'));await loadChatPeople(people.map(p=>p.id));
+ if(!box.isConnected)return;
+ if(requestedStaffThread){const id=requestedStaffThread;requestedStaffThread=null;await showStaffChat(id);return}
+ const [threads,messages,reads]=await Promise.all([checked(sb.from('ps_staff_threads').select('*')),checked(sb.from('ps_staff_messages').select('thread_id,sender_id,created_at').neq('sender_id',me.id)),checked(sb.from('ps_chat_reads').select('*').eq('user_id',me.id))]);
+ if(!box.isConnected)return;
+ const count=t=>t?messages.filter(m=>m.thread_id===t.id&&m.created_at>(reads.find(r=>r.channel==='staff:'+t.id)?.last_read_at||'')).length:0;
+ const badge=n=>n?'<span class="nav-badge">'+n+'</span>':'';
+ box.innerHTML='<section class="card"><button class="dialog-row" id="staffGroup"><b>💬 Общий чат консультантов</b>'+badge(count(threads.find(t=>!t.member_a)))+'</button></section><section class="card staff-directory"><h3>Консультанты</h3>'+people.filter(p=>p.id!==me.id).map(p=>'<button class="dialog-row" data-staff-person="'+p.id+'">'+chatAvatar(p.id,p.full_name)+'<b>'+escapeHtml(p.full_name||'Консультант')+'</b>'+badge(count(threads.find(t=>[t.member_a,t.member_b].includes(p.id))))+'</button>').join('')+'<p role="status"></p></section>';
+ const open=async(person,btn)=>buttonAction(btn,async()=>{const id=await checked(sb.rpc('ps_open_staff_dialog',{p_person:person}));await showStaffChat(id)},box.querySelector('[role=status]'));
+ $('staffGroup').onclick=e=>open(null,e.currentTarget);box.querySelectorAll('[data-staff-person]').forEach(b=>b.onclick=()=>open(b.dataset.staffPerson,b));
+}catch(e){journeyError(box,e,bindStaffChat)}}
+async function showStaffChat(id){stopStaffChat();const box=$('staffChatView');if(!box)return;try{
+ const t=await checked(sb.from('ps_staff_threads').select('*').eq('id',id).single());if(!box.isConnected)return;
+ const partner=t.member_a===me.id?t.member_b:t.member_a;if(partner)await loadChatPeople([partner]);if(!box.isConnected)return;
+ const s=staffChatState={id,rows:[],reply:null,busy:false,loading:false,limit:50,pending:null};
+ box.innerHTML='<section class="community-chat"><div class="staff-chat-toolbar"><button class="btn ghost" id="staffBack">← Консультанты</button><h3>'+escapeHtml(partner?chatPeople.get(partner)?.full_name||'Личный чат':'Общий чат консультантов')+'</h3></div><div id="staffLog" class="community-log"><button class="btn ghost" id="staffOlder">Ранее</button><div id="staffMessages"></div></div><form id="staffForm" class="community-composer"><div id="staffReply"></div><textarea name="body" rows="2" maxlength="3000" placeholder="Сообщение…"></textarea><label>＋ Фото<input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></label><button class="btn primary">Отправить</button><p role="status"></p></form></section>';
+ $('staffBack').onclick=()=>{stopStaffChat();bindStaffChat()};$('staffOlder').onclick=()=>{s.limit+=50;loadStaffChat(s)};$('staffForm').onsubmit=e=>{e.preventDefault();sendStaffChat(s,e.target)};
+ s.channel=sb.channel('staff-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'ps_staff_messages',filter:'thread_id=eq.'+id},()=>loadStaffChat(s)).subscribe();s.timer=setInterval(()=>{if(!document.hidden)loadStaffChat(s)},12000);await loadStaffChat(s);
+}catch(e){journeyError(box,e,bindStaffChat)}}
+async function loadStaffChat(s){if(staffChatState!==s||s.loading||!$('staffMessages'))return;s.loading=true;try{
+ const rows=await checked(sb.from('ps_staff_messages').select('*').eq('thread_id',s.id).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(s.limit));
+ const reactions=rows.length?await checked(sb.from('ps_staff_reactions').select('*').in('message_id',rows.map(m=>m.id))):[];
+ await loadChatPeople(rows.map(m=>m.sender_id));const urls=new Map();await Promise.allSettled(rows.filter(m=>m.image_path).map(async m=>urls.set(m.id,await signedMedia('ps-staff-chat',m.image_path))));
+ if(staffChatState!==s||!$('staffMessages'))return;const log=$('staffLog'),bottom=log.scrollHeight-log.scrollTop-log.clientHeight<100||!s.rows.length;s.rows=rows.reverse();
+ $('staffMessages').innerHTML=s.rows.map(m=>{const person=chatPeople.get(m.sender_id),parent=s.rows.find(r=>r.id===m.reply_to);return '<article class="chat-message '+(m.sender_id===me.id?'chat-own':'')+'"><div class="chat-message-head">'+chatAvatar(m.sender_id,person?.full_name)+'<b>'+escapeHtml(person?.full_name||'Консультант')+'</b><time>'+new Date(m.created_at).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</time></div>'+(m.reply_to?'<div class="chat-quote">'+escapeHtml(parent?.body||'Фото / раннее сообщение')+'</div>':'')+'<p class="chat-body">'+escapeHtml(m.body)+'</p>'+(urls.get(m.id)?'<img class="chat-image" src="'+escapeHtml(urls.get(m.id))+'" alt="Фото">':'')+'<button class="chat-text-button" data-staff-reply="'+m.id+'">Ответить</button><div>'+['❤️','👏','🔥','👍','🎉'].map(emoji=>{const rr=reactions.filter(r=>r.message_id===m.id&&r.emoji===emoji);return '<button class="chat-text-button" aria-pressed="'+rr.some(r=>r.user_id===me.id)+'" data-react-id="'+m.id+'" data-emoji="'+emoji+'">'+emoji+(rr.length?' '+rr.length:'')+'</button>'}).join('')+'</div></article>'}).join('')||'<p class="chat-empty">Начните разговор</p>';
+ $('staffOlder').hidden=rows.length<s.limit;
+ $('staffMessages').querySelectorAll('[data-staff-reply]').forEach(b=>b.onclick=()=>{s.reply=b.dataset.staffReply;$('staffReply').textContent='Ответ: '+(s.rows.find(m=>m.id===s.reply)?.body||'Фото');const cancel=document.createElement('button');cancel.type='button';cancel.textContent='×';cancel.onclick=()=>{s.reply=null;$('staffReply').textContent=''};$('staffReply').append(cancel)});
+ $('staffMessages').querySelectorAll('[data-react-id]').forEach(b=>b.onclick=()=>buttonAction(b,async()=>{await checked(sb.rpc('ps_react_staff',{p_message:b.dataset.reactId,p_emoji:b.dataset.emoji}));await loadStaffChat(s)},$('staffForm').querySelector('[role=status]')));
+ if(bottom)log.scrollTop=log.scrollHeight;
+ if(!document.hidden&&s.rows.length){await checked(sb.rpc('ps_mark_chat_read',{p_channel:'staff:'+s.id,p_until:s.rows.at(-1).created_at}));await checked(sb.from('ps_notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',me.id).eq('route->>thread',s.id).lte('created_at',s.rows.at(-1).created_at));refreshBadges()}
+}catch(e){const p=$('staffForm')?.querySelector('[role=status]');if(p)p.textContent=e.message}finally{s.loading=false}}
+async function sendStaffChat(s,form){if(s.busy||!canStaffChat())return;const body=form.elements.body.value.trim(),file=form.elements.photo.files[0];if(!s.pending&&!body&&!file)return;s.busy=true;const btn=form.querySelector('button.btn.primary');btn.disabled=true;const status=form.querySelector('[role=status]');try{
+ if(!s.pending)s.pending={id:crypto.randomUUID(),body,reply:s.reply,path:null};const p=s.pending;
+ if(file&&!p.path){if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10485760)throw Error('Фото JPG, PNG или WEBP до 10 МБ');const path=me.id+'/'+s.id+'/'+p.id+'.'+file.type.split('/')[1];const r=await sb.storage.from('ps-staff-chat').upload(path,file,{contentType:file.type});if(r.error&&!/duplicate|already exists/i.test(r.error.message))throw r.error;p.path=path;}
+ await checked(sb.rpc('ps_send_staff',{p_thread:s.id,p_id:p.id,p_body:p.body,p_photo:p.path,p_reply:p.reply}));s.pending=null;s.reply=null;form.reset();$('staffReply').textContent='';status.textContent='';await loadStaffChat(s);
+}catch(e){status.textContent=e.message+' · нажмите отправить для повтора'}finally{s.busy=false;btn.disabled=false}}

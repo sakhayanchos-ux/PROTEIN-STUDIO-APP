@@ -494,7 +494,8 @@ function prevOnboarding(){
 }
 
 function openPage(page){
-  appRoute=page;stopDirect();
+  appRoute=page;stopDirect();stopStaffChat();
+  if(page==="consultants"&&!canStaffChat())page="plan";
   document.getElementById("rewardDialog")?.remove();
   if(isStaffWorkspace()&&["plan","nutrition","water","progress","consultant"].includes(page)){if(page==="progress")coachTab="result";page="coachPlan";}
   if(!isStaffWorkspace()&&["admin","staffCard","coachPlan","myQR"].includes(page))page="plan";
@@ -502,7 +503,7 @@ function openPage(page){
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={consultants:"Консультанты",messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
@@ -511,6 +512,7 @@ function openPage(page){
   if(page==="admin")bindAdmin();
   if(page==="community")bindCommunity();
   if(page==="messages")bindMessages();
+  if(page==="consultants")bindStaffChat();
   if(page==="notifications"){bindNotificationToggles();loadJourneyNotifications();bindPush();}
   if(page==="coachPlan")bindCoachPlan();
   if(page==="myQR")bindMyQR();
@@ -1256,7 +1258,7 @@ async function changeProfilePassword(event){
 }
 
 function soon(name){return `<section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={messages:pageMessages,coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
+const pages={consultants:pageStaffChat,messages:pageMessages,coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();

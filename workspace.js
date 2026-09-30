@@ -1,7 +1,7 @@
 function staffNavigation(){
  const staff=isStaffWorkspace();
  document.querySelectorAll('.nav[data-page]').forEach(b=>{
-  const p=b.dataset.page;
+  const p=b.dataset.page;if(p==='consultants'){b.classList.toggle('hidden',!canStaffChat());return;}
   b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant'].includes(p):['admin','staffCard','coachPlan','myQR'].includes(p));
  });
  $('adminNav').textContent='🗂 Клиенты';
@@ -57,8 +57,10 @@ async function loadStaffCollection(page){
  try{
  const rows=await fetchAdminRows();const facts=await Promise.all(rows.map(p=>clientFacts(p.id)));
  if(!box.isConnected||version!==adminViewVersion)return;adminRows=rows;
- box.innerHTML=rows.length?rows.map((p,i)=>'<div class="staff-client-summary"><button class="admin-client-row" data-client="'+p.id+'"><b>'+escapeHtml(p.full_name||'Клиент')+'</b><span>Открыть карточку →</span></button>'+marathonSummary(facts[i])+(page==='achievements'&&facts[i].journey?.enrollment?facts[i].journey.rewards.filter(r=>r.unlocked_at).map(r=>'<p>'+r.milestone+'% · '+escapeHtml(r.gift||'Подарок не назначен')+' · '+rewardStatus(r)+'</p>').join(''):'')+'</div>').join(''):'<p>Клиентов пока нет.</p>';
- box.querySelectorAll('[data-client]').forEach(b=>b.onclick=()=>loadAdminClientDetail(b.dataset.client,version));
+ box.innerHTML=rows.length?rows.map((p,i)=>'<div class="staff-client-summary"><button class="admin-client-row" data-client="'+p.id+'"><b>'+escapeHtml(p.full_name||'Клиент')+'</b><span>Открыть карточку →</span></button>'+(page==='marathon'?journeyHeader(facts[i].journey):'')+(page==='achievements'&&facts[i].journey?.enrollment?facts[i].journey.rewards.filter(r=>r.unlocked_at).map(r=>'<p>'+r.milestone+'% · '+escapeHtml(r.gift||'Подарок не назначен')+' · '+rewardStatus(r)+'</p>').join(''):'')+'</div>').join(''):'<p>Клиентов пока нет.</p>';
+ box.querySelectorAll('[data-client]').forEach(b=>b.onclick=()=>loadStaffJourney(b.dataset.client,page,version));
  }catch{if(box.isConnected)box.innerHTML='<p>Не удалось загрузить данные.</p><button class="btn ghost" id="staffRetry">Повторить</button>';const retry=$('staffRetry');if(retry)retry.onclick=()=>loadStaffCollection(page)}
 }
 
+
+async function loadStaffJourney(id,page,version){const box=$('adminClientDetail'),p=adminRows.find(p=>p.id===id);if(!box||!p)return;box.dataset.client=id;try{const s=await getJourney(id);if(!box.isConnected||box.dataset.client!==id||version!==adminViewVersion)return;box.innerHTML='<section class="card"><h2>'+escapeHtml(p.full_name||'Клиент')+'</h2>'+(page==='achievements'?staffRewardsHtml(s):s?.enrollment?journeyHeader(s)+clientTaskSettings(s)+activityHtml({journey:s}):'<p>Марафон ещё не начат.</p>')+'</section>';const reload=()=>loadStaffJourney(id,page,version);if(page==='achievements')bindRewards(box,s,true,reload);else{bindClientTaskSettings(box,s,reload);hydratePhotos(box)}box.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){journeyError(box,e,()=>loadStaffJourney(id,page,version))}}
