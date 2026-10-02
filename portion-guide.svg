@@ -13,10 +13,8 @@
 
   <text x="360" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#3f6747">1/2 ОВОЩИ</text>
   <text x="360" y="386" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#3f6747">салат · зелень · овощи</text>
-
   <text x="267" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#7b6539">1/4 ГАРНИР</text>
   <text x="267" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7b6539">крупа · картофель</text>
-
   <text x="453" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#7b4942">1/4 БЕЛОК</text>
   <text x="453" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7b4942">рыба · мясо · яйца · бобовые</text>
 
@@ -26,20 +24,20 @@
     <rect width="290" height="105" rx="22" fill="#f4f8f1" stroke="#e2ded5"/>
     <text x="36" y="44" font-size="32">✋</text>
     <text x="82" y="39" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#26362d">Ладонь</text>
-    <text x="82" y="68" font-family="Arial, sans-serif" font-size="17" fill="#6f756f">порция белка</text>
+    <text x="82" y="68" font-family="Arial, sans-serif" font-size="17" fill="#6f756f">белок</text>
   </g>
 
   <g transform="translate(375 560)">
     <rect width="290" height="105" rx="22" fill="#fbf6eb" stroke="#e2ded5"/>
-    <text x="36" y="44" font-size="32">🤲</text>
-    <text x="82" y="39" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#26362d">Ладонь-лодочка</text>
+    <text x="36" y="44" font-size="32">✊</text>
+    <text x="82" y="39" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#26362d">Кулак</text>
     <text x="82" y="68" font-family="Arial, sans-serif" font-size="17" fill="#6f756f">гарнир / углеводы</text>
   </g>
 
   <g transform="translate(55 685)">
     <rect width="290" height="105" rx="22" fill="#edf5ea" stroke="#e2ded5"/>
     <text x="36" y="44" font-size="32">🙌</text>
-    <text x="82" y="39" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#26362d">2 пригоршни</text>
+    <text x="82" y="39" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#26362d">Две ладони</text>
     <text x="82" y="68" font-family="Arial, sans-serif" font-size="17" fill="#6f756f">овощи / салат</text>
   </g>
 
@@ -47,8 +45,9 @@
     <rect width="290" height="105" rx="22" fill="#f9eeee" stroke="#e2ded5"/>
     <text x="36" y="44" font-size="32">👍</text>
     <text x="82" y="39" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#26362d">Большой палец</text>
-    <text x="82" y="68" font-family="Arial, sans-serif" font-size="17" fill="#6f756f">масло / орехи / жиры</text>
+    <text x="82" y="66" font-family="Arial, sans-serif" font-size="16" fill="#6f756f">масло · орехи · семечки</text>
+    <text x="82" y="88" font-family="Arial, sans-serif" font-size="16" fill="#6f756f">соусы · жиры</text>
   </g>
 
-  <text x="360" y="825" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#99948c">Ориентир для взрослых · порции индивидуальны</text>
+  <text x="360" y="825" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#99948c">Порции индивидуальны</text>
 </svg>
