@@ -9,7 +9,7 @@ function ps56HeartUrl(token){const u=appBaseUrl();u.searchParams.set('heart',tok
 function ps56RelationOptions(){return ['Подруга','Друг','Сестра','Брат','Младшая сестра','Двоюродная сестра','Родственник','Коллега','Знакомый','Другое']}
 function ps56InviteTypes(){return ['Привилегированный клиент','Независимый партнёр','Домашний клиент','Абонемент / клиент клуба']}
 async function bindInvitations56(){
-  const slots=$('heartSlots56');if(!slots||clientPreview)return;
+  const slots=$('heartSlots56');if(!slots)return;if(clientPreview){slots.innerHTML='<p>Приглашения недоступны в режиме предпросмотра.</p>';if($('heartList56'))$('heartList56').innerHTML='';return;}
   try{
     const [rows,reward]=await Promise.all([
       checked(sb.from('ps_heart_invites').select('*').eq('owner_id',me.id).order('slot')),
@@ -76,7 +76,7 @@ const PS56_STORY_FIELDS=[
 function pageStory56(){return '<section class="card"><h2>Моя история</h2><p>Ответьте на несколько вопросов — приложение соберёт короткую историю, которую удобно рассказать на встрече или мероприятии.</p><div id="story56">Загружаем…</div></section>'}
 function ps56StoryOptions(isUpdate){const vals=isUpdate?['Стало лучше','Без изменений','Стало хуже','Не было / не относится']:['Хорошо','Средне','Плохо','Не было / не относится'];return '<option value="">Выберите</option>'+vals.map(v=>'<option>'+v+'</option>').join('')}
 async function bindStory56(){
-  const box=$('story56');if(!box||clientPreview)return;
+  const box=$('story56');if(!box)return;if(clientPreview){box.innerHTML='<p>«Моя история» доступна в рабочем аккаунте клиента.</p>';return;}
   try{
     const rows=await checked(sb.from('ps_stories').select('*').eq('user_id',me.id).order('created_at',{ascending:false}));
     if(!box.isConnected)return;
@@ -101,7 +101,7 @@ async function bindStory56(){
 function ps56WaterTotal(state){return Number(state?.today_ml??state?.total_ml??state?.ml??0)||0}
 function ps56WaterTarget(state){return Number(state?.target_ml??state?.goal_ml??(buildNutritionTargets(progressSummary?.latestWeight).waterLiters||0)*1000)||0}
 async function bindWaterQuick56(){
-  const box=$('waterQuick56');if(!box||clientPreview)return;
+  const box=$('waterQuick56');if(!box)return;if(clientPreview){box.innerHTML='';return;}
   try{
     let state=await checked(sb.rpc('ps_water_state'));if(!box.isConnected)return;
     const paint=()=>{const total=ps56WaterTotal(state),target=ps56WaterTarget(state),pct=target?Math.min(100,Math.round(total/target*100)):0;box.innerHTML='<section class="card water-quick56"><div class="row"><h3>💧 Вода сегодня</h3><b>'+Math.round(total/100)/10+' / '+Math.round(target/100)/10+' л</b></div><div class="plan-progress-line"><i style="width:'+pct+'%"></i></div><div class="water-buttons56">'+[200,250,500].map(n=>'<button class="btn ghost" data-water-add="'+n+'">+'+n+' мл</button>').join('')+'</div><p role="status"></p></section>';box.querySelectorAll('[data-water-add]').forEach(b=>b.onclick=()=>buttonAction(b,async()=>{state=await checked(sb.rpc('ps_add_water',{p_id:crypto.randomUUID(),p_ml:Number(b.dataset.waterAdd)}));paint()},box.querySelector('[role=status]')))};paint();
@@ -122,7 +122,7 @@ async function ps56AppendClientAccess(id){
   const detail=$('adminClientDetail');if(!detail||detail.dataset.client!==id)return;
   const p=adminRows.find(x=>x.id===id);if(!p)return;
   let heartRows=[],refReward=null;try{[heartRows,refReward]=await Promise.all([checked(sb.from('ps_heart_invites').select('registered_user_id').eq('owner_id',id)),checked(sb.from('ps_referral_rewards').select('*').eq('owner_id',id).maybeSingle())])}catch{}
-  detail.querySelector('#clientAccess56')?.remove();
+  detail.querySelector('#clientAccess56')?.remove();detail.querySelector('#clientReferral56')?.remove();
   const section=document.createElement('section');section.id='clientAccess56';section.className='card';
   section.innerHTML='<h3>'+(p.access_paused?'Доступ приостановлен':'Доступ клиента')+'</h3>'+(p.access_paused?'<p>Причина: '+escapeHtml(p.pause_reason||'Не указана')+'</p><button class="btn primary" id="resumeClient56">Возобновить доступ</button>':'<button class="btn ghost" id="pauseClient56">Приостановить доступ</button>')+'<p role="status"></p>';
   detail.append(section);
