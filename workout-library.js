@@ -7,7 +7,10 @@ async function loadWorkoutLibrary(){
  const box=$('workoutLibrary');if(!box)return;
  try{
  const staff=isStaffWorkspace();
- const rows=await checked(sb.from('ps_workouts').select('*').eq('active',true).order('created_at',{ascending:false}));
+ let q=sb.from('ps_workouts').select('*').eq('active',true);
+ const cid=staff?staffConsultants[0]?.id:profile?.consultant_id;
+ if(cid)q=q.or('is_global.eq.true,consultant_id.eq.'+cid);else q=q.eq('is_global',true);
+ const rows=await checked(q.order('created_at',{ascending:false}));
  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Yakutsk'}).format(new Date());
  const logs=staff?[]:await checked(sb.from('ps_workout_logs').select('*').eq('user_id',me.id).eq('log_date',today));
  if(!box.isConnected)return;
