@@ -1,5 +1,5 @@
 let clientPreview=false,previewOriginalSB=null,previewOriginalProfile=null,previewData=null,previewObserver=null,coachTab='business';
-const BUSINESS_FIELDS={points:'Очки',wellness:'Wellness-оценки',scans:'Сканы',meetings:'Встречи',talks:'Бизнес-разговоры',contacts:'Контакты',clients:'Новые клиенты'};
+const BUSINESS_FIELDS={points:'Очки',wellness:'Wellness-оценки',meetings:'Встречи',talks:'Бизнес-разговоры',contacts:'Контакты',clients:'Новые клиенты',new_pc:'Новые ПК',new_np:'Новые НП',new_35:'Новые 35%',new_42:'Новые 42%',new_50:'Новые 50%'};
 function isStaffWorkspace(){return staffConsultants.length>0&&!clientPreview}
 function coachPlan(){return '<section class="card coach-tabs" role="tablist"><button data-coach-tab="business" role="tab" aria-selected="'+(coachTab==='business')+'">Бизнес</button><button data-coach-tab="result" role="tab" aria-selected="'+(coachTab==='result')+'">Результат</button></section><div id="coachPlanBody"></div>'}
 function bindCoachPlan(){document.querySelectorAll('[data-coach-tab]').forEach(b=>b.onclick=()=>{coachTab=b.dataset.coachTab;bindCoachPlan()});document.querySelectorAll('[data-coach-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.coachTab===coachTab)));if(coachTab==='business')loadBusiness();else loadCoachResult()}
