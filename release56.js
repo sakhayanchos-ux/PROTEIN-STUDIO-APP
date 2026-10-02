@@ -58,20 +58,20 @@ async function ps56OpenHeart(slot,row){
 }
 
 const PS56_STORY_FIELDS=[
- ['goal','Зачем вы пришли в PROTEIN STUDIO?','textarea'],
+ ['change','Что вы хотите изменить или что изменилось с прошлого раза?','textarea'],
  ['energy','Энергия','select'],
  ['sleep','Сон','select'],
- ['exercise','Переносимость физической нагрузки','select'],
- ['breathlessness','Одышка / тяжесть при нагрузке','select'],
+ ['endurance','Переносимость физической нагрузки','select'],
+ ['breath','Одышка / тяжесть при нагрузке','select'],
  ['swelling','Отёчность','select'],
  ['digestion','Пищеварение / регулярность стула','select'],
- ['discomfort','Тяжесть или дискомфорт','select'],
+ ['heaviness','Тяжесть или дискомфорт','select'],
  ['appetite','Аппетит','select'],
- ['cravings','Тяга к сладкому','select'],
- ['activity','Физическая активность','select'],
+ ['sweets','Тяга к сладкому','select'],
+ ['movement','Физическая активность','select'],
  ['wellbeing','Общее самочувствие','select'],
  ['products','Какие продукты или напитки вы начали использовать?','textarea'],
- ['notes','Что ещё хотите рассказать?','textarea']
+ ['extra','Что ещё хотите рассказать?','textarea']
 ];
 function pageStory56(){return '<section class="card"><h2>Моя история</h2><p>Ответьте на несколько вопросов — приложение соберёт короткую историю, которую удобно рассказать на встрече или мероприятии.</p><div id="story56">Загружаем…</div></section>'}
 function ps56StoryOptions(isUpdate){const vals=isUpdate?['Стало лучше','Без изменений','Стало хуже','Не было / не относится']:['Хорошо','Средне','Плохо','Не было / не относится'];return '<option value="">Выберите</option>'+vals.map(v=>'<option>'+v+'</option>').join('')}
@@ -90,6 +90,9 @@ async function bindStory56(){
     const form=$('storyForm56');
     form.onsubmit=e=>{e.preventDefault();buttonAction(form.querySelector('button.btn.primary'),async()=>{
       const answers=Object.fromEntries(PS56_STORY_FIELDS.map(([key])=>[key,form.elements[key].value.trim()]));
+      const required=PS56_STORY_FIELDS.filter(([key])=>key!=='extra').map(([key,label])=>({key,label}));
+      const missing=required.find(({key})=>!answers[key]);
+      if(missing)throw Error('Ответьте на вопрос: «'+missing.label+'».');
       const saved=await checked(sb.rpc('ps_save_story',{p_id:crypto.randomUUID(),p_answers:answers}));
       $('storyResult56').innerHTML='<section class="story-result56"><h3>Готово 🌸</h3><p class="pre-line">'+escapeHtml(saved.body)+'</p></section>';
       await bindStory56();
