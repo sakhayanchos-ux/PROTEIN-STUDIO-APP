@@ -6,6 +6,7 @@ async function bindStaffChat(){const box=$('staffChatView');if(!box||!canStaffCh
  const people=await checked(sb.rpc('ps_staff_directory'));await loadChatPeople(people.map(p=>p.id));
  if(!box.isConnected)return;
  if(requestedStaffThread){const id=requestedStaffThread;requestedStaffThread=null;await showStaffChat(id);return}
+ const savedThread=localStorage.getItem('ps_last_staff_thread_v56');if(savedThread){try{await showStaffChat(savedThread);return}catch{localStorage.removeItem('ps_last_staff_thread_v56')}}
  const [threads,messages,reads]=await Promise.all([checked(sb.from('ps_staff_threads').select('*')),checked(sb.from('ps_staff_messages').select('thread_id,sender_id,created_at').neq('sender_id',me.id)),checked(sb.from('ps_chat_reads').select('*').eq('user_id',me.id))]);
  if(!box.isConnected)return;
  const count=t=>t?messages.filter(m=>m.thread_id===t.id&&m.created_at>(reads.find(r=>r.channel==='staff:'+t.id)?.last_read_at||'')).length:0;
@@ -14,12 +15,12 @@ async function bindStaffChat(){const box=$('staffChatView');if(!box||!canStaffCh
  const open=async(person,btn)=>buttonAction(btn,async()=>{const id=await checked(sb.rpc('ps_open_staff_dialog',{p_person:person}));await showStaffChat(id)},box.querySelector('[role=status]'));
  $('staffGroup').onclick=e=>open(null,e.currentTarget);box.querySelectorAll('[data-staff-person]').forEach(b=>b.onclick=()=>open(b.dataset.staffPerson,b));
 }catch(e){journeyError(box,e,bindStaffChat)}}
-async function showStaffChat(id){stopStaffChat();const box=$('staffChatView');if(!box)return;try{
+async function showStaffChat(id){stopStaffChat();const box=$('staffChatView');if(!box)return;try{localStorage.setItem('ps_last_staff_thread_v56',id);
  const t=await checked(sb.from('ps_staff_threads').select('*').eq('id',id).single());if(!box.isConnected)return;
  const partner=t.member_a===me.id?t.member_b:t.member_a;if(partner)await loadChatPeople([partner]);if(!box.isConnected)return;
  const s=staffChatState={id,rows:[],reply:null,busy:false,loading:false,limit:50,pending:null};
  box.innerHTML='<section class="community-chat"><div class="staff-chat-toolbar"><button class="btn ghost" id="staffBack">← Консультанты</button><h3>'+escapeHtml(partner?chatPeople.get(partner)?.full_name||'Личный чат':'Общий чат консультантов')+'</h3></div><div id="staffLog" class="community-log"><button class="btn ghost" id="staffOlder">Ранее</button><div id="staffMessages"></div></div><form id="staffForm" class="community-composer"><div id="staffReply"></div><textarea name="body" rows="2" maxlength="3000" placeholder="Сообщение…"></textarea><label>＋ Фото<input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></label><button class="btn primary">Отправить</button><p role="status"></p></form></section>';
- $('staffBack').onclick=()=>{stopStaffChat();bindStaffChat()};$('staffOlder').onclick=()=>{s.limit+=50;loadStaffChat(s)};$('staffForm').onsubmit=e=>{e.preventDefault();sendStaffChat(s,e.target)};
+ $('staffBack').onclick=()=>{try{localStorage.removeItem('ps_last_staff_thread_v56')}catch{}stopStaffChat();bindStaffChat()};$('staffOlder').onclick=()=>{s.limit+=50;loadStaffChat(s)};$('staffForm').onsubmit=e=>{e.preventDefault();sendStaffChat(s,e.target)};
  s.channel=sb.channel('staff-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'ps_staff_messages',filter:'thread_id=eq.'+id},()=>loadStaffChat(s)).subscribe();s.timer=setInterval(()=>{if(!document.hidden)loadStaffChat(s)},12000);await loadStaffChat(s);
 }catch(e){journeyError(box,e,bindStaffChat)}}
 async function loadStaffChat(s){if(staffChatState!==s||s.loading||!$('staffMessages'))return;s.loading=true;try{
