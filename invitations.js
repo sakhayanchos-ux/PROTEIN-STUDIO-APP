@@ -1,17 +1,27 @@
-let incomingReferral=null,pendingCoachInvitation=null;
-try{const url=new URL(location.href),token=new URLSearchParams(url.hash.slice(1)).get('invite');if(token&&/^[a-f0-9]{64}$/.test(token))sessionStorage.setItem('ps_coach_invite',token);pendingCoachInvitation=sessionStorage.getItem('ps_coach_invite');const ref=url.searchParams.get('ref');if(ref&&/^[A-Za-z0-9_-]{1,80}$/.test(ref))sessionStorage.setItem('ps_client_ref',ref);incomingReferral=sessionStorage.getItem('ps_client_ref')}catch{}
+let incomingReferral=null,pendingCoachInvitation=null,incomingHeart=null;
+try{const url=new URL(location.href),token=new URLSearchParams(url.hash.slice(1)).get('invite');if(token&&/^[a-f0-9]{64}$/.test(token))sessionStorage.setItem('ps_coach_invite',token);pendingCoachInvitation=sessionStorage.getItem('ps_coach_invite');const ref=url.searchParams.get('ref');if(ref&&/^[A-Za-z0-9_-]{1,80}$/.test(ref))sessionStorage.setItem('ps_client_ref',ref);incomingReferral=sessionStorage.getItem('ps_client_ref');const heart=url.searchParams.get('heart');if(heart&&/^[a-f0-9]{32,128}$/i.test(heart))sessionStorage.setItem('ps_heart_invite',heart);incomingHeart=sessionStorage.getItem('ps_heart_invite')}catch{}
 function showInvitationNotice(text){const el=$('invitationNotice');if(el){el.classList.remove('hidden');$('invitationNoticeText').textContent=text}}
-function clearIncomingInvitation(){pendingCoachInvitation=null;incomingReferral=null;try{sessionStorage.removeItem('ps_coach_invite');sessionStorage.removeItem('ps_client_ref')}catch{}const url=new URL(location.href);url.hash='';url.searchParams.delete('ref');history.replaceState({},'',url);$('invitationNotice')?.classList.add('hidden');$('regConsultant').disabled=false;if(me)bootstrap();else loadConsultants()}
+function clearIncomingInvitation(){pendingCoachInvitation=null;incomingReferral=null;incomingHeart=null;try{sessionStorage.removeItem('ps_coach_invite');sessionStorage.removeItem('ps_client_ref');sessionStorage.removeItem('ps_heart_invite')}catch{}const url=new URL(location.href);url.hash='';url.searchParams.delete('ref');url.searchParams.delete('heart');history.replaceState({},'',url);$('invitationNotice')?.classList.add('hidden');$('regConsultant').disabled=false;$('regConsultant').closest('label').hidden=false;if(me)bootstrap();else loadConsultants()}
 async function applyIncomingRegistration(consultants){
  if(pendingCoachInvitation){showInvitationNotice('Приглашение консультанта. Войдите по номеру, для которого оно создано, или зарегистрируйтесь с этим номером.');$('regConsultant').closest('label').hidden=true;return}
  $('regConsultant').closest('label').hidden=false;
+ if(incomingHeart){
+  try{
+   const info=await checked(sb.rpc('ps_heart_info',{p_token:incomingHeart}));
+   const cid=info?.consultant_id||info?.owner_consultant_id||null;
+   const cname=info?.consultant_name||info?.owner_name||'участника PROTEIN STUDIO';
+   if(cid&&consultants.some(c=>c.id===cid)){$('regConsultant').value=cid;$('regConsultant').disabled=true;$('regConsultant').closest('label').hidden=true}
+   showInvitationNotice('Персональное приглашение от '+cname+'. Зарегистрируйтесь по этой ссылке, чтобы приглашение засчиталось.');
+   return;
+  }catch{showInvitationNotice('Персональное приглашение PROTEIN STUDIO. Зарегистрируйтесь, чтобы приглашение засчиталось.');return}
+ }
  if(!incomingReferral)return;
  const c=consultants.find(c=>c.referral_code===incomingReferral);
  if(!c){showInvitationNotice('Эта ссылка консультанта недоступна. Выберите консультанта вручную.');$('regConsultant').disabled=false;return}
  $('regConsultant').value=c.id;$('regConsultant').disabled=true;showInvitationNotice('Регистрация клиента · ваш консультант: '+c.display_name);
  if(!me){$('loginBox').classList.add('hidden');$('registerBox').classList.remove('hidden')}
 }
-async function acceptPendingCoachInvitation(){if(!pendingCoachInvitation)return;await checked(sb.rpc('ps_accept_coach_invitation',{p_token:pendingCoachInvitation}));pendingCoachInvitation=null;try{sessionStorage.removeItem('ps_coach_invite')}catch{}const url=new URL(location.href);url.hash='';history.replaceState({},'',url);$('invitationNotice')?.classList.add('hidden')}
+async function acceptPendingCoachInvitation(){if(!pendingCoachInvitation){if(incomingHeart){try{sessionStorage.removeItem('ps_heart_invite')}catch{}const url=new URL(location.href);url.searchParams.delete('heart');history.replaceState({},'',url);incomingHeart=null}return}await checked(sb.rpc('ps_accept_coach_invitation',{p_token:pendingCoachInvitation}));pendingCoachInvitation=null;try{sessionStorage.removeItem('ps_coach_invite')}catch{}const url=new URL(location.href);url.hash='';history.replaceState({},'',url);$('invitationNotice')?.classList.add('hidden')}
 function pageMyQR(){return '<section class="card"><h2>QR для клиента</h2><div id="clientQR">Загружаем…</div></section><section class="card"><h2>Пригласить консультанта</h2><p>Одноразовая ссылка на 7 дней. Только для указанного номера.</p><form id="coachInviteForm"><label>Имя и фамилия<input name="inviteName" maxlength="100" required></label><label>Номер для входа<input name="invitePhone" type="tel" inputmode="tel" placeholder="+7 999 000-00-00" required></label><button class="btn primary">Создать приглашение</button><p role="status"></p></form><div id="newCoachInvite"></div></section><section class="card"><h2>Мои приглашения</h2><div id="coachInviteList">Загружаем…</div></section>'}
 function appBaseUrl(){const url=new URL('./',location.href);url.search='';url.hash='';return url}
 function qrMarkup(url,label,id){const qr=qrcode(0,'M');qr.addData(url,'Byte');qr.make();return '<div class="qr-card"><img id="'+id+'Image" src="'+qr.createDataURL(6,24)+'" alt="QR: '+escapeHtml(label)+'"><h3>'+escapeHtml(label)+'</h3><label>Ссылка<input id="'+id+'Link" readonly value="'+escapeHtml(url)+'"></label><button class="btn primary" id="'+id+'Share">Поделиться QR</button><button class="btn ghost" id="'+id+'Copy">Скопировать ссылку</button><a class="btn ghost app-link" href="'+qr.createDataURL(6,24)+'" download="protein-studio-qr.gif">Скачать QR</a><p id="'+id+'Status" role="status"></p></div>'}
