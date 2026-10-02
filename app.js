@@ -1,4 +1,5 @@
 const CONFIG_KEY="protein_studio_supabase_config";
+const LAST_ROUTE_KEY="protein_studio_last_route_v56";
 let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoals=[],progressSummary=null,onboardingStep=1,onboardingDraft={};
 
 const $=id=>document.getElementById(id);
@@ -97,7 +98,7 @@ async function registerClient(){
   const {data,error}=await sb.auth.signUp({
     email:technicalEmail,
     password,
-    options:{data:{full_name,phone:normalizedPhone,consultant_id}}
+    options:{data:{full_name,phone:normalizedPhone,consultant_id,...(typeof incomingHeart!=="undefined"&&incomingHeart?{heart_token:incomingHeart}: {})}}
   });
   if(error)return setMessage(error.message);
   if(!data.user)return setMessage("Не удалось создать аккаунт.");
@@ -161,6 +162,15 @@ async function bootstrap(){
     profile=p.data;
     assessment=a.data||null;
     await loadStaffAccess();
+    if(profile.access_paused&&!staffConsultants.length){
+      showScreen("appScreen");
+      $("drawer").classList.add("hidden");
+      $("content").innerHTML='<section class="card client-paused56"><h2>Доступ приостановлен</h2><p>Ваши данные и прогресс сохранены. Чтобы возобновить доступ, свяжитесь со своим консультантом.</p><button class="btn ghost" id="pausedLogout56">Выйти</button></section>';
+      $("pageTitle").textContent="PROTEIN STUDIO";
+      $("pausedLogout56").onclick=logout;
+      return;
+    }
+    $("drawer").classList.remove("hidden");
     applyTheme();
     selectedGoals=assessment?.goals?.length?assessment.goals:(assessment?.primary_goal?[assessment.primary_goal]:[]);
 
@@ -203,7 +213,12 @@ async function bootstrap(){
     setMessage("");
     showScreen("appScreen");
     $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
-    openPage(staffConsultants.length?"coachPlan":"plan");consumePushRoute();
+    let savedRoute=null;try{savedRoute=localStorage.getItem(LAST_ROUTE_KEY)}catch{}
+    const staffAllowed=["coachPlan","admin","staffCard","workouts","marathon","topics","achievements","consultants","messages","community","notifications","myQR","profile","story"];
+    const clientAllowed=["plan","workouts","marathon","topics","progress","achievements","invitations","story","messages","community","consultant","notifications","profile"];
+    const fallback=staffConsultants.length?"coachPlan":"plan";
+    const startRoute=(staffConsultants.length?staffAllowed:clientAllowed).includes(savedRoute)?savedRoute:fallback;
+    openPage(startRoute);consumePushRoute();
     startJourneyUpdates();
     if(!staffConsultants.length)getJourney().then(showNewReward).catch(()=>{});
   }catch(err){
@@ -495,6 +510,7 @@ function prevOnboarding(){
 
 function openPage(page){
   appRoute=page;stopDirect();stopStaffChat();
+  if(!clientPreview){try{localStorage.setItem(LAST_ROUTE_KEY,page)}catch{}}
   if(page==="consultants"&&!canStaffChat())page="plan";
   document.getElementById("rewardDialog")?.remove();
   if(isStaffWorkspace()&&["plan","nutrition","water","progress","consultant"].includes(page)){if(page==="progress")coachTab="result";page="coachPlan";}
@@ -503,7 +519,7 @@ function openPage(page){
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={consultants:"Консультанты",messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
@@ -513,6 +529,8 @@ function openPage(page){
   if(page==="community")bindCommunity();
   if(page==="messages")bindMessages();
   if(page==="consultants")bindStaffChat();
+  if(page==="invitations"&&typeof bindInvitations56==="function")bindInvitations56();
+  if(page==="story"&&typeof bindStory56==="function")bindStory56();
   if(page==="notifications"){bindNotificationToggles();loadJourneyNotifications();bindPush();}
   if(page==="coachPlan")bindCoachPlan();
   if(page==="myQR")bindMyQR();
@@ -522,7 +540,7 @@ function openPage(page){
   else if(page==="marathon")loadMarathonTracker();
   else if(page==="achievements")loadAchievements();
   if(page==="progress")bindProgressPhotoActions();
-  if(page==="plan")loadPlanProgress();
+  if(page==="plan"){loadPlanProgress();if(typeof bindWaterQuick56==="function")bindWaterQuick56();}
   if(page==="nutrition"||page==="water"){loadNutritionTargets();if(page==="water")$("waterTargetTitle")?.closest("section")?.scrollIntoView({block:"start"})}
   if(page==="workouts"){loadWorkoutLibrary()}
 }
@@ -541,22 +559,16 @@ function pagePlan(){
   '</section>'+
   '<div id="programEstimate"></div>'+
   '<section class="card">'+
-    '<div class="row"><div><div class="eyebrow">Что делать сегодня</div><h3 class="photo-title">План на день</h3></div><span class="pill">Шаг за шагом</span></div>'+
-    planActionCard("🥗","Питание","Утром: Алоэ + Травяной напиток + коктейль. Днём: белковые перекусы и правильная тарелка. Вечером: белок + овощи без гарнира.","Белковая цель пересчитывается автоматически по текущему весу.","nutrition")+
+    '<h3 class="photo-title">План на день</h3>'+
+    planActionCard("🥗","Питание","Утром: Алоэ + Травяной напиток + коктейль. Днём: белковые перекусы и правильная тарелка. Вечером: белок + овощи без гарнира.","Белковая цель рассчитывается по текущему весу.","nutrition")+
     planActionCard("🏋🏻‍♀️","Движение",(assessment?.minutes_available||10)+" минут · "+(assessment?.training_place||"Дома")+". Начинаем с уровня, который можно повторять регулярно.","Нагрузка растёт постепенно по мере прогресса.","workouts")+
-    planActionCard("💧","Вода","Суточный ориентир рассчитывается по текущему весу. Алоэ можно включить в ваш водный ритуал по инструкции продукта.","CR7 Drive — только как спортивный напиток при подходящей нагрузке, не вместо всей воды.","water")+
-    planActionCard("🔥","30 дней","Каждый день открывается новая тема. Отмечайте задания и собирайте звёзды. Следующие дни пока закрыты 🔒.","Почему: маленькие ежедневные действия легче превратить в привычку.","marathon")+
+    planActionCard("💧","Вода","Суточная цель рассчитывается по текущему весу. Алоэ можно включить в водный ритуал по инструкции продукта.","CR7 Drive — спортивный напиток при подходящей нагрузке, не вместо всей воды.","water")+
+    planActionCard("🔥","30 дней","Каждый день открывается новая тема. Выполняйте задания и собирайте звёзды. Следующие дни пока закрыты 🔒.","","marathon")+
     '<div id="planDailyTargets" class="daily-targets"><span>Белок: считаем…</span><span>Вода: считаем…</span></div>'+
   '</section>'+
-
-  '<section class="card product-plan-card">'+
-    '<div class="row"><div><div class="eyebrow">Продукты клуба</div><h3 class="photo-title">Herbalife в вашем плане</h3></div><span class="pill">С консультантом</span></div>'+
-    '<div class="product-plan-row"><div class="product-plan-icon">🥤</div><div><b>Завтрак клуба</b><small>Алоэ + Травяной напиток + Формула 1. Если белка по расчёту не хватает — консультант может добавить дополнительный белковый компонент.</small></div></div>'+
-    '<div class="product-plan-row"><div class="product-plan-icon">🌿</div><div><b>Растительный напиток Алоэ</b><small>Можно включить в водный ритуал по инструкции продукта и рекомендации консультанта.</small></div></div>'+
-    '<div class="product-plan-row"><div class="product-plan-icon">⚡</div><div><b>CR7 Drive</b><small>Для тренировочных дней и интенсивной физической нагрузки — использовать согласно инструкции продукта.</small></div></div>'+
-    '<div class="discount-note"><b>Ваша скидка на продукты</b><span>15–50% в зависимости от статуса клиента. Точный процент укажет ваш консультант.</span></div>'+
-    '<p class="product-disclaimer">Используйте продукты согласно маркировке конкретного продукта и рекомендациям консультанта. При индивидуальных ограничениях учитывайте рекомендации врача.</p>'+
-  '</section>';
+  '<div id="waterQuick56"></div>'+
+  '<section class="card"><h3>Важно</h3><p>Если по расчёту не хватает белка, можно использовать Протеиновую смесь Формула 3 в количестве, соответствующем вашей дневной потребности и инструкции продукта.</p><p>При увеличении количества белка следите, чтобы в рационе также хватало жидкости и клетчатки.</p></section>'+
+  '<p class="plan-health-note">План носит информационный характер. Индивидуальные рекомендации зависят от целей, состояния здоровья и рекомендаций специалиста.</p>';
 }
 
 function planActionCard(icon,title,body,why,page){
@@ -650,12 +662,12 @@ function pageNutrition(){
   '</section>'+
 
   '<section class="card">'+
-    '<div class="eyebrow">По порядку</div><h3>Как выглядит день</h3>'+
+    '<h3>Как выглядит день</h3>'+
     mealStep("Утро","Алоэ + Травяной напиток + коктейль","Сначала Растительный напиток Алоэ, затем Травяной напиток и протеиновый коктейль. Ягоды или фрукт можно добавить утром. Если по дневному расчёту не хватает белка — добавьте дополнительный белковый компонент, например Протеиновую смесь Формула 3 или другой согласованный с консультантом вариант.","Базовый минимум клуба: Алоэ + чай + коктейль. Дополнительный белок — только если его нужно добрать до вашей дневной цели.")+
-    mealStep("Перекус","Белковый перекус","Выберите один белковый вариант: Protein Bites, протеиновый батончик, Formula 1 Express или протеиновые чипсы.","Смысл перекуса — не «добрать сладкое», а помочь удержать структуру питания.")+
+    mealStep("Перекус","Утренний перекус","Фрукт + белковый вариант: яйцо, Protein Bites, протеиновый батончик, Formula 1 Express или другой подходящий белковый продукт.","") +
     mealStep("Обед","Правильная тарелка","Половина тарелки — овощи/салат, четверть — источник белка, четверть — гарнир.","Если нет весов, используйте ориентир по ладони ниже.")+
     '<img id="portionGuide" class="portion-guide" src="'+portionGuideSrc()+'" alt="Правильная тарелка и ориентир порций по руке">'+
-    mealStep("Перекус","Ещё один белковый вариант","Если между обедом и ужином большой промежуток — используйте белковый перекус из меню клуба или обычную белковую еду.","Количество перекусов можно уменьшить, если вам комфортно без них.")+
+    mealStep("Перекус","Белковый перекус","Если между обедом и ужином большой промежуток — используйте белковый перекус из меню клуба или обычную белковую еду.","")+
     mealStep("Ужин","Белок + овощи, без гарнира","Вариант 1 — протеиновый коктейль. Вариант 2 — мясо, рыба, яйца или другой белковый продукт + овощи/салат. Гарнир вечером в этом плане не используем.","Сохраняем ужин простым: белок + овощи или коктейль.")+
   '</section>'+
 
@@ -671,6 +683,8 @@ function pageNutrition(){
       menuSuggestion("H24 Achieve","21","спортивный высокобелковый батончик")+
     '</div>'+
     '<a class="btn ghost app-link" href="https://sakhayanchos-ux.github.io/PROTEIN-STUDIO-MENU/" target="_blank" rel="noopener">Открыть меню PROTEIN STUDIO</a>'+
+    '<div class="hydration-note"><b>Протеиновая смесь Формула 3</b><span>Если по расчёту не хватает белка, добавьте её в количестве, соответствующем вашей дневной потребности и инструкции продукта.</span></div>'+
+    '<div class="hydration-note"><b>Важно</b><span>При увеличении количества белка следите, чтобы также хватало жидкости и клетчатки.</span></div>'+
   '</section>'+
 
   '<section class="card">'+
@@ -1111,6 +1125,7 @@ async function shareSavedCollage(path){
 
 function pageConsultant(){return '<div id="clientConsultantCard"><section class="card">Загружаем карточку…</section></div>'}
 function pageNotifications(){
+  if(isStaffWorkspace())return pushMarkup()+'<section class="card"><h3>События клиентов</h3><div id="journeyNotifications">Загружаем…</div></section>';
   return pushMarkup()+`<section class="card"><div id="journeyNotifications">Загружаем…</div></section><section class="card">
   ${toggle("notifWater","💧 Вода")}
   ${toggle("notifNutrition","🥗 Питание")}
@@ -1118,10 +1133,11 @@ function pageNotifications(){
   ${toggle("notifMarathon","🔥 Марафон")}
   ${toggle("notifMeasurements","📈 Замеры")}
   ${toggle("notifConsultant","💬 Консультант")}
-  </section>`;
+  </section><section class="card" id="waterReminder56"></section>`;
 }
 function toggle(id,label){return `<div class="toggle-row"><b>${label}</b><input id="${id}" type="checkbox" checked></div>`}
 async function bindNotificationToggles(){
+  if(isStaffWorkspace())return;
   const q=await sb.from("ps_notification_settings").select("*").eq("user_id",me.id).maybeSingle();
   const d=q.data||{};
   const map={notifWater:"water",notifNutrition:"nutrition",notifWorkouts:"workouts",notifMarathon:"marathon",notifMeasurements:"measurements",notifConsultant:"consultant_messages"};
@@ -1129,6 +1145,7 @@ async function bindNotificationToggles(){
     if($(id))$(id).checked=d[key]!==false;
     $(id)?.addEventListener("change",async e=>{await sb.from("ps_notification_settings").upsert({user_id:me.id,[key]:e.target.checked,updated_at:new Date().toISOString()})});
   }
+  if(typeof bindWaterReminderSettings56==="function")bindWaterReminderSettings56();
 }
 
 
@@ -1139,7 +1156,7 @@ function pageProfile(){
   const initials=name.trim().split(/\s+/).slice(0,2).map(x=>Array.from(x)[0]||"").join("");
   return `<section class="card profile-hero">
   <div class="profile-avatar" id="profileAvatar" aria-label="Фото профиля">${escapeHtml(initials)}</div>
-  <h1 id="profileDisplayName">${escapeHtml(name)}</h1>
+  <h1 id="profileDisplayName">${escapeHtml(name)}</h1>${profile?.ambassador_at?'<div class="ambassador56">🎉 Амбассадор PROTEIN STUDIO</div>':''}
   <p id="profileDisplayBio" class="profile-bio">${escapeHtml(profile?.bio||"")}</p>
   <div class="profile-photo-actions"><button type="button" class="btn ghost" id="profilePhotoBtn">Изменить фото</button><button type="button" class="btn ghost" id="removeProfilePhotoBtn" ${profile?.avatar_path?"":"hidden"}>Убрать фото</button></div>
   <input class="hidden" id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp">
