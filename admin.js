@@ -45,7 +45,7 @@ function renderAdminClients(){
  const search=$("adminSearch").value.trim().toLocaleLowerCase("ru");
  const digits=search.replace(/\D/g,"");
  const rows=adminRows.filter(p=>!search||(p.full_name||"").toLocaleLowerCase("ru").includes(search)||(digits&&String(p.phone||"").replace(/\D/g,"").includes(digits)));
- box.innerHTML=rows.length?rows.map(p=>'<button type="button" class="admin-client-row" data-admin-client="'+p.id+'"><span><b>'+escapeHtml(p.full_name)+'</b><span>'+escapeHtml(p.phone||"Телефон не указан")+'</span></span><span class="admin-badge">'+(p.onboarding_completed?"Профиль готов":"Заполняет профиль")+'</span></button>').join(""):'<p>Клиенты не найдены.</p>';
+ box.innerHTML=rows.length?rows.map(p=>'<button type="button" class="admin-client-row" data-admin-client="'+p.id+'"><span><b>'+escapeHtml(p.full_name)+'</b><span>'+escapeHtml(p.phone||"Телефон не указан")+'</span></span><span class="admin-badge '+(p.access_paused?'paused-badge56':'')+'">'+(p.access_paused?'На паузе':p.onboarding_completed?"Профиль готов":"Заполняет профиль")+'</span></button>').join(""):'<p>Клиенты не найдены.</p>';
 }
 
 async function fetchAdminRows(){
