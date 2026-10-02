@@ -2,7 +2,7 @@ function staffNavigation(){
  const staff=isStaffWorkspace();
  document.querySelectorAll('.nav[data-page]').forEach(b=>{
   const p=b.dataset.page;if(p==='consultants'){b.classList.toggle('hidden',!canStaffChat());return;}
-  b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant'].includes(p):['admin','staffCard','coachPlan','myQR'].includes(p));
+  b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant','invitations'].includes(p):['admin','staffCard','coachPlan','myQR'].includes(p));
  });
  $('adminNav').textContent='🗂 Клиенты';
  $('clientPreviewNav').classList.toggle('hidden',!staff);
@@ -26,7 +26,7 @@ function activityHtml(f){
  if(!f.journey?.enrollment)return '<p>Клиент ещё не начал марафон.</p>';
  return Array.from({length:30},(_,i)=>{const n=i+1,rows=f.journey.tasks.filter(t=>t.day_number===n);return '<details class="activity-row"><summary><b>День '+n+'</b> · '+rows.filter(t=>t.completed_at).length+' / '+rows.length+'</summary>'+rows.map(t=>'<div class="activity-row"><b>'+(t.completed_at?'✓ ':'○ ')+escapeHtml(t.title)+'</b><span>'+ (t.completed_at?dateLabel(t.completed_at):'Не выполнено')+'</span>'+(t.value!=null?'<span>Шагов: '+t.value+'</span>':'')+(t.photo_path?'<img class="task-photo" data-task-photo="'+escapeHtml(t.photo_path)+'" alt="Фото задания клиента">':'')+'</div>').join('')+'</details>'}).join('');
 }
-function marathonSummary(f){const s=f.journey;if(!s?.enrollment)return '<p>Марафон ещё не начат.</p>';const next=s.rewards.find(r=>!r.unlocked_at);return '<div class="fact-grid"><div><b>День '+s.day+' из 30</b><span>'+s.percent+'% заданий</span></div><div><b>⭐ '+s.enrollment.stars+'</b><span>Заработано звёзд</span></div><div><b>'+(next?next.milestone+'%':'Все этапы открыты')+'</b><span>'+escapeHtml(next?.gift||'Ближайшая награда')+'</span></div></div>'}
+function marathonSummary(f){const s=f.journey;if(!s?.enrollment)return '<p>Марафон ещё не начат.</p>';const day=Math.max(1,Math.min(30,s.day)),stage=Math.ceil(day/10);return '<div class="fact-grid"><div><b>Этап '+stage+' из 3</b><span>День '+((day-1)%10+1)+' из 10</span></div><div><b>'+s.percent+'%</b><span>Общий прогресс</span></div><div><b>⭐ '+s.enrollment.stars+'</b><span>Заработано звёзд</span></div></div>'}
 async function loadAdminClientDetail(id,version=adminViewVersion,tab='overview'){
  const p=adminRows.find(p=>p.id===id);const box=$('adminClientDetail');if(!p||!box)return;
  box.dataset.client=id;box.innerHTML='<section class="card">Загружаем карточку…</section>';
