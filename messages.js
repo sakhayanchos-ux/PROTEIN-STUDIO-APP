@@ -9,6 +9,7 @@ async function bindMessages(){const box=$('directView');if(clientPreview){box.in
  const threads=await checked(sb.from('ps_direct_threads').select('*').order('created_at',{ascending:false}));
  if(!box.isConnected)return;
  if(requestedThread){const id=requestedThread;requestedThread=null;await showDirect(id);return}
+ const savedThread=localStorage.getItem('ps_last_direct_thread_v56');if(savedThread){try{await showDirect(savedThread);return}catch{localStorage.removeItem('ps_last_direct_thread_v56')}}
  if(!isStaffWorkspace()){await openClientDialog();return}
  await loadChatPeople(threads.flatMap(t=>[t.client_id,t.coach_id]));
  const [messages,reads]=await Promise.all([checked(sb.from('ps_direct_messages').select('thread_id,sender_id,created_at').neq('sender_id',me.id).order('created_at',{ascending:false}).limit(1000)),checked(sb.from('ps_chat_reads').select('*').eq('user_id',me.id))]);
@@ -16,10 +17,10 @@ async function bindMessages(){const box=$('directView');if(clientPreview){box.in
  box.innerHTML='<section class="card">'+(threads.length?threads.map(t=>{const person=chatPeople.get(t.client_id),n=messages.filter(m=>m.thread_id===t.id&&m.created_at>(reads.find(r=>r.channel===t.id)?.last_read_at||'')).length;return '<button class="dialog-row" data-thread="'+t.id+'">'+chatAvatar(t.client_id,person?.full_name)+'<b>'+escapeHtml(person?.full_name||'Клиент')+'</b>'+(n?'<span class="nav-badge">'+n+'</span>':'')+'</button>'}).join(''):'<p>Откройте карточку клиента и нажмите «Написать клиенту».</p>')+'</section>';
  box.querySelectorAll('[data-thread]').forEach(b=>b.onclick=()=>showDirect(b.dataset.thread));
 }catch(e){journeyError(box,e,bindMessages)}}
-async function showDirect(id){stopDirect();const box=$('directView');if(!box)return;
+async function showDirect(id){stopDirect();const box=$('directView');if(!box)return;try{localStorage.setItem('ps_last_direct_thread_v56',id)}catch{}
  const s=directState={id,rows:[],reply:null,busy:false,loading:false,limit:50,pending:null};
  box.innerHTML='<section class="community-chat"><button class="btn ghost" id="dialogBack">← Диалоги</button><div id="directLog" class="community-log"><button class="btn ghost" id="directOlder">Ранее</button><div id="directMessages"></div></div><form id="directForm" class="community-composer"><div id="directReply"></div><textarea name="body" rows="2" maxlength="3000" placeholder="Сообщение…"></textarea><label>＋ Фото<input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></label><button class="btn primary">Отправить</button><p role="status"></p></form></section>';
- $('dialogBack').onclick=()=>{stopDirect();bindMessages()};$('directOlder').onclick=()=>{s.limit+=50;loadDirect(s)};
+ $('dialogBack').onclick=()=>{try{localStorage.removeItem('ps_last_direct_thread_v56')}catch{}stopDirect();bindMessages()};$('directOlder').onclick=()=>{s.limit+=50;loadDirect(s)};
  $('directForm').onsubmit=e=>{e.preventDefault();sendDirect(s,e.target)};
  s.channel=sb.channel('private-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'ps_direct_messages',filter:'thread_id=eq.'+id},()=>loadDirect(s)).subscribe();s.timer=setInterval(()=>{if(!document.hidden)loadDirect(s)},12000);await loadDirect(s);
 }
