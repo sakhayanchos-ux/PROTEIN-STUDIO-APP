@@ -9,7 +9,7 @@ function consultantCardForm(){
  '<label for="consultantNameInput">Имя и фамилия</label><input id="consultantNameInput" required maxlength="100">'+
  '<label for="consultantBioInput">О себе</label><textarea id="consultantBioInput" rows="4" maxlength="1200"></textarea>'+
  '<label for="consultantPhoneInput">Телефон</label><input id="consultantPhoneInput" type="tel" inputmode="tel">'+
- '<label for="consultantWhatsappInput">WhatsApp</label><input id="consultantWhatsappInput" type="tel" inputmode="tel">'+
+ '<label for="consultantWhatsappInput">WhatsApp</label><input id="consultantWhatsappInput" type="tel" inputmode="tel">'+'<label for="consultantInstagramInput">Instagram</label><input id="consultantInstagramInput" type="url" inputmode="url" placeholder="https://www.instagram.com/username/">'+
  '<label for="consultantHoursInput">Время для связи</label><input id="consultantHoursInput" maxlength="160">'+
  '<label for="consultantClubInput">Название клуба</label><input id="consultantClubInput" maxlength="160">'+
  '<label for="consultantAddressInput">Адрес клуба</label><input id="consultantAddressInput" maxlength="300">'+
@@ -17,7 +17,7 @@ function consultantCardForm(){
  '<button class="btn primary" id="consultantCardSave">Сохранить карточку</button></fieldset></form>'+
  '<p id="consultantCardStatus" class="profile-status" role="status"></p><button id="consultantCardReload" type="button" class="btn ghost">Обновить карточку</button></section>';
 }
-const CONSULTANT_INPUTS={display_name:"consultantNameInput",bio:"consultantBioInput",contact_phone:"consultantPhoneInput",whatsapp_phone:"consultantWhatsappInput",contact_hours:"consultantHoursInput",club_name:"consultantClubInput",club_address:"consultantAddressInput",club_hours:"consultantClubHoursInput"};
+const CONSULTANT_INPUTS={display_name:"consultantNameInput",bio:"consultantBioInput",contact_phone:"consultantPhoneInput",whatsapp_phone:"consultantWhatsappInput",instagram_url:"consultantInstagramInput",contact_hours:"consultantHoursInput",club_name:"consultantClubInput",club_address:"consultantAddressInput",club_hours:"consultantClubHoursInput"};
 function cardPhone(value){if(!value?.trim())return null;const normalized=normalizePhone(value);if(!/^\+7\d{10}$/.test(normalized))throw new Error("Введите телефон в формате +7 999 000-00-00.");return normalized}
 async function showConsultantPhoto(frame,path,name){
  if(!frame)return;
@@ -58,6 +58,7 @@ function bindConsultantCardEditor(){
    for(const [key,input] of Object.entries(CONSULTANT_INPUTS))update[key]=$(input).value.trim()||null;
    if(!update.display_name)throw new Error("Введите имя и фамилию.");
    update.contact_phone=cardPhone(update.contact_phone);update.whatsapp_phone=cardPhone(update.whatsapp_phone);
+   if(update.instagram_url){let u;try{u=new URL(update.instagram_url)}catch{throw new Error("Введите корректную ссылку Instagram.")}if(u.protocol!=="https:"||!/^(www\.)?instagram\.com$/i.test(u.hostname))throw new Error("Используйте ссылку вида https://www.instagram.com/имя/");update.instagram_url=u.href}
    const file=$("consultantCardPhoto").files?.[0],remove=$("consultantRemovePhoto").checked;
    if(file&&remove)throw new Error("Выберите новое фото или отметьте «Убрать фото».");
    if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>10485760))throw new Error("Фото — JPG, PNG или WEBP до 10 МБ.");
@@ -96,7 +97,7 @@ function consultantCardHtml(c){
  const club=c.club_name||c.club_address||c.club_hours;
  return '<section class="card consultant-hero"><div class="profile-avatar" id="clientConsultantPhoto">♡</div><h1>'+escapeHtml(name)+'</h1>'+
  '<div class="consultant-contact-buttons">'+
- '<button class="btn primary" id="writeConsultant">Написать консультанту</button>'+
+ '<button class="btn primary" id="writeConsultant">Написать консультанту</button>'+ (c.instagram_url?'<a class="btn ghost app-link" href="'+escapeHtml(c.instagram_url)+'" target="_blank" rel="noopener">Instagram</a>':'')+
  (phone?'<a class="btn ghost app-link" href="tel:'+phone+'">Позвонить</a>':"")+'</div></section>'+about+
  (c.contact_hours?'<section class="card consultant-info"><h3>На связи</h3><p class="consultant-bio">'+escapeHtml(c.contact_hours)+'</p></section>':"")+
  (club?'<section class="card consultant-info"><h3>'+escapeHtml(c.club_name||"Мой клуб")+'</h3>'+
