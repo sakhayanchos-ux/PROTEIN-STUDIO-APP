@@ -26,7 +26,7 @@ function applyTheme(){
     button.setAttribute("aria-pressed",String(active));
   });
 }
-function portionGuideSrc(){return "portion-guide.svg?v=40"}
+function portionGuideSrc(){return "portion-guide.svg?v=56"}
 function updateThemeAssets(){
   const guide=$("portionGuide");if(guide)guide.src=portionGuideSrc();
   const bg=$("themeBgImage");
@@ -509,12 +509,13 @@ function prevOnboarding(){
 }
 
 function openPage(page){
-  appRoute=page;stopDirect();stopStaffChat();
-  if(!clientPreview){try{localStorage.setItem(LAST_ROUTE_KEY,page)}catch{}}
+  stopDirect();stopStaffChat();
   if(page==="consultants"&&!canStaffChat())page="plan";
   document.getElementById("rewardDialog")?.remove();
   if(isStaffWorkspace()&&["plan","nutrition","water","progress","consultant"].includes(page)){if(page==="progress")coachTab="result";page="coachPlan";}
   if(!isStaffWorkspace()&&["admin","staffCard","coachPlan","myQR"].includes(page))page="plan";
+  appRoute=page;
+  if(!clientPreview){try{localStorage.setItem(LAST_ROUTE_KEY,page)}catch{}}
   adminViewVersion++;
   stopCommunity();
   toggleDrawer(false);
