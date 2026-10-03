@@ -13,3 +13,4 @@
 .image-editor-controls58 label{margin:0}
 .progress-start58{margin:14px 0;padding:14px;border-radius:18px;background:var(--soft);display:grid;gap:8px}
 @media(max-width:480px){.image-editor-controls58{grid-template-columns:1fr}.story-mode58 .btn{width:100%}}
+.story-section-title58{margin:22px 0 10px;padding:14px 16px;border-radius:18px;background:var(--soft);display:grid;gap:4px}.story-section-title58 b{font-size:18px}.story-section-title58 span{color:var(--muted);font-size:14px}
