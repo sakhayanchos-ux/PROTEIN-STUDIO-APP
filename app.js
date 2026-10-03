@@ -214,8 +214,8 @@ async function bootstrap(){
     showScreen("appScreen");
     $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
     let savedRoute=null;try{savedRoute=localStorage.getItem(LAST_ROUTE_KEY)}catch{}
-    const staffAllowed=["coachPlan","admin","staffCard","workouts","marathon","topics","achievements","consultants","messages","community","notifications","myQR","profile","story"];
-    const clientAllowed=["plan","workouts","marathon","topics","progress","achievements","invitations","story","messages","community","consultant","notifications","profile"];
+    const staffAllowed=["coachPlan","admin","staffCard","workouts","marathon","topics","achievements","events","training","links","consultants","messages","community","notifications","myQR","profile","story"];
+    const clientAllowed=["plan","workouts","marathon","topics","progress","achievements","events","training","links","invitations","story","messages","community","consultant","notifications","profile"];
     const fallback=staffConsultants.length?"coachPlan":"plan";
     const startRoute=(staffConsultants.length?staffAllowed:clientAllowed).includes(savedRoute)?savedRoute:fallback;
     openPage(startRoute);consumePushRoute();
@@ -520,7 +520,7 @@ function openPage(page){
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",events:"Мероприятия",training:"Обучение",links:"Полезные ссылки",messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
@@ -535,6 +535,8 @@ function openPage(page){
   if(page==="consultants")bindStaffChat();
   if(page==="invitations"&&typeof bindInvitations56==="function")bindInvitations56();
   if(page==="story"&&typeof bindStory56==="function")bindStory56();
+  if(page==="events"&&typeof bindEvents62==="function")bindEvents62("event");
+  if(page==="training"&&typeof bindEvents62==="function")bindEvents62("training");
   if(page==="notifications"){bindNotificationToggles();loadJourneyNotifications();bindPush();}
   if(page==="coachPlan")bindCoachPlan();
   if(page==="myQR")bindMyQR();
@@ -1161,6 +1163,7 @@ async function shareSavedCollage(path){
 }
 
 function pageConsultant(){return '<div id="clientConsultantCard"><section class="card">Загружаем карточку…</section></div>'}
+function pageUsefulLinks(){return '<section class="card useful-links62"><div class="eyebrow">Официальные ресурсы</div><h1>Полезные ссылки</h1><a class="btn primary" href="https://www.herbalife.ru/" target="_blank" rel="noopener">Herbalife.ru</a><a class="btn ghost" href="https://www.myherbalife.com/" target="_blank" rel="noopener">MyHerbalife.com</a></section>'}
 function pageNotifications(){
   if(isStaffWorkspace())return pushMarkup()+'<section class="card"><h3>События клиентов</h3><div id="journeyNotifications">Загружаем…</div></section>';
   return pushMarkup()+`<section class="card"><div id="journeyNotifications">Загружаем…</div></section><section class="card">
@@ -1207,6 +1210,7 @@ function pageProfile(){
   <div><label for="personalHeight">Рост, см</label><input id="personalHeight" type="number" inputmode="decimal" min="50" max="250" step="0.1" value="${escapeHtml(profile?.height_cm??"")}"></div></div>
   <button class="btn primary" id="savePersonalBtn">Сохранить</button><p class="profile-status" id="personalMessage" role="status"></p>
   </form></section>
+  <section class="card profile-discount62"><h3>Моя скидка / статус</h3><div class="fact-grid"><div><span>Скидка</span><b>${escapeHtml(profile?.discount_level?profile.discount_level+"%":"Не назначена")}</b></div><div><span>Статус</span><b>${escapeHtml(profile?.member_status||"—")}</b></div></div><p class="muted">Скидку назначает ваш консультант.</p></section>
   <section class="card theme-settings"><h3>Оформление</h3>
   <div class="theme-options">${Object.entries(THEMES).map(([id,theme])=>`<button type="button" class="theme-choice" data-theme-choice="${id}" aria-pressed="${selectedTheme===id}"><span class="theme-preview theme-preview-${id}" style="background-image:url('${theme.image}')"></span><span>${theme.name}</span><span class="theme-check" aria-hidden="true">✓</span></button>`).join("")}</div>
   <p class="profile-status" id="themeStatus" role="status"></p></section>
@@ -1312,7 +1316,7 @@ async function changeProfilePassword(event){
 }
 
 function soon(name){return `<section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={consultants:pageStaffChat,messages:pageMessages,coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
+const pages={consultants:pageStaffChat,messages:pageMessages,coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,events:()=>pageEvents62("event"),training:()=>pageEvents62("training"),links:pageUsefulLinks,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();
