@@ -1000,6 +1000,7 @@ async function loadProgressPhotos(){
     const url=URL.createObjectURL(dl.data);
     const frame=$(row.kind==="before"?"beforePhotoFrame":"afterPhotoFrame");
     if(frame)frame.innerHTML=`<img src="${url}" alt="${row.kind==="before"?"Фото до":"Фото после"}">`;
+    const editBtn=$(row.kind==="before"?"beforePhotoBtn":"afterPhotoBtn");if(editBtn)editBtn.textContent=row.kind==="before"?"Изменить фото ДО":"Изменить фото ПОСЛЕ";
   }
 }
 
