@@ -524,6 +524,9 @@ function openPage(page){
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
+  if(!isStaffWorkspace()&&!clientPreview&&["nutrition","water","workouts","topics"].includes(page)){
+    const back=document.createElement("button");back.className="btn ghost plan-back58";back.textContent="← Назад в «Мой план»";back.onclick=()=>openPage("plan");$("content").prepend(back);
+  }
   if(page==="profile")bindPersonalProfile();
   if(page==="consultant")loadClientConsultantCard();
   if(page==="admin")bindAdmin();
@@ -652,6 +655,13 @@ function mealStep(time,title,text,note){
 function menuSuggestion(name,protein,note){
   return '<div class="menu-suggestion"><div><b>'+name+'</b></div><span>'+protein+' г белка</span></div>';
 }
+function proteinMenuUrl(){
+  const raw=consultant?.referral_code||"";
+  const ref=raw==="SAKHAYANA"?"SS":raw;
+  const url=new URL("https://sakhayanchos-ux.github.io/PROTEIN-STUDIO-MENU/");
+  if(ref)url.searchParams.set("ref",ref);
+  return url.href;
+}
 
 function pageNutrition(){
   return ''+
@@ -683,7 +693,7 @@ function pageNutrition(){
       menuSuggestion("Formula 1 Express","14–16","порционный перекус")+
       menuSuggestion("H24 Achieve","21","спортивный высокобелковый батончик")+
     '</div>'+
-    '<a class="btn ghost app-link" href="https://sakhayanchos-ux.github.io/PROTEIN-STUDIO-MENU/" target="_blank" rel="noopener">Открыть меню PROTEIN STUDIO</a>'+
+    '<a class="btn ghost app-link" href="'+proteinMenuUrl()+'" target="_blank" rel="noopener">Открыть меню PROTEIN STUDIO</a>'+
     '<div class="hydration-note"><b>Протеиновая смесь Формула 3</b><span>Если по расчёту не хватает белка, добавьте её в количестве, соответствующем вашей дневной потребности и инструкции продукта.</span></div>'+
     '<div class="hydration-note"><b>Важно</b><span>При увеличении количества белка следите, чтобы также хватало жидкости и клетчатки.</span></div>'+
   '</section>'+
@@ -753,6 +763,13 @@ function pageProgress(){
     <div id="progressSummaryBox">
       <p class="muted">Считаем изменения…</p>
     </div>
+    <div class="progress-start58">
+      <span>Начало пути</span>
+      <b id="progressStartInfo58">Загружаем…</b>
+      <label>Дата начала<input id="progressStartDate58" type="date" min="2000-01-01" max="${profileToday()}"></label>
+      <button class="btn ghost" id="saveProgressStart58">Сохранить дату начала</button>
+      <p id="progressStartMessage58" class="message"></p>
+    </div>
     <button class="btn ghost" id="toggleMeasurementBtn">+ Добавить замер</button>
     <div id="measurementForm" class="measurement-form hidden">
       <div class="two-col">
@@ -817,6 +834,7 @@ async function bindProgressPhotoActions(){
     $("measurementForm")?.classList.toggle("hidden");
   });
   $("saveMeasurementBtn")?.addEventListener("click",saveMeasurement);
+  $("saveProgressStart58")?.addEventListener("click",saveProgressStart58);
 
   await Promise.all([loadProgressPhotos(),loadProgressStats(),loadSavedCollages()]);
 }
@@ -874,7 +892,8 @@ async function getProgressSummary(){
   if(error)throw error;
   const rows=data||[];
 
-  const startDate=(assessment?.completed_at||"").slice(0,10) || plan?.start_date || rows[0]?.entry_date || null;
+  const fallbackDates=[(assessment?.completed_at||"").slice(0,10),plan?.start_date,rows[0]?.entry_date].filter(Boolean).sort();
+  const startDate=assessment?.progress_start_date || fallbackDates[0] || null;
   const last=rows.length?rows[rows.length-1]:null;
   const lastWeight=[...rows].reverse().find(r=>r.weight_kg!=null);
   const lastWaist=[...rows].reverse().find(r=>r.waist_cm!=null);
@@ -899,6 +918,9 @@ async function loadProgressStats(){
     const s=progressSummary;
     const box=$("progressSummaryBox"),pill=$("progressDaysPill");
     if(pill)pill.textContent=s.days===0?"Сегодня":s.days+" дн.";
+    const startInfo=$("progressStartInfo58"),startDateInput=$("progressStartDate58");
+    if(startInfo)startInfo.textContent=(s.startDate?dateLabel(s.startDate):"Дата не указана")+" · "+(s.startWeight!=null?ruNumber(s.startWeight)+" кг":"вес не указан")+(s.startWaist!=null?" · талия "+ruNumber(s.startWaist)+" см":"");
+    if(startDateInput)startDateInput.value=s.startDate||"";
     if(box)box.innerHTML=`
       <div class="progress-highlight">
         <small>Вес</small>
@@ -913,6 +935,17 @@ async function loadProgressStats(){
     const box=$("progressSummaryBox");
     if(box)box.innerHTML='<p class="message">Не удалось посчитать прогресс.</p>';
   }
+}
+
+async function saveProgressStart58(){
+  const input=$("progressStartDate58"),msg=$("progressStartMessage58"),btn=$("saveProgressStart58");
+  const value=input?.value||null;if(!value){msg.textContent="Укажите дату начала.";return}
+  btn.disabled=true;msg.textContent="Сохраняем…";
+  try{
+    const {data,error}=await sb.from("ps_assessments").update({progress_start_date:value,updated_at:new Date().toISOString()}).eq("user_id",me.id).select("*").single();
+    if(error)throw error;assessment=data;msg.textContent="Дата начала сохранена ✓";await loadProgressStats();if($("coachGraphs"))await refreshCoachResult();
+  }catch(e){msg.textContent="Не удалось сохранить дату. Попробуйте снова."}
+  finally{btn.disabled=false}
 }
 
 async function uploadProgressPhoto(kind,file){
@@ -1036,6 +1069,7 @@ async function makeBeforeAfterCollage(){
     ctx.fillText(weightLine,540,1100);
 
     const detailParts=[];
+    if(s.startWeight!=null&&s.latestWeight!=null)detailParts.push("Вес "+ruNumber(s.startWeight)+" → "+ruNumber(s.latestWeight)+" кг");
     if(s.waistChange!=null)detailParts.push("Талия "+deltaText(s.waistChange," см"));
     ctx.fillStyle="#26362d";ctx.font="600 34px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(detailParts.join("   •   ")||"Мой прогресс",540,1160);
