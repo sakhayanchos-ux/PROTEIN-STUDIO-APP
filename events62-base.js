@@ -2,6 +2,27 @@
 let requestedEvent62=null;
 function event62Money(v){const n=Number(v||0);return n.toLocaleString('ru-RU',{maximumFractionDigits:n%1?2:0})+' ₽'}
 function event62Poster(path){if(!path)return'';try{return sb.storage.from('ps-event-posters').getPublicUrl(path).data.publicUrl||''}catch{return''}}
+function event67MediaUrl(item){
+ if(!item?.path)return'';
+ try{return sb.storage.from(item.bucket||'ps-event-media').getPublicUrl(item.path).data.publicUrl||''}catch{return''}
+}
+function event67MediaItems(e){
+ const out=[];
+ if(e.poster_path)out.push({type:'image',path:e.poster_path,bucket:'ps-event-posters',legacy:true});
+ const media=Array.isArray(e.media)?e.media:[];
+ media.forEach(x=>{if(x&&x.path&&['image','video'].includes(x.type))out.push(x)});
+ return out
+}
+function event67MediaGallery(e){
+ const items=event67MediaItems(e);
+ if(!items.length)return'<div class="event-poster-placeholder62">📣<span>Фото или видео</span></div>';
+ return'<div class="event-media67 '+(items.length>1?'multi':'single')+'">'+items.map((m,i)=>{
+  const url=m.legacy?event62Poster(m.path):event67MediaUrl(m);
+  if(!url)return'';
+  if(m.type==='video')return'<div class="event-media-item67"><video controls playsinline preload="metadata" src="'+escapeHtml(url)+'" aria-label="Видео афиши '+(i+1)+'"></video>'+(items.length>1?'<span class="event-media-count67">'+(i+1)+' / '+items.length+'</span>':'')+'</div>';
+  return'<div class="event-media-item67"><img src="'+escapeHtml(url)+'" alt="Фото афиши '+(i+1)+'">'+(items.length>1?'<span class="event-media-count67">'+(i+1)+' / '+items.length+'</span>':'')+'</div>'
+ }).join('')+'</div>'
+}
 function event62When(e){const a=[];if(e.is_permanent&&e.schedule_text)a.push(e.schedule_text);else if(e.event_date)a.push(dateLabel(e.event_date));if(e.event_time)a.push(String(e.event_time).slice(0,5));return a.join(' · ')||'Дата уточняется'}
 function event62Price(e){
  if(e.price_mode==='free')return'Бесплатно';
@@ -26,10 +47,10 @@ function event62State(p){
  return'<div class="event-state62 confirmed">✅ Участие подтверждено</div>'
 }
 function event62Card(e,p,staff){
- const poster=event62Poster(e.poster_path),access=event62Eligible(e);
+ const access=event62Eligible(e);
  const userAction=staff?'':!access.ok?'<button class="btn ghost" disabled>'+escapeHtml(access.text)+'</button>':p&&p.status!=='cancelled'?(p.attended_at?'':'<button class="btn ghost" data-cancel-event62="'+e.id+'">Отменить участие</button>'):'<button class="btn primary" data-join-event62="'+e.id+'">Участвую</button>';
  const staffActions=staff?'<div class="event-staff-actions62"><button class="btn ghost" data-edit-event62="'+e.id+'">Редактировать</button><button class="btn primary" data-publish-event62="'+e.id+'">'+(e.published_at?'Отправить новое 📣':'Опубликовать 📣')+'</button><button class="btn ghost" data-participants-event62="'+e.id+'">Участники</button><button class="btn ghost" data-archive-event62="'+e.id+'">Снять с публикации</button></div>':'';
- return'<article class="event-card62" id="event62-'+e.id+'">'+(poster?'<img class="event-poster62" src="'+escapeHtml(poster)+'" alt="Афиша">':'<div class="event-poster-placeholder62">📣<span>Афиша</span></div>')+'<div class="event-body62"><div class="row"><span class="event-kind62">'+(e.kind==='training'?'🎓 Обучение':'🎉 Мероприятие')+'</span>'+(staff?'<span class="pill">'+(e.published_at?'Опубликовано':'Черновик')+'</span>':'')+'</div><h2>'+escapeHtml(e.title)+'</h2><div class="event-meta62"><b>'+escapeHtml(event62When(e))+'</b>'+(e.venue?'<span>📍 '+escapeHtml(e.venue)+'</span>':'')+(e.online_url?'<a href="'+escapeHtml(e.online_url)+'" target="_blank" rel="noopener">Открыть онлайн-ссылку</a>':'')+'</div>'+(e.description?'<p>'+escapeHtml(e.description)+'</p>':'')+'<div class="event-price62">'+escapeHtml(event62Price(e))+(e.kind==='training'&&e.min_discount?'<small> · доступ от '+e.min_discount+'%</small>':'')+(e.kind==='training'&&Array.isArray(e.allowed_statuses)&&e.allowed_statuses.length?'<small> · статусы: '+escapeHtml(e.allowed_statuses.join(', '))+'</small>':'')+'</div>'+(e.attendance_stars?'<div class="event-stars62">За фактический приход: +'+e.attendance_stars+' ⭐</div>':'')+event62Speakers(e)+event62State(p)+userAction+staffActions+'<div class="event-participants62 hidden" data-participant-box62="'+e.id+'"></div></div></article>'
+ return'<article class="event-card62" id="event62-'+e.id+'">'+event67MediaGallery(e)+'<div class="event-body62"><div class="row"><span class="event-kind62">'+(e.kind==='training'?'🎓 Обучение':'🎉 Мероприятие')+'</span>'+(staff?'<span class="pill">'+(e.published_at?'Опубликовано':'Черновик')+'</span>':'')+'</div><h2>'+escapeHtml(e.title)+'</h2><div class="event-meta62"><b>'+escapeHtml(event62When(e))+'</b>'+(e.venue?'<span>📍 '+escapeHtml(e.venue)+'</span>':'')+(e.online_url?'<a href="'+escapeHtml(e.online_url)+'" target="_blank" rel="noopener">Открыть онлайн-ссылку</a>':'')+'</div>'+(e.description?'<p>'+escapeHtml(e.description)+'</p>':'')+'<div class="event-price62">'+escapeHtml(event62Price(e))+(e.kind==='training'&&e.min_discount?'<small> · доступ от '+e.min_discount+'%</small>':'')+(e.kind==='training'&&Array.isArray(e.allowed_statuses)&&e.allowed_statuses.length?'<small> · статусы: '+escapeHtml(e.allowed_statuses.join(', '))+'</small>':'')+'</div>'+(e.attendance_stars?'<div class="event-stars62">За фактический приход: +'+e.attendance_stars+' ⭐</div>':'')+event62Speakers(e)+event62State(p)+userAction+staffActions+'<div class="event-participants62 hidden" data-participant-box62="'+e.id+'"></div></div></article>'
 }
 function pageEvents62(kind){
  return'<section class="card event-head62"><div class="eyebrow">PROTEIN STUDIO</div><h1>'+(kind==='training'?'🎓 Обучение':'🎉 Мероприятия')+'</h1></section>'+(isStaffWorkspace()?event62Editor(kind):'')+'<div id="eventsList62">Загружаем…</div>'
