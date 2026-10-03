@@ -897,7 +897,8 @@ async function getProgressSummary(){
   const last=rows.length?rows[rows.length-1]:null;
   const lastWeight=[...rows].reverse().find(r=>r.weight_kg!=null);
   const lastWaist=[...rows].reverse().find(r=>r.waist_cm!=null);
-  const latestDate=last?.entry_date||startDate;
+  const latestMeasurementDate=last?.entry_date||startDate;
+  const latestDate=profileToday();
 
   const startWeight=assessment?.starting_weight_kg!=null?Number(assessment.starting_weight_kg):null;
   const startWaist=assessment?.waist_cm!=null?Number(assessment.waist_cm):null;
@@ -905,7 +906,7 @@ async function getProgressSummary(){
   const latestWaist=lastWaist?.waist_cm!=null?Number(lastWaist.waist_cm):startWaist;
 
   return {
-    startDate,latestDate,
+    startDate,latestDate,latestMeasurementDate,
     days:dateDiffDays(startDate,latestDate),
     startWeight,latestWeight,weightChange:(startWeight!=null&&latestWeight!=null)?latestWeight-startWeight:null,
     startWaist,latestWaist,waistChange:(startWaist!=null&&latestWaist!=null)?latestWaist-startWaist:null
