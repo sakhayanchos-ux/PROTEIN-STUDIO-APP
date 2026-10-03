@@ -7,11 +7,12 @@
   <title>PROTEIN STUDIO</title>
   <link rel="manifest" href="manifest.webmanifest">
   <script>(()=>{let t="jewel";try{const s=localStorage.getItem("protein_studio_theme");if(["jewel","kpop","neon","sunset","blackgold"].includes(s))t=s}catch{}document.documentElement.dataset.theme=t})()</script>
-  <link rel="stylesheet" href="styles.css?v=57">
-  <link rel="stylesheet" href="journey.css?v=57">
-  <link rel="stylesheet" href="coach.css?v=57">
-<link rel="stylesheet" href="features.css?v=57">
-  <link rel="stylesheet" href="release56.css?v=57">
+  <link rel="stylesheet" href="styles.css?v=58">
+  <link rel="stylesheet" href="journey.css?v=58">
+  <link rel="stylesheet" href="coach.css?v=58">
+<link rel="stylesheet" href="features.css?v=58">
+  <link rel="stylesheet" href="release56.css?v=58">
+  <link rel="stylesheet" href="release58.css?v=58">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 </head>
 <body>
@@ -27,7 +28,25 @@
         <label>Телефон<input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 999 000-00-00"></label>
         <label>Пароль<input id="loginPassword" type="password" autocomplete="current-password"></label>
         <button class="btn primary" id="loginBtn">Войти</button>
+        <button class="btn ghost" id="forgotPassword58">Забыли пароль?</button>
         <button class="btn ghost" id="showRegisterBtn">Я новый клиент</button>
+      </div>
+
+      <div id="passwordReset58" class="hidden">
+        <h3>Восстановление пароля</h3>
+        <p class="muted">Введите номер. Консультант подтвердит запрос и даст вам одноразовый 6-значный код.</p>
+        <label>Телефон<input id="resetPhone58" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 999 000-00-00"></label>
+        <button class="btn primary" id="requestReset58">Запросить код</button>
+        <p id="resetMessage58" class="message"></p>
+        <div id="resetStep2_58" class="hidden">
+          <label>Телефон<input id="resetPhoneComplete58" type="tel" inputmode="tel"></label>
+          <label>Код от консультанта<input id="resetCode58" inputmode="numeric" maxlength="6" placeholder="000000"></label>
+          <label>Новый пароль<input id="resetPassword58" type="password" autocomplete="new-password" minlength="8"></label>
+          <label>Повторите пароль<input id="resetPasswordConfirm58" type="password" autocomplete="new-password" minlength="8"></label>
+          <button class="btn primary" id="completeReset58">Сохранить новый пароль</button>
+          <p id="resetCompleteMessage58" class="message"></p>
+        </div>
+        <button class="btn ghost" id="resetBack58">← Вернуться ко входу</button>
       </div>
 
       <div id="registerBox" class="hidden">
@@ -107,21 +126,24 @@
     <main id="content"></main>
   </section>
 </div>
-<script src="config.js?v=57"></script>
-<script src="community.js?v=57"></script>
-<script src="consultant-card.js?v=57"></script>
-<script src="admin.js?v=57"></script>
-<script src="workspace.js?v=57"></script>
-<script src="journey.js?v=57"></script>
-<script src="workout-library.js?v=57"></script>
-<script src="vendor/qrcode.js?v=57"></script>
-<script src="coach.js?v=57"></script>
-<script src="invitations.js?v=57"></script>
-<script src="messages.js?v=57"></script>
-<script src="staff-chat.js?v=57"></script>
-<script src="client-extras.js?v=57"></script>
-<script src="app.js?v=57"></script>
-<script src="release56.js?v=57"></script>
+<script src="config.js?v=58"></script>
+<script src="community.js?v=58"></script>
+<script src="consultant-card.js?v=58"></script>
+<script src="admin.js?v=58"></script>
+<script src="workspace.js?v=58"></script>
+<script src="journey.js?v=58"></script>
+<script src="workout-library.js?v=58"></script>
+<script src="vendor/qrcode.js?v=58"></script>
+<script src="coach.js?v=58"></script>
+<script src="invitations.js?v=58"></script>
+<script src="messages.js?v=58"></script>
+<script src="staff-chat.js?v=58"></script>
+<script src="client-extras.js?v=58"></script>
+<script src="app.js?v=58"></script>
+<script src="release56.js?v=58"></script>
+<script src="story58.js?v=58"></script>
+<script src="password-reset58.js?v=58"></script>
+<script src="image-editor58.js?v=58"></script>
 </body>
 </html>
 
