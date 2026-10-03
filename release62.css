@@ -1,0 +1,16 @@
+
+.event-head62 h1{margin-bottom:6px}.event-card62{overflow:hidden;border-radius:28px;background:var(--card);box-shadow:var(--shadow);margin:14px 0;border:1px solid var(--line)}
+.event-poster62,.event-poster-placeholder62{width:100%;aspect-ratio:4/5;display:block;object-fit:cover;background:var(--soft)}
+.event-poster-placeholder62{display:grid;place-items:center;font-size:64px}.event-poster-placeholder62 span{display:block;font-size:16px}
+.event-body62{padding:18px}.event-body62 h2{margin:8px 0 10px}.event-kind62{font-weight:800}.event-meta62{display:grid;gap:5px;color:var(--muted)}
+.event-price62{font-size:20px;font-weight:900;margin:14px 0}.event-price62 small{font-size:13px;color:var(--muted)}
+.event-stars62{padding:10px 12px;border-radius:16px;background:var(--soft);font-weight:800;margin:10px 0}
+.event-speakers62{margin:14px 0}.event-speakers62>div{display:grid;gap:3px;padding:9px 0;border-bottom:1px solid var(--line)}.event-speakers62 span{color:var(--muted)}
+.event-state62{margin:12px 0;padding:10px 12px;border-radius:16px;background:var(--soft);font-weight:800}.event-state62.pending{font-weight:700}
+.event-staff-actions62,.participant-actions62{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.event-editor62 form{display:grid;gap:10px}.five-col62{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.five-col62 input{min-width:0}
+.event-participants62{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}.participant-row62{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.participant-row62>div:first-child{display:grid;gap:3px}.participant-row62 small,.participant-row62 span{color:var(--muted)}.participant-row62.cancelled{opacity:.5}
+.special-notice62{border:2px solid currentColor;position:relative}.special-label62{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--soft);font-weight:900;margin-bottom:7px}
+.profile-discount62 .fact-grid{margin-top:10px}.useful-links62{display:grid;gap:12px}.useful-links62 .eyebrow,.useful-links62 h1{margin-bottom:0}
+@media(max-width:560px){.five-col62{grid-template-columns:repeat(2,1fr)}.participant-row62{display:block}.participant-actions62 .btn{width:100%}}
