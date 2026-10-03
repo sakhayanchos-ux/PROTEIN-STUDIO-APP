@@ -1163,7 +1163,7 @@ async function shareSavedCollage(path){
 }
 
 function pageConsultant(){return '<div id="clientConsultantCard"><section class="card">Загружаем карточку…</section></div>'}
-function pageUsefulLinks(){return '<section class="card useful-links62"><div class="eyebrow">Официальные ресурсы</div><h1>Полезные ссылки</h1><a class="btn primary" href="https://www.herbalife.ru/" target="_blank" rel="noopener">Herbalife.ru</a><a class="btn ghost" href="https://www.myherbalife.com/" target="_blank" rel="noopener">MyHerbalife.com</a></section>'}
+function pageUsefulLinks(){return '<section class="card useful-links62"><div class="eyebrow">Официальные ресурсы</div><h1>Полезные ссылки</h1><a class="btn primary" href="https://www.herbalife.ru/" target="_blank" rel="noopener">Herbalife.ru · Официальный сайт</a><p class="muted">Информация о компании и продуктах.</p><a class="btn ghost" href="https://www.myherbalife.com/" target="_blank" rel="noopener">MyHerbalife.com · Мой кабинет</a><p class="muted"><b>Заказы · регистрация · доход</b></p></section>'}
 function pageNotifications(){
   if(isStaffWorkspace())return pushMarkup()+'<section class="card"><h3>События клиентов</h3><div id="journeyNotifications">Загружаем…</div></section>';
   return pushMarkup()+`<section class="card"><div id="journeyNotifications">Загружаем…</div></section><section class="card">
