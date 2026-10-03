@@ -1,0 +1,10 @@
+.notification-item{position:relative}
+.notification-close68{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-size:24px;line-height:1;display:grid;place-items:center;padding:0}
+.notification-item:not(.special-notice62){padding-right:54px}
+.current-day-head68{margin:0 0 14px;padding:14px 16px;border-radius:16px;background:var(--soft);border:1px solid var(--line);font-size:16px}
+.day-row68 summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.current-day68{border:2px solid var(--green)!important;border-radius:16px;padding:4px 12px!important;background:var(--soft)}
+.current-day-badge68{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--green);color:#fff;font-size:12px;font-weight:800}
+.day-state68{display:inline-block;padding:4px 8px;border-radius:999px;background:var(--soft);color:var(--muted);font-size:11px}
+.future-day68{opacity:.72}
+html[data-theme="blackgold"] .current-day-badge68{background:#d5b569;color:#17191b}
