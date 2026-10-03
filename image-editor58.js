@@ -27,7 +27,7 @@ async function editImageFile58(file,input){
 }
 function installImageEditor58(){
  document.addEventListener('change',async e=>{
-  const input=e.target;if(!(input instanceof HTMLInputElement)||input.type!=='file'||!String(input.accept||'').includes('image'))return;
+  const input=e.target;if(!(input instanceof HTMLInputElement)||input.type!=='file'||input.dataset.noImageEditor==='1'||!String(input.accept||'').includes('image'))return;
   if(input.dataset.ps58Ready==='1'){delete input.dataset.ps58Ready;return}
   const file=input.files?.[0];if(!file||!file.type.startsWith('image/')||ps58Editing)return;
   e.stopImmediatePropagation();e.preventDefault();ps58Editing=true;
