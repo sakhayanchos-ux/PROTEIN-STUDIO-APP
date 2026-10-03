@@ -10,9 +10,10 @@ async function loadJourneyNotifications(){
  try{
   const rows=await checked(sb.from('ps_notifications').select('*').eq('recipient_id',me.id).order('is_special',{ascending:false}).order('created_at',{ascending:false}).limit(100));
   if(!box.isConnected)return;
-  box.innerHTML=rows.length?rows.map(n=>'<article class="notification-item '+(n.is_special?'special-notice62':'')+'">'+(n.is_special?'<span class="special-label62">📣 Специальное уведомление</span>':'')+'<b>'+escapeHtml(n.title)+'</b><p>'+escapeHtml(n.body)+'</p><time>'+new Date(n.created_at).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</time><button class="btn ghost" data-notice="'+n.id+'">Открыть</button></article>').join(''):'<p>Новых уведомлений пока нет.</p>';
+  box.innerHTML=rows.length?rows.map(n=>'<article class="notification-item '+(n.is_special?'special-notice62':'')+'">'+(n.is_special?'<span class="special-label62">📣 Специальное уведомление · закреплено</span>':'')+'<b>'+escapeHtml(n.title)+'</b><p>'+escapeHtml(n.body)+'</p><time>'+new Date(n.created_at).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</time><button class="btn ghost" data-notice="'+n.id+'">Открыть</button></article>').join(''):'<p>Новых уведомлений пока нет.</p>';
   box.querySelectorAll('[data-notice]').forEach(b=>b.onclick=async()=>{const n=rows.find(x=>x.id===b.dataset.notice);if(n.route?.page)await routeNotice(n.route);else if(n.reward_id&&!isStaffWorkspace())openPage('achievements');else if(n.reward_id){const r=await checked(sb.from('ps_marathon_rewards').select('enrollment_id').eq('id',n.reward_id).single());const e=await checked(sb.from('ps_marathon_enrollments').select('user_id').eq('id',r.enrollment_id).single());routeNotice({page:'admin',client:e.user_id})}});
-  if(!clientPreview&&!document.hidden&&rows.some(n=>!n.read_at)){await checked(sb.from('ps_notifications').update({read_at:new Date().toISOString()}).in('id',rows.filter(n=>!n.read_at).map(n=>n.id)));refreshBadges()}
+  const normalUnread=rows.filter(n=>!n.read_at&&!n.is_special);
+  if(!clientPreview&&!document.hidden&&normalUnread.length){await checked(sb.from('ps_notifications').update({read_at:new Date().toISOString()}).in('id',normalUnread.map(n=>n.id)));refreshBadges()}
  }catch(e){journeyError(box,e,loadJourneyNotifications)}
 }
 function startJourneyUpdates(){clearInterval(journeyTimer);refreshBadges();journeyTimer=setInterval(()=>{if(!document.hidden){refreshBadges();if($('journeyNotifications'))loadJourneyNotifications()}},15000)}
