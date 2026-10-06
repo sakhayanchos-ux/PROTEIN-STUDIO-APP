@@ -65,7 +65,7 @@ function common75Daily(s){
  '<div class="cm75-task"><h3>🚶 Шаги · 1⭐ / 1000</h3><form data-cm75-form="steps"><label>Шагов сегодня<input name="value" type="number" min="0" max="100000" value="'+escapeHtml(steps?.value??'')+'" required></label><button class="btn ghost">Сохранить шаги</button><p role="status">'+(steps?'Сейчас: '+steps.value+' шагов · +'+steps.stars+'⭐':'')+'</p></form></div>'+
  '<div class="cm75-task"><h3>🥤 Ужин коктейлем · 3⭐</h3>'+(dinner&&dinner.status!=='rejected'?common75EntryStatus(dinner):'<form data-cm75-photo="dinner_shake"><label>Фото ужина<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn ghost">Отправить в общую группу</button><p role="status"></p></form>')+'</div>'+
  '<div class="cm75-task"><h3>⚡ Turbo / Detox · 3⭐</h3>'+(turbo&&turbo.status!=='rejected'?common75EntryStatus(turbo):'<form data-cm75-photo="turbo_detox"><label>Фото Turbo / Detox<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn ghost">Отправить в общую группу</button><p role="status"></p></form>')+'</div>'+
- '<div class="cm75-task"><h3>🏋🏻‍♀️ Тренировка + фото · 5⭐</h3>'+(workout?common75EntryStatus(workout):'<p>Выполните любую простую тренировку и добавьте фото тренировки.</p><button class="btn ghost" data-cm75-go="workouts">Открыть тренировки</button>')+'</div>'+
+ '<div class="cm75-task"><h3>🏋🏻‍♀️ Тренировка + фото · 5⭐</h3>'+(workout?common75EntryStatus(workout)+(workout.photo_path?'<img class="task-photo" data-task-photo="'+escapeHtml(workout.photo_path)+'" alt="Фото тренировки">':''):'<p>Выполните любую простую тренировку и добавьте фото тренировки. Для 5⭐ фото обязательно.</p><button class="btn ghost" data-cm75-go="workouts">Открыть тренировки</button>')+'</div>'+
  '<div class="cm75-task"><h3>🧍 Сканирование друга · 10⭐</h3>'+(scan&&scan.status!=='rejected'?common75EntryStatus(scan):'<form data-cm75-form="scan_friend"><label>Сколько друзей просканировали?<input name="qty" type="number" min="1" max="20" value="1" required></label><button class="btn ghost">Отправить консультанту</button><p role="status"></p></form>')+'</div>'+
  '<div class="cm75-task"><h3>❤️ Амбассадор · 20⭐</h3><p>'+Math.min(Number(s.heart_count||0),2)+' / 2 успешных приглашений</p>'+(ambassador?common75EntryStatus(ambassador):'<button class="btn ghost" data-cm75-go="invitations">Открыть приглашения</button>')+'</div>'+
  '<div class="cm75-task"><h3>📦 VP · 20⭐ / каждые 50 VP</h3>'+(vp&&vp.status==='pending'?common75EntryStatus(vp):'<form data-cm75-form="vp"><label>Сколько VP добавить сегодня?<input name="value" type="number" min="1" max="10000" step="0.1" required></label><button class="btn ghost">Отправить на подтверждение</button><p role="status">'+(vp?.status==='approved'?'Сегодня уже подтверждено: '+vp.value+' VP · +'+vp.stars+'⭐':'')+'</p></form>')+'</div>'+
@@ -91,7 +91,7 @@ async function loadCommonMarathon75(){
   const s=await checked(sb.rpc('ps_common_marathon_state'));common75State=s;
   if(!s.campaign){box.innerHTML='<section class="card">Активного марафона пока нет.</section>';return}
   box.innerHTML=common75Hero(s)+common75JoinCard(s)+(s.participant?common75ZoomCard(s):'')+common75Daily(s)+common75FinishCard(s)+(s.participant?common75Rules():'')+common75History(s);
-  bindCommonMarathon75(box,s);
+  bindCommonMarathon75(box,s);hydratePhotos(box);
  }catch(e){journeyError(box,e,loadCommonMarathon75)}
 }
 function bindCommonMarathon75(box,s){
