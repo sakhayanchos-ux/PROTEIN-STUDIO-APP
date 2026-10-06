@@ -79,7 +79,7 @@ function bindConsultantCardEditor(){
     if(upload.error)throw new Error("Не удалось загрузить фото. Попробуйте снова.");
     update.avatar_path=newPhoto;
    }
-   const {data,error}=await sb.rpc("ps_save_consultant_card",{
+   const {data:rpcData,error}=await sb.rpc("ps_save_consultant_card",{
     p_consultant:id,
     p_display_name:update.display_name,
     p_bio:update.bio,
@@ -93,7 +93,7 @@ function bindConsultantCardEditor(){
     p_avatar_path:update.avatar_path
    });
    if(error)throw new Error(error.message||"Не удалось сохранить карточку.");
-   const savedRow=Array.isArray(data)?data[0]:data;
+   const savedRow=Array.isArray(rpcData)?rpcData[0]:rpcData;
    if(!savedRow)throw new Error("Не удалось сохранить карточку.");
    const data=savedRow;saved=true;current=data;
    if(oldPhoto&&oldPhoto!==data.avatar_path&&oldPhoto.startsWith(uid+"/"))await sb.storage.from("ps-consultant-cards").remove([oldPhoto]);
