@@ -1,8 +1,10 @@
+let personalMarathonAvailable=false;
 function staffNavigation(){
  const staff=isStaffWorkspace();
  document.querySelectorAll('.nav[data-page]').forEach(b=>{
   const p=b.dataset.page;if(p==='consultants'){b.classList.toggle('hidden',!canStaffChat());return;}
-  b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant','invitations'].includes(p):['admin','staffCard','coachPlan','myQR'].includes(p));
+  if(p==='personalMarathon'){b.classList.toggle('hidden',!(staff&&personalMarathonAvailable));return;}
+  b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant','invitations'].includes(p):['admin','staffCard','coachPlan','myQR','personalMarathon'].includes(p));
  });
  $('adminNav').textContent='🗂 Клиенты';
  $('clientPreviewNav').classList.toggle('hidden',!staff);
