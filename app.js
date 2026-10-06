@@ -525,7 +525,7 @@ function openPage(page){
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",events:"Мероприятия",training:"Обучение",links:"Полезные ссылки",messages:"Личные сообщения",coachPlan:"Мой план",personalMarathon:"Мой марафон",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",events:"Мероприятия",training:"Обучение",links:"Полезные ссылки",messages:"Личные сообщения",coachPlan:"Мой план",personalMarathon:"Мой марафон",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"МАРАФОН",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
@@ -548,7 +548,8 @@ function openPage(page){
   if(page==="staffCard")bindConsultantCardEditor();
   if(page==="topics")loadTopics();
   if(page==="personalMarathon")loadMarathonTracker();
-  else if(isStaffWorkspace()&&["marathon","achievements"].includes(page)){loadStaffCollection(page);if(page==="marathon")loadTaskSettings()}
+  else if(page==="marathon"&&typeof loadCommonMarathon75==="function")loadCommonMarathon75();
+  else if(isStaffWorkspace()&&page==="achievements")loadStaffCollection(page);
   else if(page==="marathon")loadMarathonTracker();
   else if(page==="achievements")loadAchievements();
   if(page==="progress")bindProgressPhotoActions();
