@@ -527,7 +527,7 @@ function openPage(page){
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
   const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",events:"Мероприятия",training:"Обучение",links:"Полезные ссылки",messages:"Личные сообщения",coachPlan:"Мой план",personalMarathon:"Мой марафон",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"МАРАФОН",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
-  const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
+  const fn=(isStaffWorkspace()&&page==="achievements"?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
   if(!isStaffWorkspace()&&!clientPreview&&["nutrition","water","workouts","topics"].includes(page)){
     const back=document.createElement("button");back.className="btn ghost plan-back58";back.textContent="← Назад в «Мой план»";back.onclick=()=>openPage("plan");$("content").prepend(back);
