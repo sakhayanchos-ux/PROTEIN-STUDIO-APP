@@ -19,6 +19,14 @@ function consultantCardForm(){
 }
 const CONSULTANT_INPUTS={display_name:"consultantNameInput",bio:"consultantBioInput",contact_phone:"consultantPhoneInput",whatsapp_phone:"consultantWhatsappInput",instagram_url:"consultantInstagramInput",contact_hours:"consultantHoursInput",club_name:"consultantClubInput",club_address:"consultantAddressInput",club_hours:"consultantClubHoursInput"};
 function cardPhone(value){if(!value?.trim())return null;const normalized=normalizePhone(value);if(!/^\+7\d{10}$/.test(normalized))throw new Error("Введите телефон в формате +7 999 000-00-00.");return normalized}
+function cardInstagram(value){
+ if(!value?.trim())return null;
+ let u;try{u=new URL(value.trim())}catch{throw new Error("Введите корректную ссылку Instagram.");}
+ if(u.protocol!=="https:"||!/^(www\.)?instagram\.com$/i.test(u.hostname))throw new Error("Используйте ссылку вида https://www.instagram.com/имя/");
+ const username=u.pathname.split("/").filter(Boolean)[0];
+ if(!username||!/^[A-Za-z0-9_.]+$/.test(username))throw new Error("Проверьте имя Instagram.");
+ return "https://www.instagram.com/"+username+"/";
+}
 async function showConsultantPhoto(frame,path,name){
  if(!frame)return;
  frame.textContent=(name||"♡").trim().split(/\s+/).slice(0,2).map(x=>Array.from(x)[0]||"").join("");
@@ -58,7 +66,7 @@ function bindConsultantCardEditor(){
    for(const [key,input] of Object.entries(CONSULTANT_INPUTS))update[key]=$(input).value.trim()||null;
    if(!update.display_name)throw new Error("Введите имя и фамилию.");
    update.contact_phone=cardPhone(update.contact_phone);update.whatsapp_phone=cardPhone(update.whatsapp_phone);
-   if(update.instagram_url){let u;try{u=new URL(update.instagram_url)}catch{throw new Error("Введите корректную ссылку Instagram.")}if(u.protocol!=="https:"||!/^(www\.)?instagram\.com$/i.test(u.hostname))throw new Error("Используйте ссылку вида https://www.instagram.com/имя/");update.instagram_url=u.href}
+   update.instagram_url=cardInstagram(update.instagram_url);
    const file=$("consultantCardPhoto").files?.[0],remove=$("consultantRemovePhoto").checked;
    if(file&&remove)throw new Error("Выберите новое фото или отметьте «Убрать фото».");
    if(file&&(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>10485760))throw new Error("Фото — JPG, PNG или WEBP до 10 МБ.");
@@ -71,9 +79,23 @@ function bindConsultantCardEditor(){
     if(upload.error)throw new Error("Не удалось загрузить фото. Попробуйте снова.");
     update.avatar_path=newPhoto;
    }
-   const {data,error}=await sb.from("ps_consultants").update(update).eq("id",id).eq("user_id",uid).select("*").single();
-   if(error)throw new Error("Не удалось сохранить карточку. Проверьте подключение.");
-   saved=true;current=data;
+   const {data,error}=await sb.rpc("ps_save_consultant_card",{
+    p_consultant:id,
+    p_display_name:update.display_name,
+    p_bio:update.bio,
+    p_contact_phone:update.contact_phone,
+    p_whatsapp_phone:update.whatsapp_phone,
+    p_instagram_url:update.instagram_url,
+    p_contact_hours:update.contact_hours,
+    p_club_name:update.club_name,
+    p_club_address:update.club_address,
+    p_club_hours:update.club_hours,
+    p_avatar_path:update.avatar_path
+   });
+   if(error)throw new Error(error.message||"Не удалось сохранить карточку.");
+   const savedRow=Array.isArray(data)?data[0]:data;
+   if(!savedRow)throw new Error("Не удалось сохранить карточку.");
+   const data=savedRow;saved=true;current=data;
    if(oldPhoto&&oldPhoto!==data.avatar_path&&oldPhoto.startsWith(uid+"/"))await sb.storage.from("ps-consultant-cards").remove([oldPhoto]);
    const entry=staffConsultants.find(c=>c.id===id);if(entry)entry.display_name=data.display_name;
    if(consultant?.id===id)consultant=data;
