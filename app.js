@@ -518,7 +518,7 @@ function openPage(page){
   if(page==="consultants"&&!canStaffChat())page="plan";
   document.getElementById("rewardDialog")?.remove();
   if(isStaffWorkspace()&&["plan","nutrition","water","progress","consultant"].includes(page)){if(page==="progress")coachTab="result";page="coachPlan";}
-  if(!isStaffWorkspace()&&["admin","staffCard","coachPlan","myQR"].includes(page))page="plan";
+  if(!isStaffWorkspace()&&["admin","staffCard","coachPlan","myQR","personalMarathon"].includes(page))page="plan";
   appRoute=page;
   if(!clientPreview){try{localStorage.setItem(LAST_ROUTE_KEY,page)}catch{}}
   adminViewVersion++;
