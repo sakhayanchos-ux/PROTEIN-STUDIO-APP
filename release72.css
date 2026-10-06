@@ -1,0 +1,10 @@
+.personal-stages72{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 22px}
+.personal-stage72{padding:10px 8px;border:1px solid var(--line);border-radius:14px;background:transparent;cursor:default;user-select:none}
+.personal-stage72 b,.personal-stage72 small{display:block}
+.personal-stage72 b{font-size:13px}
+.personal-stage72 small{margin-top:4px;font-size:10px;color:var(--muted);line-height:1.2}
+.personal-stage72.current{border-width:2px;background:var(--soft)}
+.personal-stage72.current b{color:var(--gold)}
+.personal-stage72.done{opacity:.85}
+.personal-stage72.future{opacity:.58}
+@media(max-width:390px){.personal-stages72{gap:6px}.personal-stage72{padding:8px 6px}.personal-stage72 b{font-size:12px}.personal-stage72 small{font-size:9px}}
