@@ -48,7 +48,7 @@ function common75ZoomCard(s){
 function common75JoinCard(s){
  if(s.participant)return '';
  if(s.phase==='upcoming')return '<section class="card cm75-join"><h2>Присоединение — 12 октября</h2><p>12 октября откроются стартовые замеры и фото ДО. Первый день заданий — 13 октября.</p></section>';
- if(!['join','live'].includes(s.phase)||s.today>s.campaign.start_date)return '<section class="card"><h2>Присоединение закрыто</h2><p>Следующий марафон появится здесь.</p></section>';
+ if(s.phase!=='join')return '<section class="card"><h2>Присоединение закрыто</h2><p>Присоединение к этому марафону проходит 12 октября.</p></section>';
  return '<section class="card cm75-join"><h2>Присоединиться к марафону</h2><p>Сейчас фиксируем старт: вес, талию и фото ДО.</p><form id="cm75JoinForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" required></label></div><label>Фото ДО<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn primary">Присоединиться 🏁</button><p role="status"></p></form></section>';
 }
 function common75FinishCard(s){
