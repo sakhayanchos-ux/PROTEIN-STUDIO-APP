@@ -1322,7 +1322,7 @@ async function changeProfilePassword(event){
 }
 
 function soon(name){return `<section class="card"><b>Раздел уже заложен в структуру.</b><p class="muted">Наполнение добавим следующим этапом без переделки основы приложения.</p></section>`}
-const pages={consultants:pageStaffChat,messages:pageMessages,coachPlan:coachPlan,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,events:()=>pageEvents62("event"),training:()=>pageEvents62("training"),links:pageUsefulLinks,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
+const pages={consultants:pageStaffChat,messages:pageMessages,coachPlan:coachPlan,personalMarathon:journeyShell,myQR:pageMyQR,admin:pageAdmin,staffCard:consultantCardForm,topics:journeyShell,water:pageNutrition,plan:pagePlan,nutrition:pageNutrition,workouts:pageWorkouts,marathon:journeyShell,progress:pageProgress,achievements:journeyShell,events:()=>pageEvents62("event"),training:()=>pageEvents62("training"),links:pageUsefulLinks,community:pageCommunity,consultant:pageConsultant,notifications:pageNotifications,profile:pageProfile};
 
 $("saveSetupBtn").addEventListener("click",()=>{
   const url=$("setupUrl").value.trim(),key=$("setupKey").value.trim();
