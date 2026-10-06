@@ -1143,6 +1143,7 @@ async function loadSavedCollages(){
   }
   box.innerHTML=items.map(({row,url})=>`
     <div class="saved-collage">
+      <button class="saved-collage-delete" type="button" aria-label="Удалить результат" data-collage-id="${row.id}" data-path="${row.storage_path}">×</button>
       <img src="${url}" alt="Коллаж прогресса">
       <div class="saved-collage-info">
         <b>${row.weight_change_kg!=null?deltaText(row.weight_change_kg," кг"):"Прогресс"} · ${row.days_count||0} дн.</b>
@@ -1152,6 +1153,22 @@ async function loadSavedCollages(){
     </div>
   `).join("");
   box.querySelectorAll(".share-collage-btn").forEach(btn=>btn.addEventListener("click",()=>shareSavedCollage(btn.dataset.path)));
+  box.querySelectorAll(".saved-collage-delete").forEach(btn=>btn.addEventListener("click",()=>deleteSavedCollage(btn.dataset.collageId,btn.dataset.path,btn)));
+}
+
+async function deleteSavedCollage(id,path,button){
+  if(!confirm("Удалить этот результат из истории?"))return;
+  button.disabled=true;
+  try{
+    const del=await sb.from("ps_progress_collages").delete().eq("id",id).eq("user_id",me.id);
+    if(del.error)throw del.error;
+    const rm=await sb.storage.from("ps-progress-photos").remove([path]);
+    if(rm.error)console.warn("Collage storage cleanup:",rm.error);
+    await loadSavedCollages();
+  }catch(e){
+    button.disabled=false;
+    alert("Не удалось удалить результат. Попробуйте ещё раз.");
+  }
 }
 
 async function shareSavedCollage(path){
