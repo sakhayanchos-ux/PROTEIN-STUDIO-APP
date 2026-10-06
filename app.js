@@ -162,6 +162,11 @@ async function bootstrap(){
     profile=p.data;
     assessment=a.data||null;
     await loadStaffAccess();
+    if(staffConsultants.length){
+      const ownMarathon=await sb.rpc("ps_marathon_state");
+      personalMarathonAvailable=!ownMarathon.error&&!!ownMarathon.data?.enrollment?.data?.personal;
+      staffNavigation();
+    }
     if(profile.access_paused&&!staffConsultants.length){
       showScreen("appScreen");
       $("drawer").classList.add("hidden");
