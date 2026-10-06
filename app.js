@@ -547,7 +547,8 @@ function openPage(page){
   if(page==="myQR")bindMyQR();
   if(page==="staffCard")bindConsultantCardEditor();
   if(page==="topics")loadTopics();
-  if(isStaffWorkspace()&&["marathon","achievements"].includes(page)){loadStaffCollection(page);if(page==="marathon")loadTaskSettings()}
+  if(page==="personalMarathon")loadMarathonTracker();
+  else if(isStaffWorkspace()&&["marathon","achievements"].includes(page)){loadStaffCollection(page);if(page==="marathon")loadTaskSettings()}
   else if(page==="marathon")loadMarathonTracker();
   else if(page==="achievements")loadAchievements();
   if(page==="progress")bindProgressPhotoActions();
