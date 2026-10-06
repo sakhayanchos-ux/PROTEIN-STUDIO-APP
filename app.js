@@ -525,7 +525,7 @@ function openPage(page){
   stopCommunity();
   toggleDrawer(false);
   document.querySelectorAll(".nav[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",events:"Мероприятия",training:"Обучение",links:"Полезные ссылки",messages:"Личные сообщения",coachPlan:"Мой план",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
+  const titles={consultants:"Консультанты",invitations:"Приглашения",story:"Моя история",events:"Мероприятия",training:"Обучение",links:"Полезные ссылки",messages:"Личные сообщения",coachPlan:"Мой план",personalMarathon:"Мой марафон",myQR:"Мои QR-коды",admin:"Клиенты",staffCard:"О себе",topics:"Темы",water:"Вода",plan:"Мой план",nutrition:"Питание",workouts:"Тренировки",marathon:"Марафон",progress:"Прогресс",achievements:"Достижения",community:"Группа поддержки",consultant:"Мой консультант",notifications:"Уведомления",profile:"Профиль"};
   $("pageTitle").textContent=titles[page]||"PROTEIN STUDIO";
   const fn=(isStaffWorkspace()&&["marathon","achievements"].includes(page)?pageStaffCollection:pages[page])||(()=>soon(titles[page]));
   $("content").innerHTML=fn();
