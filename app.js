@@ -219,7 +219,7 @@ async function bootstrap(){
     showScreen("appScreen");
     $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
     let savedRoute=null;try{savedRoute=localStorage.getItem(LAST_ROUTE_KEY)}catch{}
-    const staffAllowed=["coachPlan","admin","staffCard","workouts","marathon","topics","achievements","events","training","links","consultants","messages","community","notifications","myQR","profile","story"];
+    const staffAllowed=["coachPlan","personalMarathon","admin","staffCard","workouts","marathon","topics","achievements","events","training","links","consultants","messages","community","notifications","myQR","profile","story"];
     const clientAllowed=["plan","workouts","marathon","topics","progress","achievements","events","training","links","invitations","story","messages","community","consultant","notifications","profile"];
     const fallback=staffConsultants.length?"coachPlan":"plan";
     const startRoute=(staffConsultants.length?staffAllowed:clientAllowed).includes(savedRoute)?savedRoute:fallback;
