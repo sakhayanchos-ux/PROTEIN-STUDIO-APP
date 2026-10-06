@@ -30,19 +30,45 @@ async function loadCoachResult(){
 }
 async function refreshCoachResult(){const route=$('coachWeightRoute'),graph=$('coachGraphs');try{const [s,rows]=await Promise.all([getProgressSummary(),checked(sb.from('ps_progress_entries').select('entry_date,weight_kg,waist_cm').eq('user_id',me.id).order('entry_date'))]);const chartRows=[...rows];if(s.startDate&&(s.startWeight!=null||s.startWaist!=null))chartRows.unshift({entry_date:s.startDate,weight_kg:s.startWeight,waist_cm:s.startWaist,_start:true});if(route?.isConnected)route.innerHTML=resultRouteHtml(s);if(graph?.isConnected)graph.innerHTML=resultGraph(chartRows,'weight_kg','Вес','кг')+resultGraph(chartRows,'waist_cm','Талия','см')+'<details><summary>Все замеры</summary><div class="business-table"><table><thead><tr><th>Дата</th><th>Вес</th><th>Талия</th></tr></thead><tbody>'+chartRows.map(r=>'<tr><td>'+dateLabel(r.entry_date)+(r._start?' · старт':'')+'</td><td>'+ruNumber(r.weight_kg)+'</td><td>'+ruNumber(r.waist_cm)+'</td></tr>').join('')+'</tbody></table></div></details>'}catch{if(route?.isConnected)route.textContent='Не удалось загрузить результат. Откройте вкладку ещё раз.'}}
 
-// Preview uses the actual client rendering, with writes blocked before reaching Supabase.
-function previewBlocked(){return {data:null,error:{message:'Предпросмотр: данные не сохраняются. Вернитесь в кабинет консультанта.'}}}
-function previewQuery(q){return new Proxy(q,{get(t,k){if(['insert','update','upsert','delete'].includes(k))return ()=>previewQuery(Promise.resolve(previewBlocked()));const v=Reflect.get(t,k,t);if(k==='then')return v.bind(t);if(typeof v==='function')return (...a)=>{const next=v.apply(t,a);return next&&typeof next==='object'?previewQuery(next):next};return v}})}
-function emptyPreviewQuery(){const q=new Proxy({},{get(t,k){if(k==='then')return (yes,no)=>Promise.resolve({data:[],error:null,count:0}).then(yes,no);return ()=>q}});return q}
-function previewClient(real){return new Proxy(real,{get(t,k){if(k==='from')return (...a)=>a[0]==='ps_notifications'?emptyPreviewQuery():previewQuery(t.from(...a));if(k==='rpc')return async(name)=>{if(name==='ps_marathon_state')return {data:previewData};if(name==='ps_get_marathon_days')return {data:previewData.topics.map(d=>({...d,unlocked:d.day_number<=previewData.day,unlock_date:isoPlus(previewData.enrollment.start_date,d.day_number-1)}))};if(name==='ps_community_moderator')return {data:false};return previewBlocked()};if(k==='functions')return {invoke:async()=>previewBlocked()};if(k==='storage')return {from:bucket=>new Proxy(t.storage.from(bucket),{get(st,key){if(['upload','update','remove','move','copy'].includes(key))return async()=>previewBlocked();const v=st[key];return typeof v==='function'?v.bind(st):v}})};if(k==='auth')return new Proxy(t.auth,{get(a,key){if(['signOut','updateUser','signUp','signInWithPassword'].includes(key))return async()=>previewBlocked();const v=a[key];return typeof v==='function'?v.bind(a):v}});const v=t[k];return typeof v==='function'?v.bind(t):v}})}
+// Client version uses the real client UI and saves changes to the consultant's own profile.
+function selfClientApi(real){
+ return new Proxy(real,{get(t,k){
+  if(k==='rpc')return async(name,args)=>{
+   if(name==='ps_community_moderator')return {data:false,error:null};
+   return t.rpc(name,args);
+  };
+  const v=t[k];return typeof v==='function'?v.bind(t):v;
+ }});
+}
 async function enterClientPreview(){
  if(!staffConsultants.length||clientPreview)return;
  const button=$('clientPreviewNav');button.disabled=true;
- try{const topics=await checked(sb.from('ps_marathon_days').select('*').order('day_number'));const templates=await checked(sb.from('ps_marathon_task_templates').select('*').is('consultant_id',null).eq('active',true));const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Yakutsk',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
- previewData={enrollment:{id:'preview',start_date:today,stars:0,duration_days:30},day:1,actual_day:1,percent:0,checks:[],topics,rewards:[10,25,50,75,100].map(n=>({id:'preview-'+n,milestone:n,gift:null})),tasks:Array.from({length:30},(_,i)=>templates.map(t=>({...t,day_number:i+1,enrollment_id:'preview',completed_at:null}))).flat()};
- stopCommunity();clientPreview=true;previewOriginalProfile=profile;profile={...profile,role:'client',consultant_id:staffConsultants[0].id};previewOriginalSB=sb;sb=previewClient(sb);staffNavigation();$('clientPreviewBar').classList.remove('hidden');
- previewObserver=new MutationObserver(disablePreviewWrites);previewObserver.observe($('content'),{childList:true,subtree:true});openPage('plan');disablePreviewWrites();
- }catch(e){alert('Не удалось открыть предпросмотр: '+e.message)}finally{button.disabled=false}
+ try{
+  stopCommunity();
+  clientPreview=true;
+  previewOriginalProfile=profile;
+  profile={...profile,role:'client',consultant_id:staffConsultants[0].id};
+  previewOriginalSB=sb;
+  sb=selfClientApi(sb);
+  staffNavigation();
+  $('clientPreviewBar').classList.remove('hidden');
+  openPage('marathon');
+ }catch(e){
+  clientPreview=false;
+  if(previewOriginalSB){sb=previewOriginalSB;previewOriginalSB=null}
+  if(previewOriginalProfile){profile=previewOriginalProfile;previewOriginalProfile=null}
+  alert('Не удалось открыть клиентскую версию: '+e.message);
+ }finally{button.disabled=false}
 }
-function disablePreviewWrites(){if(!clientPreview)return;document.querySelectorAll('#content input,#content textarea,#content form button,#content [data-claim],#content [data-read-notice],#saveMeasurementBtn,#beforePhotoBtn,#afterPhotoBtn,#makeCollageBtn,#profilePhotoBtn,#removeProfilePhotoBtn,#profileLogoutBtn,#communityPhotoBtn').forEach(el=>{el.disabled=true;el.title='Предпросмотр — без сохранения'});}
-function exitClientPreview(){if(!clientPreview)return;stopCommunity();previewObserver?.disconnect();previewObserver=null;sb=previewOriginalSB;previewOriginalSB=null;profile=previewOriginalProfile;previewOriginalProfile=null;clientPreview=false;previewData=null;$('clientPreviewBar').classList.add('hidden');staffNavigation();openPage('coachPlan')}
+function disablePreviewWrites(){}
+function exitClientPreview(){
+ if(!clientPreview)return;
+ stopCommunity();
+ previewObserver?.disconnect();previewObserver=null;
+ if(previewOriginalSB){sb=previewOriginalSB;previewOriginalSB=null}
+ if(previewOriginalProfile){profile=previewOriginalProfile;previewOriginalProfile=null}
+ clientPreview=false;previewData=null;
+ $('clientPreviewBar').classList.add('hidden');
+ staffNavigation();
+ openPage('coachPlan');
+}
