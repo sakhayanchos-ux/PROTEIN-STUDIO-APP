@@ -90,7 +90,7 @@ async function loadCommonMarathon75(){
   if(isStaffWorkspace()&&!clientPreview)return loadCommonMarathonStaff75(box);
   const s=await checked(sb.rpc('ps_common_marathon_state'));common75State=s;
   if(!s.campaign){box.innerHTML='<section class="card">Активного марафона пока нет.</section>';return}
-  box.innerHTML=common75Hero(s)+common75JoinCard(s)+(s.participant?common75ZoomCard(s):'')+common75Daily(s)+common75FinishCard(s)+common75Rules()+common75History(s);
+  box.innerHTML=common75Hero(s)+common75JoinCard(s)+common75ZoomCard(s)+common75Daily(s)+common75FinishCard(s)+common75Rules()+common75History(s);
   bindCommonMarathon75(box,s);hydratePhotos(box);
  }catch(e){journeyError(box,e,loadCommonMarathon75)}
 }
