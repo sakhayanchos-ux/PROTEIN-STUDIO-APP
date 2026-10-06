@@ -18,6 +18,7 @@ function common75Poster(path){
  return url?'<img class="cm75-poster" src="'+escapeHtml(url)+'" alt="Афиша Zoom">':'';
 }
 function common75SafeUrl(value){try{const u=new URL(value);return u.protocol==='https:'?u.href:''}catch{return ''}}
+function common75Preview(){return typeof clientPreview!=='undefined'&&clientPreview}
 function common75Rules(){
  return '<section class="card cm75-rules"><h2>Как собираем ⭐</h2><div class="cm75-rule-grid">'+
  [['1⭐','за каждые 1000 шагов'],['3⭐','ужин коктейлем'],['3⭐','Turbo / Detox'],['5⭐','утренний Zoom'],['5⭐','каждый друг в Zoom'],['5⭐','тренировка + фото'],['10⭐','коллаж ДО / ПОСЛЕ'],['10⭐','сканирование друга'],['20⭐','Амбассадор · 2❤️'],['20⭐','за каждые 50 VP']]
@@ -34,34 +35,37 @@ function common75ZoomCard(s){
  const sessions=s.zoom_sessions||[],today=s.today;
  const z=sessions.find(x=>x.session_date===today)||sessions.find(x=>x.session_date>=today)||sessions[sessions.length-1];
  if(!z)return '';
- const isToday=z.session_date===today;
+ const isToday=z.session_date===today||common75Preview();
  const self=common75Entry(s,'zoom_self'),friend=common75Entry(s,'zoom_friend');
  const url=common75SafeUrl(z.zoom_url);
  return '<section class="card cm75-zoom"><div class="eyebrow">☀️ УТРЕННИЙ ZOOM · 7:30</div><h2>'+escapeHtml(z.title)+'</h2><p>'+common75Date(z.session_date)+(isToday?' · сегодня':'')+'</p>'+
  common75Poster(z.poster_path)+
  (url?'<a class="btn primary app-link" href="'+escapeHtml(url)+'" target="_blank" rel="noopener">Подключиться к Zoom</a>':'<p class="muted">Ссылка Zoom появится здесь.</p>')+
- (isToday&&s.participant?'<div class="cm75-actions">'+
+ (isToday&&(s.participant||common75Preview())?'<div class="cm75-actions">'+
    (self?common75EntryStatus(self):'<button class="btn ghost" data-cm75-submit="zoom_self">Я подключилась · +5⭐</button><p id="cm75ZoomStatus" role="status"></p>')+
    (friend?common75EntryStatus(friend):'<form data-cm75-form="zoom_friend"><label>Сколько друзей подключилось?<input name="qty" type="number" min="1" max="20" value="1" required></label><button class="btn ghost">Друг в Zoom · +5⭐ за каждого</button><p role="status"></p></form>')+
  '</div>':'')+'</section>';
 }
 function common75JoinCard(s){
- if(s.participant)return '';
- if(s.phase==='upcoming')return '<section class="card cm75-join"><h2>Присоединение — 12 октября</h2><p>12 октября откроются стартовые замеры и фото ДО. Первый день заданий — 13 октября.</p></section>';
- if(s.phase!=='join')return '<section class="card"><h2>Присоединение закрыто</h2><p>Присоединение к этому марафону проходит 12 октября.</p></section>';
- return '<section class="card cm75-join"><h2>Присоединиться к марафону</h2><p>Сейчас фиксируем старт: вес, талию и фото ДО.</p><form id="cm75JoinForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" required></label></div><label>Фото ДО<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn primary">Присоединиться 🏁</button><p role="status"></p></form></section>';
+ if(s.participant)return common75Preview()?'<section class="card cm75-preview-note"><b>👁 Ты уже участвуешь как клиент</b><p>Все действия в клиентской версии относятся к твоему собственному профилю.</p></section>':'';
+ if(s.phase==='upcoming'&&!common75Preview())return '<section class="card cm75-join"><h2>Присоединение — 12 октября</h2><p>12 октября откроются стартовые замеры и фото ДО. Первый день заданий — 13 октября.</p></section>';
+ if(s.phase!=='join'&&!common75Preview())return '<section class="card"><h2>Присоединение закрыто</h2><p>Присоединение к этому марафону проходит 12 октября.</p></section>';
+ return '<section class="card cm75-join"><div class="eyebrow">'+(common75Preview()?'👁 КЛИЕНТСКАЯ ВЕРСИЯ':'СТАРТ')+'</div><h2>Присоединиться к марафону</h2><p>'+(common75Preview()?'Можно проверить весь путь клиента уже сейчас. Стартовые данные сохранятся в твой профиль, а датой старта будет 12 октября.':'Сейчас фиксируем старт: вес, талию и фото ДО.')+'</p><form id="cm75JoinForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" required></label></div><label>Фото ДО<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn primary">Присоединиться 🏁</button><p role="status"></p></form></section>';
 }
 function common75FinishCard(s){
- if(!s.participant||s.today<s.campaign.end_date)return '';
- if(s.participant.after_photo_path)return '<section class="card"><h2>Финальные замеры ✓</h2><p>Фото ПОСЛЕ и замеры сохранены. Теперь создайте коллаж в разделе «Прогресс».</p><button class="btn primary" data-cm75-go="progress">Создать коллаж</button>'+common75EntryStatus(common75Entry(s,'collage',s.campaign.end_date))+'</section>';
- return '<section class="card cm75-finish"><h2>Финиш · замеры и фото ПОСЛЕ</h2><form id="cm75FinishForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" required></label></div><label>Фото ПОСЛЕ<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn primary">Сохранить финал</button><p role="status"></p></form></section>';
+ const preview=common75Preview();
+ if((!s.participant&&!preview)||(s.today<s.campaign.end_date&&!preview))return '';
+ if(s.participant?.after_photo_path)return '<section class="card"><h2>Финальные замеры ✓</h2><p>Фото ПОСЛЕ и замеры сохранены. Теперь создайте коллаж в разделе «Прогресс».</p><button class="btn primary" data-cm75-go="progress">Создать коллаж</button>'+common75EntryStatus(common75Entry(s,'collage',s.campaign.end_date))+'</section>';
+ return '<section class="card cm75-finish"><div class="eyebrow">'+(preview&&s.today<s.campaign.end_date?'👁 ПРЕДПРОСМОТР · ОТКРОЕТСЯ 22 ОКТЯБРЯ':'ФИНИШ')+'</div><h2>Финиш · замеры и фото ПОСЛЕ</h2><form id="cm75FinishForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" required></label></div><label>Фото ПОСЛЕ<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn primary">Сохранить финал</button><p role="status">'+(preview&&s.today<s.campaign.end_date?'Сейчас можно посмотреть форму. Сохранение финала откроется 22 октября.':'')+'</p></form></section>';
 }
 function common75Daily(s){
- if(!s.participant||s.phase!=='live')return '';
+ const preview=common75Preview();
+ if((!s.participant&&!preview)||(s.phase!=='live'&&!preview))return '';
  const steps=common75Entry(s,'steps'),dinner=common75Entry(s,'dinner_shake'),turbo=common75Entry(s,'turbo_detox'),
  workout=common75Entry(s,'workout'),scan=common75Entry(s,'scan_friend'),vp=common75Entry(s,'vp');
  const ambassador=(s.entries||[]).find(e=>e.kind==='ambassador'&&(e.status==='auto'||e.status==='approved'));
- return '<section class="card cm75-today"><div class="eyebrow">ДЕНЬ '+s.day_number+' ИЗ 10</div><h2>Сегодня собираем ⭐</h2>'+
+ const shownDay=s.day_number||1;
+ return '<section class="card cm75-today"><div class="eyebrow">'+(preview&&s.phase!=='live'?'👁 ПРЕДПРОСМОТР · ДЕНЬ 1':'ДЕНЬ '+shownDay+' ИЗ 10')+'</div><h2>Сегодня собираем ⭐</h2>'+(preview&&s.phase!=='live'?'<p class="muted">Все зоны уже видны. Начисление реальных звёзд начнётся 13 октября.</p>':'')+
  '<div class="cm75-task"><h3>🚶 Шаги · 1⭐ / 1000</h3><form data-cm75-form="steps"><label>Шагов сегодня<input name="value" type="number" min="0" max="100000" value="'+escapeHtml(steps?.value??'')+'" required></label><button class="btn ghost">Сохранить шаги</button><p role="status">'+(steps?'Сейчас: '+steps.value+' шагов · +'+steps.stars+'⭐':'')+'</p></form></div>'+
  '<div class="cm75-task"><h3>🥤 Ужин коктейлем · 3⭐</h3>'+(dinner&&dinner.status!=='rejected'?common75EntryStatus(dinner):'<form data-cm75-photo="dinner_shake"><label>Фото ужина<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn ghost">Отправить в общую группу</button><p role="status"></p></form>')+'</div>'+
  '<div class="cm75-task"><h3>⚡ Turbo / Detox · 3⭐</h3>'+(turbo&&turbo.status!=='rejected'?common75EntryStatus(turbo):'<form data-cm75-photo="turbo_detox"><label>Фото Turbo / Detox<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn ghost">Отправить в общую группу</button><p role="status"></p></form>')+'</div>'+
@@ -72,7 +76,7 @@ function common75Daily(s){
  '</section>';
 }
 function common75History(s){
- if(!s.participant)return '';
+ if(!s.participant&&!common75Preview())return '';
  const rows=(s.entries||[]).filter(e=>e.status==='approved'||e.status==='auto');
  const labels={steps:'Шаги',dinner_shake:'Ужин коктейлем',turbo_detox:'Turbo / Detox',zoom_self:'Zoom',zoom_friend:'Друг в Zoom',workout:'Тренировка',scan_friend:'Сканирование друга',ambassador:'Амбассадор',collage:'Коллаж ДО / ПОСЛЕ',vp:'VP'};
  return '<section class="card"><details><summary><b>История звёзд · ⭐ '+s.stars+'</b></summary><div class="cm75-ledger">'+(rows.length?rows.map(e=>'<div><span>'+common75Date(e.entry_date)+' · '+escapeHtml(labels[e.kind]||e.kind)+'</span><b>+'+e.stars+'⭐</b></div>').join(''):'<p>Пока звёзд нет.</p>')+'</div></details></section>';
