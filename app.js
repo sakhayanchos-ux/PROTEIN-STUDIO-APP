@@ -1187,7 +1187,7 @@ async function shareSavedCollage(path){
 }
 
 function pageConsultant(){return '<div id="clientConsultantCard"><section class="card">Загружаем карточку…</section></div>'}
-function pageUsefulLinks(){return '<section class="card useful-links62"><div class="eyebrow">Официальные ресурсы</div><h1>Полезные ссылки</h1><a class="btn primary" href="https://www.herbalife.ru/" target="_blank" rel="noopener">Herbalife.ru · Официальный сайт</a><p class="muted">Информация о компании и продуктах.</p><a class="btn ghost" href="https://www.myherbalife.com/" target="_blank" rel="noopener">MyHerbalife.com · Мой кабинет</a><p class="muted"><b>Заказы · регистрация · доход</b></p></section>'}
+function pageUsefulLinks(){return '<section class="card useful-links62"><div class="eyebrow">Официальные ресурсы</div><h1>Полезные ссылки</h1><a class="btn primary" href="https://www.herbalife.ru/" target="_blank" rel="noopener">Herbalife.ru · Официальный сайт</a><p class="muted">Заказы продукции и информация о продуктах Herbalife.</p><a class="btn ghost" href="https://www.myherbalife.com/" target="_blank" rel="noopener">MyHerbalife.com · Мой кабинет</a><p class="muted"><b>Личный кабинет независимого партнёра, регистрация и управление бизнесом.</b></p></section>'}
 function pageNotifications(){
   if(isStaffWorkspace())return pushMarkup()+'<section class="card"><h3>События клиентов</h3><div id="journeyNotifications">Загружаем…</div></section>';
   return pushMarkup()+`<section class="card"><div id="journeyNotifications">Загружаем…</div></section><section class="card">
@@ -1234,7 +1234,7 @@ function pageProfile(){
   <div><label for="personalHeight">Рост, см</label><input id="personalHeight" type="number" inputmode="decimal" min="50" max="250" step="0.1" value="${escapeHtml(profile?.height_cm??"")}"></div></div>
   <button class="btn primary" id="savePersonalBtn">Сохранить</button><p class="profile-status" id="personalMessage" role="status"></p>
   </form></section>
-  <section class="card profile-discount62"><h3>Моя скидка / статус</h3><div class="fact-grid"><div><span>Скидка</span><b>${escapeHtml(profile?.discount_level?profile.discount_level+"%":"Не назначена")}</b></div><div><span>Статус</span><b>${escapeHtml(profile?.member_status||"—")}</b></div></div><p class="muted">Скидку назначает ваш консультант.</p></section>
+  <section class="card profile-discount62" ${isStaffWorkspace()?"hidden":""}><h3>Моя скидка / статус</h3><div class="fact-grid"><div><span>Скидка</span><b>${escapeHtml(profile?.discount_level?profile.discount_level+"%":"Не назначена")}</b></div><div><span>Статус</span><b>${escapeHtml(profile?.member_status||"—")}</b></div></div><p class="muted">Скидку назначает ваш консультант.</p></section>
   <section class="card theme-settings"><h3>Оформление</h3>
   <div class="theme-options">${Object.entries(THEMES).map(([id,theme])=>`<button type="button" class="theme-choice" data-theme-choice="${id}" aria-pressed="${selectedTheme===id}"><span class="theme-preview theme-preview-${id}" style="background-image:url('${theme.image}')"></span><span>${theme.name}</span><span class="theme-check" aria-hidden="true">✓</span></button>`).join("")}</div>
   <p class="profile-status" id="themeStatus" role="status"></p></section>
