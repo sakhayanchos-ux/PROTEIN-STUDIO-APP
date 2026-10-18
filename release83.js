@@ -22,6 +22,7 @@ const cm83PagePlan=pagePlan;
 pagePlan=function(){
   return cm83PagePlan()+'<section class="card"><div class="eyebrow">МОЙ РЕЗУЛЬТАТ</div><h2>Динамика замеров</h2><p class="muted">Графики строятся только по реально сохранённым замерам. Если в день внесён только вес, талия не подставляется автоматически.</p><div id="clientMeasurementCharts83">Загружаем графики…</div></section>';
 };
+pages.plan=pagePlan;
 const cm83OpenPage=openPage;
 openPage=function(page){
   cm83OpenPage(page);
