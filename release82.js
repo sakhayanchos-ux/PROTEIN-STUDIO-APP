@@ -137,7 +137,7 @@ loadCommonMarathon75=async function(){
   const before=s.phase==='upcoming'||s.phase==='join';
   const live=s.phase==='live';
   const finished=s.phase==='results'||s.phase==='finished';
-  const hero='<section class="card cm75-hero"><div class="eyebrow">🏁 НАШ ОБЩИЙ МАРАФОН</div><h1>'+escapeHtml(s.campaign.title||'21-дневный марафон')+'</h1><p>21 день · '+common75Date(start)+' — '+common75Date(end)+' · Итоги '+common75Date(s.campaign.results_date)+'</p><div class="cm75-hero-row"><div><span>Этап</span><b>'+(live?'День '+s.day_number+' из 21':finished?'Итоги':before?'Регистрация':'Подготовка')+'</b></div><div class="cm75-stars"><span>Мои звёзды</span><b>⭐ '+Number(s.stars||0)+'</b></div></div></section>';
+  const hero='<section class="card cm75-hero cm95-marathon-hero"><div class="eyebrow">🏁 НАШ ОБЩИЙ МАРАФОН</div><h1>'+escapeHtml(s.campaign.title||'21-дневный марафон')+'</h1><p>21 день · '+common75Date(start)+' — '+common75Date(end)+' · Итоги '+common75Date(s.campaign.results_date)+'</p><div class="cm75-hero-row"><div><span>Этап</span><b>'+(live?'День '+s.day_number+' из 21':finished?'Итоги':before?'Регистрация':'Подготовка')+'</b></div><div class="cm75-stars"><span>Мои звёзды</span><b>⭐ '+Number(s.stars||0)+'</b></div></div></section>';
   const allowed=s.today>=s.campaign.join_date&&s.today<=s.campaign.end_date;
   const enroll=joined?cm81ZeroDay(s):allowed?cm81ZeroDay({...s,phase:'join'}):'<section class="card"><h2>Стартовые замеры</h2><p>Регистрация откроется '+common75Date(s.campaign.join_date)+'.</p></section>';
   box.innerHTML=hero+enroll+common75ZoomCard(s)+(joined&&live?common75Daily(s):'')+
