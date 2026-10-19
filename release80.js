@@ -3,7 +3,7 @@ function cm80DayName(v){return new Date(v+'T12:00:00').toLocaleDateString('ru-RU
 function cm80Time(z){return z?.session_time?String(z.session_time).slice(0,5):''}
 function cm80Program(s){
  const rows=s.zoom_sessions||[];
- return '<section class="card cm80-program"><div class="eyebrow">💫 ПРОГРАММА МАРАФОНА</div><h2>12–23 октября</h2><div class="cm80-program-list">'+rows.map(z=>{
+ return '<section class="card cm80-program"><div class="eyebrow">💫 ПРОГРАММА МАРАФОНА</div><h2>'+common75Date(s.campaign.start_date)+' — '+common75Date(s.campaign.end_date)+'</h2><div class="cm80-program-list">'+rows.map(z=>{
   const rest=!!z.is_rest;
   return '<article class="cm80-program-day '+(rest?'rest':'')+'"><div class="cm80-program-date"><b>'+common75Date(z.session_date)+'</b><span>'+cm80DayName(z.session_date)+'</span></div><div class="cm80-program-body">'+
     (rest?'<h3>🌿 Отдых</h3><p>Восстановление и мягкая активность.</p>':
@@ -44,7 +44,7 @@ function cm80Tracker(s){
 function cm80WorkoutSchedule(s){
  const rows=s.workout_schedule||[];
  if(!rows.length)return '';
- return '<section class="card cm80-workouts"><div class="eyebrow">🏋🏻‍♀️ ТРЕНИРОВКИ ПО ДНЯМ</div><h2>13–22 октября</h2><p>Как темы: каждый день открывается своя простая тренировка. Прошедшие дни остаются доступными для просмотра.</p>'+
+ return '<section class="card cm80-workouts"><div class="eyebrow">🏋🏻‍♀️ ТРЕНИРОВКИ ПО ДНЯМ</div><h2>'+common75Date(s.campaign.start_date)+' — '+common75Date(s.campaign.end_date)+'</h2><p>Как темы: каждый день открывается своя простая тренировка. Прошедшие дни остаются доступными для просмотра.</p>'+
  rows.map((w,i)=>{
    const preview=common75Preview();
    const unlocked=w.unlocked||preview;
