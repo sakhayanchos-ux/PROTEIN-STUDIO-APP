@@ -13,7 +13,7 @@ function cm82PhotoGrid(p,prefix,label){
 cm81ZeroDay=function(s){
  const p=s.participant;
  if(!p||!cm82StartComplete(p)){
-   if(s.phase!=='join')return '';
+   if(s.phase!=='join'&&s.phase!=='live')return '';
    return '<section class="card cm81-zero"><div class="eyebrow">📸 НУЛЕВОЙ ДЕНЬ</div><h2>Стартовые замеры и 3 фото ДО</h2><p>Нужны три ракурса: <b>спереди, сбоку и сзади</b>. Для фото сбоку выберите любую сторону и повторите ту же сторону ПОСЛЕ.</p>'+
     '<form id="cm82JoinForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" value="'+escapeHtml(p?.start_weight_kg??'')+'" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" value="'+escapeHtml(p?.start_waist_cm??'')+'" required></label></div>'+
     '<label>Фото ДО · спереди<input name="front" type="file" accept="image/jpeg,image/png,image/webp" required></label>'+
