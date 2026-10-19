@@ -23,7 +23,7 @@ cm81ZeroDay=function(s){
  }
  return '<section class="card cm81-zero"><div class="eyebrow">✅ НУЛЕВОЙ ДЕНЬ</div><h2>Старт зафиксирован</h2><div class="cm81-zero-grid"><div><span>Вес</span><b>'+escapeHtml(p.start_weight_kg??'—')+' кг</b></div><div><span>Талия</span><b>'+escapeHtml(p.start_waist_cm??'—')+' см</b></div><div><span>Фото ДО</span><b>3 / 3 ✓</b></div></div>'+
  cm82PhotoGrid(p,'before','ДО')+
- '<p class="muted">Кто в городе — 12 октября можно прийти на сканирование в клуб.</p></section>';
+ '<p class="muted">Сканирование Wellness можно пройти в своём клубе.</p></section>';
 };
 common75FinishCard=function(s){
  const p=s.participant;
@@ -34,7 +34,7 @@ common75FinishCard=function(s){
    '<button class="btn primary" data-cm75-go="progress">Создать коллаж</button>'+common75EntryStatus(common75Entry(s,'collage',s.campaign.results_date))+'</section>';
  }
  if(!s.final_measurements_open){
-   return '<section class="card cm82-finish-closed"><div class="eyebrow">🔒 ФИНАЛЬНЫЕ ЗАМЕРЫ</div><h2>Приём замеров закрыт</h2><p>23 октября финальные замеры и фотографии принимаются <b>до 15:00</b>.</p></section>';
+   return '<section class="card cm82-finish-closed"><div class="eyebrow">🔒 ФИНАЛЬНЫЕ ЗАМЕРЫ</div><h2>Приём замеров закрыт</h2><p>В день итогов финальные замеры и фотографии принимаются <b>до 15:00</b>.</p></section>';
  }
  return '<section class="card cm82-finish"><div class="eyebrow">📸 ФИНАЛ · ДО 15:00</div><h2>Финальные замеры и 3 фото ПОСЛЕ</h2><p>Повторите те же три ракурса: <b>спереди, сбоку и сзади</b>. Сбоку — той же стороной, что и ДО.</p>'+
  '<form id="cm82FinishForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" required></label></div>'+
@@ -126,26 +126,30 @@ loadCommonMarathon75=async function(){
  const box=$('commonMarathon75')||$('journeyView');if(!box)return;
  try{
   if(isStaffWorkspace()&&!clientPreview)return loadCommonMarathonStaff75(box);
-  const s=await checked(sb.rpc('ps_common_marathon_state'));common75State=s;
-  if(!s.campaign){box.innerHTML='<section class="card">Активного марафона пока нет.</section>';return}
-  if(s.phase==='upcoming'){
-    box.innerHTML=cm81Locked(s);
-    return;
-  }
-  const zero=cm81ZeroDay(s);
+  const state=await checked(sb.rpc('ps_common_marathon_state'));common75State=state;
+  if(!state.campaign){box.innerHTML='<section class="card"><h2>21-дневный марафон</h2><p>Ближайший набор скоро откроется.</p></section>';return}
+  const s=state;
+  const start=s.campaign.start_date,end=s.campaign.end_date;
+  const dayCount=Math.round((Date.parse(end)-Date.parse(start))/86400000)+1;
+  if(dayCount!==21){box.innerHTML='<section class="card"><h2>Марафон на 21 день</h2><p>Ожидаем расписание нового марафона.</p></section>';return}
+  const today=s.today;
+  const joined=!!s.participant;
+  const before=s.phase==='upcoming'||s.phase==='join';
   const live=s.phase==='live';
-  const result=s.phase==='results'||s.phase==='finished';
-  box.innerHTML=
-    zero+
-    common75ZoomCard(s)+
-    (live?common75Daily(s):'')+
-    (live||result?cm80Tracker(s):'')+
-    (live||result?cm80WorkoutSchedule(s):'')+
-    (result?common75FinishCard(s):'')+
-    common75Rules()+
-    cm80Program(s)+
-    (live||result?cm80StarSend(s):'')+
-    common75History(s);
+  const finished=s.phase==='results'||s.phase==='finished';
+  const hero='<section class="card cm75-hero"><div class="eyebrow">🏁 НАШ ОБЩИЙ МАРАФОН</div><h1>'+escapeHtml(s.campaign.title||'21-дневный марафон')+'</h1><p>21 день · '+common75Date(start)+' — '+common75Date(end)+' · Итоги '+common75Date(s.campaign.results_date)+'</p><div class="cm75-hero-row"><div><span>Этап</span><b>'+(live?'День '+s.day_number+' из 21':finished?'Итоги':before?'Регистрация':'Подготовка')+'</b></div><div class="cm75-stars"><span>Мои звёзды</span><b>⭐ '+Number(s.stars||0)+'</b></div></div></section>';
+  const allowed=s.today>=s.campaign.join_date&&s.today<=s.campaign.end_date;
+  const enroll=joined?cm81ZeroDay(s):allowed?cm81ZeroDay({...s,phase:'join'}):'<section class="card"><h2>Стартовые замеры</h2><p>Регистрация откроется '+common75Date(s.campaign.join_date)+'.</p></section>';
+  box.innerHTML=hero+enroll+common75ZoomCard(s)+(joined&&live?common75Daily(s):'')+
+    (joined&&(live||finished)?cm80Tracker(s):'')+
+    (joined&&(live||finished)?cm80WorkoutSchedule(s):'')+
+    (joined&&finished?common75FinishCard(s):'')+
+    common75Rules()+cm80Program(s)+
+    (joined&&(live||finished)?cm80StarSend(s):'')+common75History(s);
+  box.querySelectorAll('h2').forEach(h=>{
+    if(h.textContent==='12–23 октября'||h.textContent==='13–22 октября')h.textContent=common75Date(start)+' — '+common75Date(end);
+  });
+  box.querySelectorAll('.cm80-stick1 b').forEach(cell=>{if(cell.textContent?.match(/^\\d\\d\\.10$/))cell.textContent=cell.closest('tr')?.querySelector('small')?.textContent||cell.textContent});
   bindCommonMarathon75(box,s);cm80Bind(box,s);cm81Bind(box,s);cm82Bind(box,s);hydratePhotos(box);
  }catch(e){journeyError(box,e,loadCommonMarathon75)}
 };
