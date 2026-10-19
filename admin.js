@@ -2,7 +2,7 @@ let staffConsultants=[];
 let adminRows=[];
 let adminViewVersion=0;
 async function loadStaffAccess(){
- const {data,error}=await sb.from("ps_consultants").select("id,display_name,referral_code").eq("user_id",me.id).eq("active",true);
+ const {data,error}=await sb.from("ps_consultants").select("id,display_name,referral_code,club_name").eq("user_id",me.id).eq("active",true);
  if(error)throw error;
  staffConsultants=data||[];
  staffNavigation();
