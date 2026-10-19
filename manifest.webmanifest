@@ -1,18 +1,18 @@
 {
-  "name": "PROTEIN STUDIO",
-  "short_name": "PROTEIN STUDIO",
+  "name": "Herbalife — PROTEIN STUDIO",
+  "short_name": "Herbalife",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "IMG_1609.jpeg",
-  "theme_color": "#f4f1e8",
-  "description": "Личный кабинет клиента PROTEIN STUDIO",
+  "background_color": "#fffef4",
+  "theme_color": "#eef2d7",
+  "description": "PROTEIN STUDIO — питание, прогресс и марафон",
   "icons": [
     {
-      "src": "scene.png",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "herbalife-icon.jpg",
+      "sizes": "128x128",
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ]
 }
