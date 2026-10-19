@@ -19,12 +19,7 @@ function common75Poster(path){
 }
 function common75SafeUrl(value){try{const u=new URL(value);return u.protocol==='https:'?u.href:''}catch{return ''}}
 function common75Preview(){return typeof clientPreview!=='undefined'&&clientPreview}
-function common75Rules(){
- return '<section class="card cm75-rules"><h2>Как собираем ⭐</h2><div class="cm75-rule-grid">'+
- [['1⭐','за каждые 1000 шагов'],['3⭐','ужин коктейлем'],['3⭐','Turbo / Detox'],['5⭐','утренний Zoom'],['5⭐','каждый друг в Zoom'],['5⭐','тренировка + фото'],['10⭐','коллаж ДО / ПОСЛЕ'],['10⭐','сканирование друга'],['20⭐','Амбассадор · 2❤️'],['20⭐','за каждые 50 VP']]
- .map(x=>'<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join('')+
- '</div></section>';
-}
+function common75Rules(){return '';}
 function common75Hero(s){
  const c=s.campaign;
  const phaseText=s.phase==='upcoming'?'Присоединение 12 октября':s.phase==='join'?'Сегодня присоединение':s.phase==='live'?'День '+s.day_number+' из 21':s.phase==='results'?'ИТОГ МАРАФОНА':s.phase==='finished'?'Марафон завершён':'Подготовка';
