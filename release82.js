@@ -149,7 +149,6 @@ loadCommonMarathon75=async function(){
   box.querySelectorAll('h2').forEach(h=>{
     if(h.textContent==='12–23 октября'||h.textContent==='13–22 октября')h.textContent=common75Date(start)+' — '+common75Date(end);
   });
-  box.querySelectorAll('.cm80-stick1 b').forEach(cell=>{if(cell.textContent?.match(/^\\d\\d\\.10$/))cell.textContent=cell.closest('tr')?.querySelector('small')?.textContent||cell.textContent});
   bindCommonMarathon75(box,s);cm80Bind(box,s);cm81Bind(box,s);cm82Bind(box,s);hydratePhotos(box);
  }catch(e){journeyError(box,e,loadCommonMarathon75)}
 };
