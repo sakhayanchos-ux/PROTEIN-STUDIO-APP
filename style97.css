@@ -1,0 +1,8 @@
+/* Release 97: compact star tracker cards */
+#ps96Stars .ps96-group{margin-top:18px;padding-top:12px;border-top:1px solid rgba(190,151,76,.27)}
+#ps96Stars .ps96-group h3{color:#dfbb6c;margin:0 0 10px}
+#ps96Stars .ps96-task{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(190,151,76,.2)}
+#ps96Stars .ps96-task>div{min-width:0;flex:1}
+#ps96Stars .ps96-task b{font-size:.94rem;font-weight:600;line-height:1.42;overflow-wrap:anywhere}
+#ps96Stars .ps96-task button{flex-shrink:0;font-size:.82rem;padding:9px 13px}
+@media(max-width:380px){#ps96Stars .ps96-task{align-items:flex-start;flex-direction:column}#ps96Stars .ps96-task button{align-self:flex-end}}
