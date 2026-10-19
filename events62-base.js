@@ -65,10 +65,12 @@ async function bindEvents62(kind){
  const box=$('eventsList62');if(!box)return;
  try{
   const d=await event62Load(kind),by=new Map(d.own.map(x=>[x.event_id,x]));if(!box.isConnected)return;
-  box.innerHTML=d.rows.length?d.rows.map(e=>event62Card(e,by.get(e.id),isStaffWorkspace())).join(''):'<section class="card"><p>Пока афиш нет.</p></section>';
+  const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Yakutsk'});
+  const visible=d.rows.filter(e=>e.is_permanent||!e.event_date||String(e.event_date).slice(0,10)>=today);
+  box.innerHTML=visible.length?visible.map(e=>event62Card(e,by.get(e.id),isStaffWorkspace())).join(''):'<section class="card"><p>Актуальных афиш пока нет.</p></section>';
   box.querySelectorAll('[data-join-event62]').forEach(b=>b.onclick=()=>buttonAction(b,async()=>{await checked(sb.rpc('ps_join_event',{p_event:b.dataset.joinEvent62}));await bindEvents62(kind)},box));
   box.querySelectorAll('[data-cancel-event62]').forEach(b=>b.onclick=()=>buttonAction(b,async()=>{await checked(sb.rpc('ps_cancel_event_participation',{p_event:b.dataset.cancelEvent62}));await bindEvents62(kind)},box));
-  if(isStaffWorkspace())bindEventStaffButtons62(kind,d.rows,box);
+  if(isStaffWorkspace())bindEventStaffButtons62(kind,visible,box);
   if(requestedEvent62){const el=$('event62-'+requestedEvent62);if(el){setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),80);requestedEvent62=null}}
  }catch(e){box.innerHTML='<section class="card"><p>Не удалось загрузить афиши.</p><button class="btn ghost" id="eventsRetry62">Повторить</button></section>';$('eventsRetry62').onclick=()=>bindEvents62(kind)}
 }
