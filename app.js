@@ -1,6 +1,7 @@
 const CONFIG_KEY="protein_studio_supabase_config";
 const LAST_ROUTE_KEY="protein_studio_last_route_v56";
 let sb=null,me=null,profile=null,assessment=null,plan=null,consultant=null,selectedGoals=[],progressSummary=null,onboardingStep=1,onboardingDraft={};
+let appIsMainAdmin=false;
 
 const $=id=>document.getElementById(id);
 const screens=["authScreen","setupScreen","onboardingScreen","appScreen"];
@@ -162,7 +163,10 @@ async function bootstrap(){
     profile=p.data;
     assessment=a.data||null;
     await loadStaffAccess();
+    appIsMainAdmin=false;
     if(staffConsultants.length){
+      const privilege=await sb.rpc('ps_is_app_admin');
+      appIsMainAdmin=!privilege.error&&privilege.data===true;
       const ownMarathon=await sb.rpc("ps_marathon_state");
       personalMarathonAvailable=!ownMarathon.error&&!!ownMarathon.data?.enrollment?.data?.personal;
       staffNavigation();
@@ -217,7 +221,7 @@ async function bootstrap(){
 
     setMessage("");
     showScreen("appScreen");
-    $("drawerPerson").textContent=profile.full_name||"";
+    $("drawerPerson").textContent=(profile.full_name||"")+(appIsMainAdmin?" · Главный администратор":"");
     $("drawer").querySelector(".drawer-brand").textContent=(staffConsultants.length?staffConsultants[0]?.club_name:consultant?.club_name)||"PROTEIN STUDIO";
     let savedRoute=null;try{savedRoute=localStorage.getItem(LAST_ROUTE_KEY)}catch{}
     const staffAllowed=["coachPlan","personalMarathon","admin","staffCard","workouts","marathon","topics","achievements","events","training","links","consultants","messages","community","notifications","myQR","profile","story"];
