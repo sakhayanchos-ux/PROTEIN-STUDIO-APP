@@ -56,6 +56,16 @@ async function loadAdminClientDetail(id,version=adminViewVersion,tab='overview')
  box.scrollIntoView({behavior:'smooth',block:'start'});
  }catch{if(box.isConnected&&box.dataset.client===id)box.innerHTML='<section class="card">Не удалось загрузить карточку. Выберите клиента ещё раз.</section>'}
 }
+function pageStaffStars85(){return '<section class="card"><h2>Звёзды моих клиентов ⭐</h2><p class="muted">Только подтверждённые звёзды общего марафона. Никаких скидок, замков и карточек подарков.</p><div id="staffStars85">Загружаем…</div></section>';}
+async function loadStaffStars85(){
+ const box=$('staffStars85');if(!box)return;
+ try{
+  const [clients,state]=await Promise.all([fetchAdminRows(),checked(sb.rpc('ps_common_marathon_staff_state'))]);
+  if(!box.isConnected)return;
+  const totals=new Map((state?.participants||[]).map(p=>[p.user_id,Number(p.stars)||0]));
+  box.innerHTML=clients.length?clients.map(p=>'<div class="staff-client-summary" style="display:flex;align-items:center;justify-content:space-between;gap:12px"><b>'+escapeHtml(p.full_name||'Клиент')+'</b><strong>⭐ '+(totals.get(p.id)||0)+'</strong></div>').join(''):'<p>Клиентов пока нет.</p>';
+ }catch(e){if(box.isConnected)box.innerHTML='<p>Не удалось загрузить звёзды. Попробуйте снова.</p><button class="btn ghost" id="starsRetry85">Обновить</button>';if($('starsRetry85'))$('starsRetry85').onclick=loadStaffStars85}
+}
 function pageStaffCollection(){return '<section class="card"><div id="staffCollection">Загружаем…</div></section><div id="adminClientDetail"></div>'+($('pageTitle').textContent==='Марафон'?taskSettingsHtml():'')}
 async function loadStaffCollection(page){
  const box=$('staffCollection'),version=adminViewVersion;
