@@ -11,13 +11,14 @@ function consultantCardForm(){
  '<label for="consultantPhoneInput">Телефон</label><input id="consultantPhoneInput" type="tel" inputmode="tel">'+
  '<label for="consultantWhatsappInput">WhatsApp</label><input id="consultantWhatsappInput" type="tel" inputmode="tel">'+'<label for="consultantInstagramInput">Instagram</label><input id="consultantInstagramInput" type="url" inputmode="url" placeholder="https://www.instagram.com/username/">'+
  '<label for="consultantHoursInput">Время для связи</label><input id="consultantHoursInput" maxlength="160">'+
+ '<label for="consultantCareerStatusInput">Карьерный статус Herbalife (не название клуба)</label><input id="consultantCareerStatusInput" maxlength="160" placeholder="Например: Активный World Team">'+
  '<label for="consultantClubInput">Название клуба</label><input id="consultantClubInput" maxlength="160">'+
  '<label for="consultantAddressInput">Адрес клуба</label><input id="consultantAddressInput" maxlength="300">'+
  '<label for="consultantClubHoursInput">Часы работы клуба</label><input id="consultantClubHoursInput" maxlength="160">'+
  '<button class="btn primary" id="consultantCardSave">Сохранить карточку</button></fieldset></form>'+
  '<p id="consultantCardStatus" class="profile-status" role="status"></p><button id="consultantCardReload" type="button" class="btn ghost">Обновить карточку</button></section>';
 }
-const CONSULTANT_INPUTS={display_name:"consultantNameInput",bio:"consultantBioInput",contact_phone:"consultantPhoneInput",whatsapp_phone:"consultantWhatsappInput",instagram_url:"consultantInstagramInput",contact_hours:"consultantHoursInput",club_name:"consultantClubInput",club_address:"consultantAddressInput",club_hours:"consultantClubHoursInput"};
+const CONSULTANT_INPUTS={display_name:"consultantNameInput",bio:"consultantBioInput",contact_phone:"consultantPhoneInput",whatsapp_phone:"consultantWhatsappInput",instagram_url:"consultantInstagramInput",contact_hours:"consultantHoursInput",club_name:"consultantClubInput",career_status:"consultantCareerStatusInput",club_address:"consultantAddressInput",club_hours:"consultantClubHoursInput"};
 function cardPhone(value){if(!value?.trim())return null;const normalized=normalizePhone(value);if(!/^\+7\d{10}$/.test(normalized))throw new Error("Введите телефон в формате +7 999 000-00-00.");return normalized}
 function cardInstagram(value){
  if(!value?.trim())return null;
@@ -93,11 +94,14 @@ function bindConsultantCardEditor(){
     p_avatar_path:update.avatar_path
    });
    if(error)throw new Error(error.message||"Не удалось сохранить карточку.");
+   const careerSave=await sb.rpc('ps_set_own_career_status',{p_consultant:id,p_status:update.career_status});
+   if(careerSave.error)throw new Error('Карточка сохранена, но не удалось сохранить карьерный статус: '+careerSave.error.message);
    const savedRow=Array.isArray(rpcData)?rpcData[0]:rpcData;
    if(!savedRow)throw new Error("Не удалось сохранить карточку.");
-   const data=savedRow;saved=true;current=data;
+   const data={...savedRow,career_status:update.career_status};saved=true;current=data;
    if(oldPhoto&&oldPhoto!==data.avatar_path&&oldPhoto.startsWith(uid+"/"))await sb.storage.from("ps-consultant-cards").remove([oldPhoto]);
-   const entry=staffConsultants.find(c=>c.id===id);if(entry)entry.display_name=data.display_name;
+   const entry=staffConsultants.find(c=>c.id===id);if(entry){entry.display_name=data.display_name;entry.club_name=data.club_name;}
+   const brand=document.querySelector('#drawer .drawer-brand');if(brand)brand.textContent=data.club_name||'PROTEIN STUDIO';
    if(consultant?.id===id)consultant=data;
    if(!form.isConnected)return;
    $("consultantCardPhoto").value="";$("consultantRemovePhoto").checked=false;
@@ -118,6 +122,7 @@ function consultantCardHtml(c){
  const about=c.bio?'<section class="card consultant-info"><h3>О себе</h3><p class="consultant-bio">'+escapeHtml(c.bio)+'</p></section>':"";
  const club=c.club_name||c.club_address||c.club_hours;
  return '<section class="card consultant-hero"><div class="profile-avatar" id="clientConsultantPhoto">♡</div><h1>'+escapeHtml(name)+'</h1>'+
+ (c.career_status?'<p class="muted">Карьерный статус: '+escapeHtml(c.career_status)+'</p>':'')+
  '<div class="consultant-contact-buttons">'+
  '<button class="btn primary" id="writeConsultant">Написать консультанту</button>'+ (c.instagram_url?'<a class="btn ghost app-link" href="'+escapeHtml(c.instagram_url)+'" target="_blank" rel="noopener">Instagram</a>':'')+
  (phone?'<a class="btn ghost app-link" href="tel:'+phone+'">Позвонить</a>':"")+'</div></section>'+about+
