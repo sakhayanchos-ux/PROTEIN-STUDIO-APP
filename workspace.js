@@ -3,7 +3,7 @@ function staffNavigation(){
  const staff=isStaffWorkspace();
  document.querySelectorAll('.nav[data-page]').forEach(b=>{
   const p=b.dataset.page;if(p==='consultants'){b.classList.toggle('hidden',!canStaffChat());return;}
-  if(p==='personalMarathon'){b.classList.toggle('hidden',!(staff&&personalMarathonAvailable));return;}
+  if(p==='personalMarathon'){b.classList.add('hidden');return;}
   b.classList.toggle('hidden',staff?['plan','nutrition','progress','consultant','invitations'].includes(p):['admin','staffCard','coachPlan','myQR','personalMarathon','topics','achievements'].includes(p));
  });
  $('adminNav').textContent='🗂 Клиенты';
