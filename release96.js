@@ -2,6 +2,7 @@
    User submissions are stored as pending and approved by their assigned consultant. */
 const ps96Groups=[
  {points:1,items:[
+ ['volume_1','За каждый 1 у.р.'],
  ['weight_300g','Снизить вес на 300 г'],
  ['evening_shake','Ужин вечерним коктейлем'],
  ['product_baking','Выпечка из продукта'],
