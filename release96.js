@@ -32,11 +32,11 @@ function ps96Build(s){
  const earned=(s.entries||[]).filter(x=>String(x.kind).startsWith('star96:')&&['approved','auto'].includes(x.status)).reduce((v,x)=>v+Number(x.stars||0),0);
  return '<section class="card" id="ps96Stars"><div class="eyebrow">⭐ ЗВЁЗДНАЯ СИСТЕМА · 21 ДЕНЬ</div><h2>Мой трекер звёзд</h2><div class="cm75-hero-row"><div><span>Всего подтверждено</span><b>'+total+' ⭐</b></div><div><span>По новым заданиям</span><b>'+earned+' ⭐</b></div></div>'+
  '<p class="muted">Выбирайте выполненные задания. Консультант подтвердит их, после чего звёзды прибавятся автоматически. Каждое задание — не более одного раза в день.</p>'+
- (s.participant&&s.phase==='live'?ps96Groups.map(group=>'<div class="ps96-group"><h3>'+group.points+' ⭐</h3>'+
+ (ps96Groups.map(group=>'<div class="ps96-group"><h3>'+group.points+' ⭐</h3>'+
  group.items.map(([kind,label])=>{const e=done.get(kind),status=e?.status;
  return '<div class="ps96-task"><div><b>'+escapeHtml(label)+'</b>'+(e?'<p class="muted">'+(status==='pending'?'⏳ На проверке':status==='approved'?'✅ Подтверждено · +'+e.stars+' ⭐':status==='rejected'?'↻ Не подтверждено, можно отправить заново':'✓ '+status)+'</p>':'')+'</div>'+
- ((!e||status==='rejected')?'<button class="btn ghost" data-star96="'+escapeHtml(kind)+'">Отправить</button>':'')+
- '</div>'}).join('')+'</div>').join(''):'<p>Задания можно отправлять после регистрации и с первого дня марафона.</p>')+
+ ((!e||status==='rejected')?(s.phase==='live'&&s.participant?'<button class="btn ghost" data-star96="'+escapeHtml(kind)+'">Отправить</button>':'<span class="muted">'+(!s.participant?'После регистрации':'С начала марафона')+'</span>'):'')+
+ '</div>'}).join('')+'</div>').join(''))+
  '</section>';
 }
 function ps96Bind(box,s){
@@ -57,7 +57,7 @@ loadCommonMarathon75=async function(){
  if(!box?.isConnected)return;
  if(box.querySelector('#ps96Stars'))return;
  const ui=document.createElement('div');ui.innerHTML=ps96Build(common75State);
- const target=box.querySelector('.cm80-tracker')||box.querySelector('.cm75-rules');
+ const target=box.querySelector('.cm75-hero')?.nextElementSibling||box.firstElementChild;
  if(target)target.before(ui.firstElementChild);else box.appendChild(ui.firstElementChild);
  ps96Bind(box,common75State);
 };
