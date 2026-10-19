@@ -51,9 +51,11 @@ function ps96Bind(box,s){
 const ps96PrevLoad=loadCommonMarathon75;
 loadCommonMarathon75=async function(){
  await ps96PrevLoad();
- if(!common75State?.campaign||!me||isStaffWorkspace()&&!clientPreview)return;
+ if(!common75State?.campaign||!me)return;
+ if(isStaffWorkspace()&&!clientPreview)return;
  const box=$('commonMarathon75')||$('journeyView');
  if(!box?.isConnected)return;
+ if(box.querySelector('#ps96Stars'))return;
  const ui=document.createElement('div');ui.innerHTML=ps96Build(common75State);
  const target=box.querySelector('.cm80-tracker')||box.querySelector('.cm75-rules');
  if(target)target.before(ui.firstElementChild);else box.appendChild(ui.firstElementChild);
