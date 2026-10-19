@@ -19,7 +19,7 @@ function event67MediaGallery(e){
  return'<div class="event-media67 '+(items.length>1?'multi':'single')+'">'+items.map((m,i)=>{
   const url=m.legacy?event62Poster(m.path):event67MediaUrl(m);
   if(!url)return'';
-  if(m.type==='video')return'<div class="event-media-item67"><video controls playsinline preload="metadata" src="'+escapeHtml(url)+'" aria-label="Видео афиши '+(i+1)+'"></video>'+(items.length>1?'<span class="event-media-count67">'+(i+1)+' / '+items.length+'</span>':'')+'</div>';
+  if(m.type==='video')return'<div class="event-media-item67"><video controls playsinline muted preload="metadata" data-feed-autoplay="1" src="'+escapeHtml(url)+'" aria-label="Видео афиши '+(i+1)+'"></video>'+(items.length>1?'<span class="event-media-count67">'+(i+1)+' / '+items.length+'</span>':'')+'</div>';
   return'<div class="event-media-item67"><img src="'+escapeHtml(url)+'" alt="Фото афиши '+(i+1)+'">'+(items.length>1?'<span class="event-media-count67">'+(i+1)+' / '+items.length+'</span>':'')+'</div>'
  }).join('')+'</div>'
 }
