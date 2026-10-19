@@ -27,8 +27,8 @@ function common75Rules(){
 }
 function common75Hero(s){
  const c=s.campaign;
- const phaseText=s.phase==='upcoming'?'Присоединение 12 октября':s.phase==='join'?'Сегодня присоединение':s.phase==='live'?'День '+s.day_number+' из 10':s.phase==='results'?'ИТОГ МАРАФОНА':s.phase==='finished'?'Марафон завершён':'Подготовка';
- return '<section class="card cm75-hero"><div class="eyebrow">🏁 ОТДЕЛЬНОЕ ПРОСТРАНСТВО</div><h1>МАРАФОН</h1><p>'+common75Date(c.join_date)+' — присоединение · '+common75Date(c.start_date)+'–'+common75Date(c.end_date)+' — 10 дней · '+common75Date(c.results_date)+' — итог</p>'+
+ const phaseText=s.phase==='upcoming'?'Присоединение 12 октября':s.phase==='join'?'Сегодня присоединение':s.phase==='live'?'День '+s.day_number+' из 21':s.phase==='results'?'ИТОГ МАРАФОНА':s.phase==='finished'?'Марафон завершён':'Подготовка';
+ return '<section class="card cm75-hero"><div class="eyebrow">🏁 ОТДЕЛЬНОЕ ПРОСТРАНСТВО</div><h1>МАРАФОН</h1><p>'+common75Date(c.join_date)+' — присоединение · '+common75Date(c.start_date)+'–'+common75Date(c.end_date)+' — 21 день · '+common75Date(c.results_date)+' — итог</p>'+
  '<div class="cm75-hero-row"><div><span>Сейчас</span><b>'+phaseText+'</b></div><div class="cm75-stars"><span>Мои звёзды</span><b>⭐ '+(s.stars||0)+'</b></div></div></section>';
 }
 function common75ZoomCard(s){
@@ -65,7 +65,7 @@ function common75Daily(s){
  workout=common75Entry(s,'workout'),scan=common75Entry(s,'scan_friend'),vp=common75Entry(s,'vp');
  const ambassador=(s.entries||[]).find(e=>e.kind==='ambassador'&&(e.status==='auto'||e.status==='approved'));
  const shownDay=s.day_number||1;
- return '<section class="card cm75-today"><div class="eyebrow">'+(preview&&s.phase!=='live'?'👁 ПРЕДПРОСМОТР · ДЕНЬ 1':'ДЕНЬ '+shownDay+' ИЗ 10')+'</div><h2>Сегодня собираем ⭐</h2>'+(preview&&s.phase!=='live'?'<p class="muted">Все зоны уже видны. Начисление реальных звёзд начнётся 13 октября.</p>':'')+
+ return '<section class="card cm75-today"><div class="eyebrow">'+(preview&&s.phase!=='live'?'👁 ПРЕДПРОСМОТР · ДЕНЬ 1':'ДЕНЬ '+shownDay+' ИЗ 21')+'</div><h2>Сегодня собираем ⭐</h2>'+(preview&&s.phase!=='live'?'<p class="muted">Все зоны уже видны. Начисление реальных звёзд начнётся 13 октября.</p>':'')+
  '<div class="cm75-task"><h3>🚶 Шаги · 1⭐ / 1000</h3><form data-cm75-form="steps"><label>Шагов сегодня<input name="value" type="number" min="0" max="100000" value="'+escapeHtml(steps?.value??'')+'" required></label><button class="btn ghost">Сохранить шаги</button><p role="status">'+(steps?'Сейчас: '+steps.value+' шагов · +'+steps.stars+'⭐':'')+'</p></form></div>'+
  '<div class="cm75-task"><h3>🥤 Ужин коктейлем · 3⭐</h3>'+(dinner&&dinner.status!=='rejected'?common75EntryStatus(dinner):'<form data-cm75-photo="dinner_shake"><label>Фото ужина<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn ghost">Отправить в общую группу</button><p role="status"></p></form>')+'</div>'+
  '<div class="cm75-task"><h3>⚡ Turbo / Detox · 3⭐</h3>'+(turbo&&turbo.status!=='rejected'?common75EntryStatus(turbo):'<form data-cm75-photo="turbo_detox"><label>Фото Turbo / Detox<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><button class="btn ghost">Отправить в общую группу</button><p role="status"></p></form>')+'</div>'+
