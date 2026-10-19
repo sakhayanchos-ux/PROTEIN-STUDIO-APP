@@ -217,7 +217,8 @@ async function bootstrap(){
 
     setMessage("");
     showScreen("appScreen");
-    $("drawerPerson").textContent=profile.full_name+(consultant?" · "+consultant.display_name:"");
+    $("drawerPerson").textContent=profile.full_name||"";
+    $("drawer").querySelector(".drawer-brand").textContent=(staffConsultants.length?staffConsultants[0]?.club_name:consultant?.club_name)||"PROTEIN STUDIO";
     let savedRoute=null;try{savedRoute=localStorage.getItem(LAST_ROUTE_KEY)}catch{}
     const staffAllowed=["coachPlan","personalMarathon","admin","staffCard","workouts","marathon","topics","achievements","events","training","links","consultants","messages","community","notifications","myQR","profile","story"];
     const clientAllowed=["plan","workouts","marathon","topics","progress","achievements","events","training","links","invitations","story","messages","community","consultant","notifications","profile"];
