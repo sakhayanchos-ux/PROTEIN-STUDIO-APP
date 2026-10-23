@@ -288,7 +288,7 @@ function renderOnboarding(){
     if(hasWeightGoal()){
       extra=
         '<label>Хочу прийти к весу, кг'+
-          '<input id="shortTargetWeight" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.targetWeight??"")+'">'+
+          '<input id="shortTargetWeight" type="number" step="0.01" inputmode="decimal" value="'+(onboardingDraft.targetWeight??"")+'">'+
         '</label>'+
         '<p class="muted">Например: сейчас 96 кг → цель 75 кг.</p>';
     }else{
@@ -302,8 +302,8 @@ function renderOnboarding(){
       '<h2>Ваш старт и цель</h2>'+
       '<p class="muted">Только основные данные для отслеживания результата.</p>'+
       '<div class="two-col">'+
-        '<label>Сейчас, кг<input id="shortWeight" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.weight??"")+'"></label>'+
-        '<label>Талия, см<input id="shortWaist" type="number" step="0.1" inputmode="decimal" value="'+(onboardingDraft.waist??"")+'"></label>'+
+        '<label>Сейчас, кг<input id="shortWeight" type="number" step="0.01" inputmode="decimal" value="'+(onboardingDraft.weight??"")+'"></label>'+
+        '<label>Талия, см<input id="shortWaist" type="number" step="0.01" inputmode="decimal" value="'+(onboardingDraft.waist??"")+'"></label>'+
       '</div>'+extra+
       '<div class="two-col wellness-movement">'+
         '<label>Где удобнее двигаться?<select id="shortTrainingPlace">'+
@@ -655,7 +655,7 @@ function buildNutritionTargets(currentWeight){
     proteinMax=Math.round(proteinWeight*1.8);
   }
 
-  const waterLiters=current>0 ? Math.round(current*0.03*10)/10 : null;
+  const waterLiters=current>0 ? Math.round(current*0.03*100)/100 : null;
   return {proteinMin,proteinMax,waterLiters,proteinWeight};
 }
 
@@ -787,8 +787,8 @@ function pageProgress(){
     <button class="btn ghost" id="toggleMeasurementBtn">+ Добавить замер</button>
     <div id="measurementForm" class="measurement-form hidden">
       <div class="two-col">
-        <label>Вес, кг<input id="measureWeight" type="number" min="25" max="400" step="0.1" inputmode="decimal"></label>
-        <label>Талия, см<input id="measureWaist" type="number" min="30" max="250" step="0.1" inputmode="decimal"></label>
+        <label>Вес, кг<input id="measureWeight" type="number" min="25" max="400" step="0.01" inputmode="decimal"></label>
+        <label>Талия, см<input id="measureWaist" type="number" min="30" max="250" step="0.01" inputmode="decimal"></label>
       </div>
       <button class="btn primary" id="saveMeasurementBtn">Сохранить сегодняшний замер</button>
       <p id="measurementMessage" class="message"></p>
@@ -890,7 +890,7 @@ function dateDiffDays(a,b){
   const A=Date.parse(a+"T00:00:00Z"),B=Date.parse(b+"T00:00:00Z");
   return Math.max(0,Math.round((B-A)/86400000));
 }
-function ruNumber(v,digits=1){
+function ruNumber(v,digits=2){
   if(v===null||v===undefined||Number.isNaN(Number(v)))return "—";
   return Number(v).toLocaleString("ru-RU",{maximumFractionDigits:digits,minimumFractionDigits:0});
 }
@@ -1236,7 +1236,7 @@ function pageProfile(){
   <label for="personalBio">О себе</label><textarea id="personalBio" maxlength="160" rows="2">${escapeHtml(profile?.bio||"")}</textarea>
   <label for="personalPhone">Телефон для связи</label><input id="personalPhone" type="tel" inputmode="tel" autocomplete="tel" value="${escapeHtml(profile?.phone||"")}">
   <div class="profile-fields"><div><label for="personalBirthday">Дата рождения</label><input id="personalBirthday" type="date" min="1900-01-01" max="${profileToday()}" value="${escapeHtml(profile?.birth_date||"")}"></div>
-  <div><label for="personalHeight">Рост, см</label><input id="personalHeight" type="number" inputmode="decimal" min="50" max="250" step="0.1" value="${escapeHtml(profile?.height_cm??"")}"></div></div>
+  <div><label for="personalHeight">Рост, см</label><input id="personalHeight" type="number" inputmode="decimal" min="50" max="250" step="0.01" value="${escapeHtml(profile?.height_cm??"")}"></div></div>
   <button class="btn primary" id="savePersonalBtn">Сохранить</button><p class="profile-status" id="personalMessage" role="status"></p>
   </form></section>
   <section class="card profile-discount62" ${isStaffWorkspace()?"hidden":""}><h3>Моя скидка / статус</h3><div class="fact-grid"><div><span>Скидка</span><b>${escapeHtml(profile?.discount_level?profile.discount_level+"%":"Не назначена")}</b></div><div><span>Статус</span><b>${escapeHtml(profile?.member_status||"—")}</b></div></div><p class="muted">Скидку назначает ваш консультант.</p></section>
