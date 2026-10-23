@@ -52,7 +52,7 @@ async function enterClientPreview(){
   sb=selfClientApi(sb);
   staffNavigation();
   $('clientPreviewBar').classList.remove('hidden');
-  openPage('marathon');
+  openPage('plan');
  }catch(e){
   clientPreview=false;
   if(previewOriginalSB){sb=previewOriginalSB;previewOriginalSB=null}
