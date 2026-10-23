@@ -44,3 +44,16 @@
 .w101-photo-x.hidden{display:none!important}
 .w101-photo-x:focus-visible{outline:3px solid #aa73ba;outline-offset:2px}
 .w101-photo-x:disabled{opacity:.45;cursor:wait}
+
+/* Inline Wellness-Test apple brochure: readable ranges on narrow phones */
+.w101-source{display:block;margin:8px 0 13px;font-size:12px;font-weight:780;color:var(--ink)}
+.w101-source select{display:block;width:100%;min-height:46px;margin-top:6px;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:14px;color:var(--ink)}
+.w101-guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.w101-guide-item{border:1px solid var(--line);border-radius:13px;background:var(--soft);padding:12px 10px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.w101-guide-item b{font-size:12px;letter-spacing:.01em}
+.w101-guide-item strong{font-size:17px;line-height:1.2;overflow-wrap:break-word}
+.w101-guide-item small{font-size:11px;color:var(--muted);line-height:1.35}
+.w101-type-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
+.w101-type-list>div{font-size:12px;background:var(--soft);border-radius:9px;padding:10px;line-height:1.4}
+.w101-details a{color:#9a2e76;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:390px){.w101-guide-item strong{font-size:15px}.w101-type-list{grid-template-columns:1fr}}
