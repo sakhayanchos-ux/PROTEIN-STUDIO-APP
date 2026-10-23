@@ -26,21 +26,52 @@ const METRICS=[
 ];
 const CHART_METRICS=["weight","fat","water","waist","muscle","visceral"];
 // Optional non-clinical body-frame reference for adults 25+, distinct from Wellness scan norms.
+/* Reference transcription: "Индивидуальные параметры тела Wellness-Test", slide 2.
+Rows: height cm, small frame [min,max], medium, large. Ranges are historical
+brochure references, not clinical goal weights. Exact rows remain unchanged. */
 const FRAME_TABLE={
- female:[[145,[43,46],[45,50],[48,55]],[150,[45,49],[47,53],[51,58]],[155,[48,51],[50,55],[54,61]],[160,[50,54],[53,59],[57,64]],[163,[52,56],[54,61],[59,66]],[165,[54,58],[56,63],[60,68]],[170,[57,61],[60,67],[64,72]],[175,[61,65],[64,70],[68,76]],[178,[63,67],[65,72],[69,79]]],
- male:[[155,[51,54],[54,59],[57,64]],[160,[54,57],[56,62],[60,67]],[165,[56,60],[59,65],[63,71]],[170,[60,64],[63,69],[67,75]],[175,[64,68],[66,73],[70,79]],[180,[67,72],[70,77],[74,84]],[185,[71,76],[74,82],[79,88]],[190,[74,79],[78,86],[83,93]]]
+ female:[
+ [147,[42,45],[44,49],[47,54]],[150,[43,46],[45,50],[48,56]],
+ [152,[44,47],[46,51],[50,58]],[155,[45,49],[47,53],[51,59]],
+ [157,[46,50],[49,54],[52,60]],[160,[48,51],[50,56],[54,61]],
+ [162,[49,53],[51,57],[55,63]],[165,[51,54],[53,59],[57,65]],
+ [168,[52,56],[55,61],[58,66]],[170,[54,58],[56,63],[60,68]],
+ [173,[56,60],[58,65],[62,70]],[175,[57,61],[60,67],[64,72]],
+ [178,[59,64],[62,69],[66,74]],[180,[61,66],[64,71],[67,76]],
+ [183,[63,67],[66,72],[70,79]]
+ ],
+ male:[
+ [157,[51,55],[54,59],[57,64]],[160,[52,56],[55,60],[59,66]],
+ [162,[52,56],[56,62],[60,67]],[165,[55,59],[58,63],[61,69]],
+ [168,[56,60],[59,65],[63,71]],[170,[58,62],[61,67],[65,73]],
+ [173,[60,64],[63,69],[67,75]],[175,[62,66],[65,71],[69,77]],
+ [178,[64,68],[66,73],[71,79]],[180,[66,70],[68,75],[72,81]],
+ [183,[67,72],[70,77],[75,84]],[185,[69,74],[72,80],[76,86]],
+ [188,[71,76],[74,82],[79,88]],[190,[73,78],[76,84],[88,91]],
+ [193,[75,80],[78,86],[83,93]]
+ ]
 };
 function frameEstimate(info){
- if(!info.frame||!info.sex||!(info.age>=25)||!Number.isFinite(info.height))return null;
+ if(!info.frame||!info.sex||!(info.age>=18)||!Number.isFinite(info.height))return null;
  const rows=FRAME_TABLE[info.sex];if(!rows)return null;
  const h=info.height;
  if(h<rows[0][0]||h>rows.at(-1)[0])return null;
- let a=rows[0],b=rows[0];
- for(let i=0;i<rows.length-1;i++){if(h>=rows[i][0]&&h<=rows[i+1][0]){a=rows[i];b=rows[i+1];break}}
- const col={small:1,medium:2,large:3}[info.frame],r=(h-a[0])/Math.max(1,b[0]-a[0]);
+ let a=rows.find(row=>row[0]===h),b=a;
+ if(!a)for(let i=0;i<rows.length-1;i++){if(h>rows[i][0]&&h<rows[i+1][0]){a=rows[i];b=rows[i+1];break}}
+ if(!a||!b)return null;
+ const col={small:1,medium:2,large:3}[info.frame];
  if(!col)return null;
- return [a[col][0]+r*(b[col][0]-a[col][0]),a[col][1]+r*(b[col][1]-a[col][1])];
+ const ratio=(h-a[0])/Math.max(1,b[0]-a[0]);
+ return {range:[a[col][0]+ratio*(b[col][0]-a[col][0]),a[col][1]+ratio*(b[col][1]-a[col][1])],interpolated:a!==b};
 }
+const WELLNESS_BROCHURE_URL="https://ppt-online.org/552105";
+let wellnessNormsMode="brochure";
+try{if(localStorage.getItem("ps_wellness_norms_source")==="form2025")wellnessNormsMode="form2025"}catch(e){}
+const PHYSIQUE_TYPES=[
+"Скрытое ожирение","Ожирение","Плотное телосложение","Нетренированный",
+"Нормальный","Стандартно мускулистый","Худой",
+"Худой и мускулистый","Очень мускулистый"
+];
 let wellnessRows101=[],legacyRows101=[];
 const $w=id=>document.getElementById(id);
 const safe=v=>String(v==null?"":v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -198,8 +229,8 @@ function updateInfo(){
  "Размер костного каркаса не определяет точный «идеальный вес»."+wristHint;
  const ref=frameEstimate(m);
  if($w("w101FrameWeight"))$w("w101FrameWeight").textContent=ref
- ? "Ориентировочная таблица по телосложению: "+format(ref[0])+"–"+format(ref[1])+" кг. Это НЕ медицинская норма и не обязательная цель веса; справочник «Есть, чтобы жить» (для взрослых 25+)."
- : "При указании пола, возраста от 25 лет, роста и телосложения можно увидеть примерный диапазон из справочной таблицы. Он не заменяет оценку здоровья.";
+ ? "Таблица Wellness-Test (слайд 2): "+format(ref.range[0])+"–"+format(ref.range[1])+" кг"+(ref.interpolated?" · приблизительно между строками таблицы":"")+". Это справочный, НЕ медицинский диапазон, а не обязательная цель."
+ : "Укажите пол, рост и телосложение — покажем диапазон по таблице Wellness-Test. Он не заменяет медицинскую оценку.";
 }
 function fatReference(age,sex){
  if(!(age>=18)||!["female","male"].includes(sex))return null;
