@@ -15,7 +15,7 @@ cm81ZeroDay=function(s){
  if(!p||!cm82StartComplete(p)){
    if(s.phase!=='join'&&s.phase!=='live')return '';
    return '<section class="card cm81-zero"><div class="eyebrow">📸 НУЛЕВОЙ ДЕНЬ</div><h2>Стартовые замеры и 3 фото ДО</h2><p>Нужны три ракурса: <b>спереди, сбоку и сзади</b>. Для фото сбоку выберите любую сторону и повторите ту же сторону ПОСЛЕ.</p>'+
-    '<form id="cm82JoinForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" value="'+escapeHtml(p?.start_weight_kg??'')+'" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" value="'+escapeHtml(p?.start_waist_cm??'')+'" required></label></div>'+
+    '<form id="cm82JoinForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.01" value="'+escapeHtml(p?.start_weight_kg??'')+'" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.01" value="'+escapeHtml(p?.start_waist_cm??'')+'" required></label></div>'+
     '<label>Фото ДО · спереди<input name="front" type="file" accept="image/jpeg,image/png,image/webp" required></label>'+
     '<label>Фото ДО · сбоку<input name="side" type="file" accept="image/jpeg,image/png,image/webp" required></label>'+
     '<label>Фото ДО · сзади<input name="back" type="file" accept="image/jpeg,image/png,image/webp" required></label>'+
@@ -37,7 +37,7 @@ common75FinishCard=function(s){
    return '<section class="card cm82-finish-closed"><div class="eyebrow">🔒 ФИНАЛЬНЫЕ ЗАМЕРЫ</div><h2>Приём замеров закрыт</h2><p>В день итогов финальные замеры и фотографии принимаются <b>до 15:00</b>.</p></section>';
  }
  return '<section class="card cm82-finish"><div class="eyebrow">📸 ФИНАЛ · ДО 15:00</div><h2>Финальные замеры и 3 фото ПОСЛЕ</h2><p>Повторите те же три ракурса: <b>спереди, сбоку и сзади</b>. Сбоку — той же стороной, что и ДО.</p>'+
- '<form id="cm82FinishForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.1" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.1" required></label></div>'+
+ '<form id="cm82FinishForm"><div class="two-col"><label>Вес, кг<input name="weight" type="number" min="25" max="400" step="0.01" required></label><label>Талия, см<input name="waist" type="number" min="30" max="300" step="0.01" required></label></div>'+
  '<label>Фото ПОСЛЕ · спереди<input name="front" type="file" accept="image/jpeg,image/png,image/webp" required></label>'+
  '<label>Фото ПОСЛЕ · сбоку<input name="side" type="file" accept="image/jpeg,image/png,image/webp" required></label>'+
  '<label>Фото ПОСЛЕ · сзади<input name="back" type="file" accept="image/jpeg,image/png,image/webp" required></label>'+
