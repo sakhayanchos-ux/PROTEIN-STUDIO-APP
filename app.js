@@ -224,8 +224,8 @@ async function bootstrap(){
     $("drawerPerson").textContent=(profile.full_name||"")+(appIsMainAdmin?" · Главный администратор":"");
     $("drawer").querySelector(".drawer-brand").textContent=(staffConsultants.length?staffConsultants[0]?.club_name:consultant?.club_name)||"PROTEIN STUDIO";
     let savedRoute=null;try{savedRoute=localStorage.getItem(LAST_ROUTE_KEY)}catch{}
-    const staffAllowed=["coachPlan","personalMarathon","admin","staffCard","workouts","marathon","topics","achievements","events","training","links","consultants","messages","community","notifications","myQR","profile","story"];
-    const clientAllowed=["plan","workouts","marathon","topics","progress","achievements","events","training","links","invitations","story","messages","community","consultant","notifications","profile"];
+    const staffAllowed=["coachPlan","admin","staffCard","workouts","topics","achievements","events","training","links","consultants","messages","community","notifications","myQR","profile","story"];
+    const clientAllowed=["plan","workouts","topics","progress","achievements","events","training","links","invitations","story","messages","community","consultant","notifications","profile"];
     const fallback=staffConsultants.length?"coachPlan":"plan";
     const startRoute=(staffConsultants.length?staffAllowed:clientAllowed).includes(savedRoute)?savedRoute:fallback;
     openPage(startRoute);consumePushRoute();
@@ -519,6 +519,8 @@ function prevOnboarding(){
 }
 
 function openPage(page){
+  // Marathon runs in its own tracker. Redirect legacy internal routes without deleting data.
+  if(page==="marathon"||page==="personalMarathon")page=isStaffWorkspace()&&!clientPreview?"coachPlan":"plan";
   stopDirect();stopStaffChat();
   if(page==="consultants"&&!canStaffChat())page="plan";
   document.getElementById("rewardDialog")?.remove();
