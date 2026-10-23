@@ -283,6 +283,27 @@ function getReferenceInfo(rows){
  const latestWeight=[...rows].reverse().find(r=>nValue(r.body.weight)!=null)?.body.weight;
  return {...meta,weight:latestWeight??assessment?.starting_weight_kg??null};
 }
+function renderWellnessGuide(){
+ const box=$w("w101Guide");if(!box)return;
+ const stored=latestMeta(),input=readInfo();
+ const sex=input.sex||stored.sex||"";
+ const age=input.age??stored.age??null;
+ const fat=fatReference(age,sex);
+ const water=!sex?null:wellnessNormsMode==="form2025"?(sex==="female"?[50,60]:[60,70]):(sex==="female"?[45,60]:[50,65]);
+ const currentWeight=nValue($w("wellness101")?.querySelector('[data-w101-key="weight"]')?.value)??getReferenceInfo(mergeRows()).weight;
+ const bone=boneValue(sex,currentWeight);
+ const cell=(title,value,info)=>'<div class="w101-guide-item"><b>'+safe(title)+'</b><strong>'+safe(value)+'</strong><small>'+safe(info)+'</small></div>';
+ box.innerHTML='<p class="w101-note">'+(wellnessNormsMode==="brochure"?'Брошюра Wellness-Test: слайды 2–11':'Бланк Herbalife, июнь 2025')+'. Справочные значения для анализатора, не диагноз.</p>'+
+ '<div class="w101-guide-grid">'+
+ cell("Жир",fat?format(fat[0])+"–"+format(fat[1])+" %":"Укажите пол и возраст","Возрастная группа по выбранному источнику")+
+ cell("Вода",water?format(water[0])+"–"+format(water[1])+" %":"Укажите пол","Доля воды в организме по измерителю")+
+ cell("Внутренний жир","1–4","Шкала из брошюры; уровень 5+ выше")+
+ cell("Костная масса",bone!=null?format(bone)+" кг":"Укажите пол и вес","Расчётное значение по группе веса")+'</div>'+
+ '<details class="w101-nested"><summary>Физический тип 1–9 — пояснения</summary>'+
+ '<div class="w101-type-list">'+PHYSIQUE_TYPES.map((name,i)=>'<div><b>'+(i+1)+'.</b> '+safe(name)+'</div>').join("")+'</div>'+
+ '<p class="w101-note">Названия — из брошюры. Они описывают тип по анализатору, а не состояние здоровья.</p></details>'+
+ '<p class="w101-note">У мышечной массы, скорости основного обмена и метаболического возраста нет единого универсального «правильного» числа для всех. Важно сравнивать данные одного прибора со временем.</p>';
+}
 function renderSummary(rows){
  const box=$w("w101Summary");if(!box)return;
  const metrics=METRICS.filter(m=>m.key==="weight"||m.key==="fat"||m.key==="water"||m.key==="waist");
@@ -342,7 +363,7 @@ function renderChart(rows){
 }
 function paintWellness101(){
  const rows=mergeRows();
- renderSummary(rows);renderCompare(rows);renderHistory(rows);renderChart(rows);
+ renderSummary(rows);renderCompare(rows);renderWellnessGuide();renderHistory(rows);renderChart(rows);
 }
 async function refreshWellness101(){
  const [a,b]=await Promise.all([
@@ -402,9 +423,16 @@ async function saveWellness101(){
 async function bindWellness101(){
  $w("w101Date")?.addEventListener("change",fillDate);
  $w("w101ChartKey")?.addEventListener("change",()=>renderChart(mergeRows()));
+ const refSelect=$w("w101RefMode");if(refSelect)refSelect.value=wellnessNormsMode;
+ refSelect?.addEventListener("change",event=>{
+  wellnessNormsMode=event.target.value==="form2025"?"form2025":"brochure";
+  try{localStorage.setItem("ps_wellness_norms_source",wellnessNormsMode)}catch(error){}
+  renderCompare(mergeRows());renderWellnessGuide();updateInfo();
+ });
  ["w101Sex","w101Age","w101Height","w101Frame","w101Wrist"].forEach(id=>$w(id)?.addEventListener("input",updateInfo));
  $w("wellness101")?.querySelector('[data-w101-key="weight"]')?.addEventListener("input",updateInfo);
  $w("w101Save")?.addEventListener("click",saveWellness101);
+ ["w101Sex","w101Age","w101Height","w101Frame","w101Wrist"].forEach(id=>$w(id)?.addEventListener("change",renderWellnessGuide));
  try{await refreshWellness101()}catch(error){
   $w("w101Summary").textContent="Не удалось загрузить Wellness-историю: "+(error.message||"ошибка доступа");
  }
