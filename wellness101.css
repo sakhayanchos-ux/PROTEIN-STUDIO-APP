@@ -1,0 +1,40 @@
+/* Wellness 101 — calm, mobile-first private body measurement diary */
+.w101-card{border:1px solid var(--line);overflow:hidden}
+.w101-card h2{margin:7px 0 10px;line-height:1.14}
+.w101-current{margin:13px 0 17px}
+.w101-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.w101-stats>div{border:1px solid var(--line);border-radius:15px;padding:13px 11px;background:var(--soft);display:flex;flex-direction:column;gap:6px;min-width:0}
+.w101-stats span{font-size:12px;font-weight:750;opacity:.8}
+.w101-stats b{font-size:20px;line-height:1.2;overflow-wrap:break-word}
+.w101-stats small{font-size:11px;color:var(--muted);overflow-wrap:break-word}
+.w101-details{border:1px solid var(--line);border-radius:16px;padding:11px 12px;margin:12px 0;background:rgba(255,255,255,.44)}
+.w101-details>summary{cursor:pointer;font-size:15px;font-weight:850;line-height:1.4;padding:4px 0;color:var(--ink)}
+.w101-details[open]>summary{margin-bottom:11px}
+.w101-nested{border-top:1px dashed var(--line);margin:10px 0;padding:12px 0 1px}
+.w101-nested>summary{font-weight:850;font-size:14px;cursor:pointer;padding:3px 0}
+.w101-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:13px}
+.w101-field{font-size:12px;font-weight:730;display:flex;flex-direction:column;min-width:0;gap:5px}
+.w101-field small{font-size:11px;color:var(--muted);font-weight:550}
+.w101-field input,.w101-field select,.w101-date input,.w101-chart-choice select{width:100%;min-width:0;max-width:none;border-radius:12px;padding:12px 10px;font-size:16px;background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.w101-date,.w101-chart-choice{display:flex;flex-direction:column;gap:6px;font-weight:750;font-size:13px;margin:8px 0}
+.w101-save{margin-top:13px;width:100%;min-height:50px}
+.w101-note{font-size:12px;line-height:1.5;margin:11px 1px;color:var(--muted)}
+.w101-disclaimer{border-top:1px solid var(--line);font-size:11.5px;line-height:1.5;padding-top:12px;color:var(--muted)}
+.w101-history-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.w101-compare,.w101-history{width:100%;min-width:620px;border-collapse:collapse;font-size:12px}
+.w101-compare th,.w101-history th{font-weight:750;text-align:left}
+.w101-compare td,.w101-compare th,.w101-history th,.w101-history td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:top;white-space:normal;line-height:1.4}
+.w101-compare th:first-child{min-width:148px}
+.w101-compare td:last-child{min-width:175px;max-width:245px;color:var(--muted)}
+.w101-compare th,.w101-history th{background:transparent}
+.w101-compare tr:nth-child(even),.w101-history tr:nth-child(even){background:rgba(165,117,189,.04)}
+.w101-pick{background:var(--soft);border:1px solid var(--line);border-radius:8px;color:inherit;padding:7px;font-weight:750;font-family:inherit}
+.w101-chart{min-height:180px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.w101-linechart{display:block;width:100%;height:auto;max-height:245px}
+@media(max-width:400px){
+ .w101-details{padding:10px}
+ .w101-input-grid{gap:8px}
+ .w101-field{font-size:11.5px}
+ .w101-stats>div{padding:10px}
+ .w101-stats b{font-size:18px}
+}
