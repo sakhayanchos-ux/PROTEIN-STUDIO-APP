@@ -110,14 +110,18 @@ function cardMarkup(){
  '<button type="button" class="btn primary w101-save" id="w101Save">Сохранить Wellness-замер</button><p id="w101Message" class="message" role="status" aria-live="polite"></p>'+
  '</details>'+
  '<details class="w101-details" open><summary>📊 Начало → сейчас: показатели и нормы</summary>'+
- '<p class="w101-note">Сравнение с первым измерением. Справочные диапазоны по загруженному бланку Herbalife; не медицинская диагностика.</p>'+
+ '<label class="w101-source">Источник справочных таблиц<select id="w101RefMode"><option value="brochure">🍏 Wellness-Test · брошюра с яблоком</option><option value="form2025">Herbalife · бланк июня 2025</option></select></label>'+
+ '<p class="w101-note">Нормы зависят от выбранного источника и не заменяют медицинскую оценку.</p>'+
  '<div class="w101-history-scroll"><table class="w101-compare"><thead><tr><th>Показатель</th><th>Старт</th><th>Сейчас</th><th>Изменение</th><th>Ориентир</th></tr></thead><tbody id="w101Compare"></tbody></table></div></details>'+
+ '<details class="w101-details" open><summary>🍏 Wellness-Test: справочник и таблицы</summary>'+
+ '<p class="w101-note">Нормы жира, воды, висцерального жира и костной массы, физические типы. <a href="https://ppt-online.org/552105" target="_blank" rel="noopener noreferrer">Открыть всю брошюру с яблоком ↗</a></p>'+
+ '<div id="w101Guide"></div></details>'+
  '<details class="w101-details" open><summary>📈 График изменений</summary>'+
  '<label class="w101-chart-choice">Что показать<select id="w101ChartKey">'+CHART_METRICS.map(key=>{const m=METRICS.find(x=>x.key===key);return '<option value="'+key+'">'+safe(m.label)+'</option>'}).join("")+'</select></label>'+
  '<div id="w101Chart" class="w101-chart">Добавьте хотя бы два замера для графика.</div></details>'+
  '<details class="w101-details"><summary>📅 История замеров по датам</summary><div class="w101-history-scroll"><table class="w101-history"><thead><tr><th>Дата</th><th>Вес</th><th>Жир</th><th>Вода</th><th>Талия</th><th>Бёдра</th></tr></thead><tbody id="w101History"></tbody></table></div>'+
  '<p class="w101-note">Выберите дату выше, чтобы открыть и дополнить ранее записанные показатели. Старые данные веса и талии учитываются автоматически.</p></details>'+
- '<p class="w101-disclaimer">Справка о комплекции: <a href="https://www.eat-to-live.ru/body_types/" target="_blank" rel="noopener noreferrer">таблица веса и телосложения</a>. Нормы зависят от возраста, пола, прибора и метода измерения. «Костная масса» в весах — расчётный показатель, а не анализ кальция или исследование плотности костей. При вопросах о здоровье обратитесь к врачу.</p>'+
+ '<p class="w101-disclaimer">Таблица веса по телосложению: <a href="https://ppt-online.org/552105" target="_blank" rel="noopener noreferrer">Wellness-Test, слайд 2</a>. Старые материалы и бланк 2025 года содержат разные диапазоны: выберите нужный источник. Нормы зависят от возраста, пола, прибора и метода измерения. «Костная масса» в весах — расчётный показатель, а не анализ кальция или исследование плотности костей. При вопросах о здоровье обратитесь к врачу.</p>'+
  '</section>';
 }
 pageProgress=function(){
