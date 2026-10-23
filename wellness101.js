@@ -24,6 +24,22 @@ const METRICS=[
  {key:"leftThigh",group:"tape",label:"Левое бедро",unit:"см",min:15,max:150}
 ];
 const CHART_METRICS=["weight","fat","water","waist","muscle","visceral"];
+// Optional non-clinical body-frame reference for adults 25+, distinct from Wellness scan norms.
+const FRAME_TABLE={
+ female:[[145,[43,46],[45,50],[48,55]],[150,[45,49],[47,53],[51,58]],[155,[48,51],[50,55],[54,61]],[160,[50,54],[53,59],[57,64]],[163,[52,56],[54,61],[59,66]],[165,[54,58],[56,63],[60,68]],[170,[57,61],[60,67],[64,72]],[175,[61,65],[64,70],[68,76]],[178,[63,67],[65,72],[69,79]]],
+ male:[[155,[51,54],[54,59],[57,64]],[160,[54,57],[56,62],[60,67]],[165,[56,60],[59,65],[63,71]],[170,[60,64],[63,69],[67,75]],[175,[64,68],[66,73],[70,79]],[180,[67,72],[70,77],[74,84]],[185,[71,76],[74,82],[79,88]],[190,[74,79],[78,86],[83,93]]]
+};
+function frameEstimate(info){
+ if(!info.frame||!info.sex||!(info.age>=25)||!Number.isFinite(info.height))return null;
+ const rows=FRAME_TABLE[info.sex];if(!rows)return null;
+ const h=info.height;
+ if(h<rows[0][0]||h>rows.at(-1)[0])return null;
+ let a=rows[0],b=rows[0];
+ for(let i=0;i<rows.length-1;i++){if(h>=rows[i][0]&&h<=rows[i+1][0]){a=rows[i];b=rows[i+1];break}}
+ const col={small:1,medium:2,large:3}[info.frame],r=(h-a[0])/Math.max(1,b[0]-a[0]);
+ if(!col)return null;
+ return [a[col][0]+r*(b[col][0]-a[col][0]),a[col][1]+r*(b[col][1]-a[col][1])];
+}
 let wellnessRows101=[],legacyRows101=[];
 const $w=id=>document.getElementById(id);
 const safe=v=>String(v==null?"":v).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -53,7 +69,7 @@ function cardMarkup(){
  '<label class="w101-field">Рост <small>см</small><input id="w101Height" type="number" step="0.01" min="100" max="250" inputmode="decimal" placeholder="—"></label>'+
  '<label class="w101-field">Телосложение<select id="w101Frame">'+frame+'</select></label>'+
  '<label class="w101-field">Запястье <small>см, необязательно</small><input id="w101Wrist" type="number" step="0.01" min="8" max="35" inputmode="decimal" placeholder="—"></label>'+
- '</div><p class="w101-note" id="w101FrameInfo">Мелкое, среднее и крупное телосложение — характеристика комплекции, а не диагноз и не точный «идеальный вес».</p></details>'+
+ '</div><p class="w101-note" id="w101FrameInfo">Тип телосложения — характеристика комплекции, а не диагноз.</p><p class="w101-note" id="w101FrameWeight"></p></details>'+
  '<details class="w101-nested" open><summary>2. Полное сканирование состава тела</summary><div class="w101-input-grid">'+
  METRICS.filter(x=>x.group==="body").map(inputFor).join("")+'</div>'+
  '<p class="w101-note" id="w101Bmi">ИМТ рассчитывается автоматически по весу и росту.</p></details>'+
@@ -69,7 +85,7 @@ function cardMarkup(){
  '<div id="w101Chart" class="w101-chart">Добавьте хотя бы два замера для графика.</div></details>'+
  '<details class="w101-details"><summary>📅 История замеров по датам</summary><div class="w101-history-scroll"><table class="w101-history"><thead><tr><th>Дата</th><th>Вес</th><th>Жир</th><th>Вода</th><th>Талия</th><th>Бёдра</th></tr></thead><tbody id="w101History"></tbody></table></div>'+
  '<p class="w101-note">Выберите дату выше, чтобы открыть и дополнить ранее записанные показатели. Старые данные веса и талии учитываются автоматически.</p></details>'+
- '<p class="w101-disclaimer">Нормы зависят от возраста, пола, прибора и метода измерения. «Костная масса» в весах — расчётный показатель, а не анализ кальция или исследование плотности костей. При вопросах о здоровье обратитесь к врачу.</p>'+
+ '<p class="w101-disclaimer">Справка о комплекции: <a href="https://www.eat-to-live.ru/body_types/" target="_blank" rel="noopener noreferrer">таблица веса и телосложения</a>. Нормы зависят от возраста, пола, прибора и метода измерения. «Костная масса» в весах — расчётный показатель, а не анализ кальция или исследование плотности костей. При вопросах о здоровье обратитесь к врачу.</p>'+
  '</section>';
 }
 pageProgress=function(){
@@ -139,6 +155,10 @@ function updateInfo(){
  }
  if($w("w101FrameInfo"))$w("w101FrameInfo").textContent=(m.frame?"Выбранное телосложение: "+names[m.frame]+". ":"")+
  "Размер костного каркаса не определяет точный «идеальный вес»."+wristHint;
+ const ref=frameEstimate(m);
+ if($w("w101FrameWeight"))$w("w101FrameWeight").textContent=ref
+ ? "Ориентировочная таблица по телосложению: "+format(ref[0])+"–"+format(ref[1])+" кг. Это НЕ медицинская норма и не обязательная цель веса; справочник «Есть, чтобы жить» (для взрослых 25+)."
+ : "При указании пола, возраста от 25 лет, роста и телосложения можно увидеть примерный диапазон из справочной таблицы. Он не заменяет оценку здоровья.";
 }
 function fatReference(age,sex){
  if(!(age>=18)||!["female","male"].includes(sex))return null;
