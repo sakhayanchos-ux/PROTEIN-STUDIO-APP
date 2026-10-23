@@ -232,38 +232,46 @@ function updateInfo(){
  ? "Таблица Wellness-Test (слайд 2): "+format(ref.range[0])+"–"+format(ref.range[1])+" кг"+(ref.interpolated?" · приблизительно между строками таблицы":"")+". Это справочный, НЕ медицинский диапазон, а не обязательная цель."
  : "Укажите пол, рост и телосложение — покажем диапазон по таблице Wellness-Test. Он не заменяет медицинскую оценку.";
 }
+/* Select archived Wellness-Test (apple cover) or June 2025 Herbalife scan form. */
 function fatReference(age,sex){
  if(!(age>=18)||!["female","male"].includes(sex))return null;
- const a=age<30?0:age<40?1:age<50?2:age<60?3:4;
- const women=[[20,28],[21,29],[22,30],[23,31],[24,32]];
- const men=[[14,20],[15,21],[17,23],[18,24],[19,25]];
- return (sex==="female"?women:men)[a];
+ const i=age<30?0:age<40?1:age<50?2:age<60?3:4;
+ if(wellnessNormsMode==="form2025")return (sex==="female"?[[20,28],[21,29],[22,30],[23,31],[24,32]]:[[14,20],[15,21],[17,23],[18,24],[19,25]])[i];
+ return (sex==="female"?[[20,28],[22,30],[24,32],[26,34],[28,36]]:[[8,18],[11,20],[13,22],[15,24],[17,26]])[i];
 }
 function rangeText(low,high,value,unit){
- const lowS=format(low),highS=format(high),v=nValue(value);
- return lowS+"–"+highS+(unit||"")+(v==null?"":v<low?" · ниже":v>high?" · выше":" · в диапазоне");
+ const v=nValue(value);
+ return format(low)+"–"+format(high)+(unit||"")+(v==null?"":v<low?" · ниже":v>high?" · выше":" · в диапазоне");
+}
+function boneValue(sex,w){
+ if(!sex||!(w>0))return null;
+ if(wellnessNormsMode==="form2025")return sex==="female"?(w<50?1.95:w<=75?2.4:2.95):(w<65?2.66:w<=95?3.29:3.69);
+ return sex==="female"?(w<50?1.95:w<=75?2.4:w<=90?3.1:3.3):(w<65?2.66:w<=95?3.29:w<=110?4.0:4.3);
 }
 function reference(m,current,info){
  const v=nValue(current),sex=info.sex,age=info.age,w=nValue(info.weight);
- if(m.key==="fat"){
-  const r=fatReference(age,sex);
-  return r?rangeText(r[0],r[1],v,"%")+" · Wellness":'Укажите пол и возраст';
+ if(m.key==="fat"){const r=fatReference(age,sex);return r?rangeText(r[0],r[1],v,"%"):"Укажите пол и возраст";}
+ if(m.key==="water"){
+  if(!sex)return "Укажите пол";
+  const interval=wellnessNormsMode==="form2025"?(sex==="female"?[50,60]:[60,70]):(sex==="female"?[45,60]:[50,65]);
+  return rangeText(interval[0],interval[1],v,"%");
  }
- if(m.key==="water")return sex==="female"?rangeText(50,60,v,"%")+" · Wellness":sex==="male"?rangeText(60,70,v,"%")+" · Wellness":"Укажите пол";
  if(m.key==="visceral"){
-  if(v==null)return "1–4 · Wellness";
-  return v<=2?"1–2 · идеальный":v<=4?"3–4 · обычный":v<=6?"5–6 · средний":v<=9?"7–9 · высокий":"> 10 · высокий риск по шкале бланка";
+  if(v==null)return "1–4 · уровни 1–2 и 3–4";
+  return v<=2?"1–2 · низкий":v<=4?"3–4 · обычный":v<=6?"5–6 · средний":v<=9?"7–9 · высокий":"10+ · высокий";
  }
  if(m.key==="bone"){
-  if(!w||!sex)return "Нужны пол и вес";
-  const std=sex==="female"?(w<50?1.95:w<=75?2.4:2.95):(w<65?2.66:w<=95?3.29:3.69);
-  return "Ориентир ≈ "+format(std)+" кг для группы веса";
+  const b=boneValue(sex,w);
+  return b==null?"Нужны пол и вес":"≈ "+format(b)+" кг, ориентир для группы веса";
  }
- if(m.key==="weight")return info.height?"ИМТ 18,5–24,9 (взрослые)":"Укажите рост для ИМТ";
- if(m.key==="physique")return "Тип 1–9, не шкала нормы";
- if(m.key==="muscle")return "Зависит от возраста, роста и прибора";
- if(m.key==="bmr")return "Индивидуальный показатель весов";
- if(m.key==="metabolicAge")return "Условная оценка весов";
+ if(m.key==="weight"){
+  const frame=frameEstimate(info);
+  return frame?"По телосложению: "+format(frame.range[0])+"–"+format(frame.range[1])+" кг":"Укажите рост, пол и телосложение";
+ }
+ if(m.key==="physique")return v!=null&&Number.isInteger(v)&&v>=1&&v<=9?"Тип "+v+": "+PHYSIQUE_TYPES[v-1]:"Тип анализатора от 1 до 9";
+ if(m.key==="muscle")return "Сравнивайте динамику на одном приборе";
+ if(m.key==="bmr")return "Индивидуальная оценка прибора";
+ if(m.key==="metabolicAge")return "Расчётный показатель прибора";
  return "Изменение относительно старта";
 }
 function getReferenceInfo(rows){
