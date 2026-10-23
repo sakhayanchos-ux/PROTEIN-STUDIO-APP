@@ -111,7 +111,7 @@ function cardMarkup(){
  '</details>'+
  '<details class="w101-details" open><summary>📊 Начало → сейчас: показатели и нормы</summary>'+
  '<label class="w101-source">Источник справочных таблиц<select id="w101RefMode"><option value="brochure">🍏 Wellness-Test · брошюра с яблоком</option><option value="form2025">Herbalife · бланк июня 2025</option></select></label>'+
- '<p class="w101-note">Нормы зависят от выбранного источника и не заменяют медицинскую оценку.</p>'+
+ '<p class="w101-note">Начальный вес, талия, грудь и бёдра — из сохранённых стартовых данных. Остальные параметры — с первого Wellness-замера. Нормы справочные.</p>'+
  '<div class="w101-history-scroll"><table class="w101-compare"><thead><tr><th>Показатель</th><th>Старт</th><th>Сейчас</th><th>Изменение</th><th>Ориентир</th></tr></thead><tbody id="w101Compare"></tbody></table></div></details>'+
  '<details class="w101-details" open><summary>🍏 Wellness-Test: справочник и таблицы</summary>'+
  '<p class="w101-note">Нормы жира, воды, висцерального жира и костной массы, физические типы. <a href="https://ppt-online.org/552105" target="_blank" rel="noopener noreferrer">Открыть всю брошюру с яблоком ↗</a></p>'+
@@ -304,15 +304,36 @@ function renderWellnessGuide(){
  '<p class="w101-note">Названия — из брошюры. Они описывают тип по анализатору, а не состояние здоровья.</p></details>'+
  '<p class="w101-note">У мышечной массы, скорости основного обмена и метаболического возраста нет единого универсального «правильного» числа для всех. Важно сравнивать данные одного прибора со временем.</p>';
 }
+// Baselines of measurements entered during onboarding come from the official
+// starting values, NOT from the first chronological weigh-in in the history.
+// Historical measurements are kept unchanged.
+function startValue101(metric,firstRecorded){
+ const official={
+  weight:assessment?.starting_weight_kg,
+  waist:assessment?.waist_cm,
+  chest:assessment?.chest_cm,
+  hips:assessment?.hips_cm
+ };
+ if(Object.prototype.hasOwnProperty.call(official,metric.key)){
+  const v=nValue(official[metric.key]);
+  if(v!=null)return v;
+ }
+ return firstRecorded;
+}
+function isOfficialStart101(metric){
+ const keys={weight:"starting_weight_kg",waist:"waist_cm",chest:"chest_cm",hips:"hips_cm"};
+ return keys[metric.key]&&nValue(assessment?.[keys[metric.key]])!=null;
+}
 function renderSummary(rows){
  const box=$w("w101Summary");if(!box)return;
  const metrics=METRICS.filter(m=>m.key==="weight"||m.key==="fat"||m.key==="water"||m.key==="waist");
  const cards=metrics.map(m=>{
   const r=[...rows].reverse().find(x=>nValue(x[m.group][m.key])!=null);
   const first=rows.find(x=>nValue(x[m.group][m.key])!=null);
-  const now=r?.[m.group][m.key]??null,start=first?.[m.group][m.key]??null;
+  const now=r?.[m.group][m.key]??null,start=startValue101(m,first?.[m.group][m.key]??null);
   const delta=now!=null&&start!=null?Number((now-start).toFixed(2)):null;
-  return '<div><span>'+safe(m.label)+'</span><b>'+format(now)+' '+m.unit+'</b><small>'+(delta==null?"Нет изменений":(delta>0?"+":"")+format(delta)+" "+m.unit+" от первого замера")+'</small></div>';
+  const label=isOfficialStart101(m)?" от старта":" от первого замера";
+  return '<div><span>'+safe(m.label)+'</span><b>'+format(now)+' '+m.unit+'</b><small>'+(delta==null?"Нет изменений":(delta>0?"+":"")+format(delta)+" "+m.unit+label)+'</small></div>';
  }).join("");
  box.innerHTML='<div class="w101-stats">'+cards+'</div>';
 }
@@ -321,9 +342,9 @@ function renderCompare(rows){
  const info=getReferenceInfo(rows);
  const all=METRICS.map(m=>{
   const present=rows.filter(r=>nValue(r[m.group][m.key])!=null);
-  const first=present[0]?.[m.group][m.key]??null;
+  const first=startValue101(m,present[0]?.[m.group][m.key]??null);
   const last=present.at(-1)?.[m.group][m.key]??null;
-  const diff=present.length>1?Number((last-first).toFixed(2)):null;
+  const diff=first!=null&&last!=null?Number((last-first).toFixed(2)):null;
   return '<tr><th>'+safe(m.label)+'</th><td>'+format(first)+'</td><td><b>'+format(last)+'</b></td><td>'+ (diff==null?"—":(diff>0?"+":"")+format(diff))+'</td><td>'+safe(reference(m,last,info))+'</td></tr>';
  }).join("");
  const wRows=rows.filter(r=>nValue(r.body.weight)!=null);
