@@ -38,3 +38,9 @@
  .w101-stats>div{padding:10px}
  .w101-stats b{font-size:18px}
 }
+/* User-controlled deletion of each progress photo */
+.photo-slot{position:relative}
+.w101-photo-x{position:absolute;top:9px;right:9px;z-index:4;width:34px;height:34px;border-radius:50%;border:1px solid rgba(155,47,84,.4);background:rgba(255,250,252,.97);color:#9a275a;box-shadow:0 2px 9px rgba(55,28,40,.16);font-weight:900;font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.w101-photo-x.hidden{display:none!important}
+.w101-photo-x:focus-visible{outline:3px solid #aa73ba;outline-offset:2px}
+.w101-photo-x:disabled{opacity:.45;cursor:wait}
