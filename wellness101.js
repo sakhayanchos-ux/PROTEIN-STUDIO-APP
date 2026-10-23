@@ -3,6 +3,7 @@
 "use strict";
 const originalPageProgress=pageProgress;
 const originalBindProgress=bindProgressPhotoActions;
+const originalLoadProgressPhotos=loadProgressPhotos;
 const METRICS=[
  {key:"weight",group:"body",label:"Вес",unit:"кг",min:20,max:450},
  {key:"fat",group:"body",label:"Общий жир",unit:"%",min:0,max:80},
@@ -92,13 +93,53 @@ pageProgress=function(){
  const source=originalPageProgress();
  const target='  <section class="card">\n    <div class="row">\n      <div>\n        <div class="eyebrow">Фото прогресса</div>';
  if(!source.includes(target))return source+cardMarkup();
- return source.replace(target,cardMarkup()+'\n'+target);
+ return source.replace(target,cardMarkup()+'\n'+target)
+ .replace('<div class="photo-frame" id="beforePhotoFrame"><span>Фото ДО</span></div>',
+ '<div class="photo-frame" id="beforePhotoFrame"><span>Фото ДО</span></div><button class="w101-photo-x hidden" id="w101DeleteBefore" type="button" aria-label="Удалить фото ДО" title="Удалить фото ДО">✕</button>')
+ .replace('<div class="photo-frame" id="afterPhotoFrame"><span>Фото ПОСЛЕ</span></div>',
+ '<div class="photo-frame" id="afterPhotoFrame"><span>Фото ПОСЛЕ</span></div><button class="w101-photo-x hidden" id="w101DeleteAfter" type="button" aria-label="Удалить фото ПОСЛЕ" title="Удалить фото ПОСЛЕ">✕</button>');
 };
 pages.progress=pageProgress;
 bindProgressPhotoActions=async function(){
  await originalBindProgress();
  if($w("wellness101"))await bindWellness101();
+ $w("w101DeleteBefore")?.addEventListener("click",()=>removeProgressPhoto101("before"));
+ $w("w101DeleteAfter")?.addEventListener("click",()=>removeProgressPhoto101("after"));
 };
+loadProgressPhotos=async function(){
+ await originalLoadProgressPhotos();
+ await refreshPhotoDeleteButtons101();
+};
+async function refreshPhotoDeleteButtons101(){
+ const a=await sb.from("ps_progress_photos").select("kind").eq("user_id",me.id);
+ if(a.error)return;
+ const kinds=new Set((a.data||[]).map(x=>x.kind));
+ $w("w101DeleteBefore")?.classList.toggle("hidden",!kinds.has("before"));
+ $w("w101DeleteAfter")?.classList.toggle("hidden",!kinds.has("after"));
+}
+async function removeProgressPhoto101(kind){
+ if(!window.confirm("Удалить фото "+(kind==="before"?"ДО":"ПОСЛЕ")+"? Восстановить удалённое фото нельзя."))return;
+ const msg=$w("photoMessage"),btn=$w(kind==="before"?"w101DeleteBefore":"w101DeleteAfter");
+ if(btn)btn.disabled=true;
+ try{
+  const existing=await sb.from("ps_progress_photos").select("storage_path").eq("user_id",me.id).eq("kind",kind).maybeSingle();
+  if(existing.error)throw existing.error;
+  const removed=await sb.from("ps_progress_photos").delete().eq("user_id",me.id).eq("kind",kind);
+  if(removed.error)throw removed.error;
+  if(existing.data?.storage_path){
+   const storage=await sb.storage.from("ps-progress-photos").remove([existing.data.storage_path]);
+   if(storage.error)console.warn("Old photo storage cleanup:",storage.error.message);
+  }
+  const isBefore=kind==="before";
+  const frame=$w(isBefore?"beforePhotoFrame":"afterPhotoFrame");
+  if(frame)frame.innerHTML="<span>Фото "+(isBefore?"ДО":"ПОСЛЕ")+"</span>";
+  const edit=$w(isBefore?"beforePhotoBtn":"afterPhotoBtn");
+  if(edit)edit.textContent="Добавить фото "+(isBefore?"ДО":"ПОСЛЕ");
+  if(msg)msg.textContent="Фото "+(isBefore?"ДО":"ПОСЛЕ")+" удалено ✓";
+  await refreshPhotoDeleteButtons101();
+ }catch(e){if(msg)msg.textContent="Не удалось удалить фото: "+(e.message||"ошибка")}
+ finally{if(btn)btn.disabled=false}
+}
 function mergeRows(){
  const map=new Map();
  const put=(d)=>{if(!map.has(d))map.set(d,{entry_date:d,body:{},tape:{},profile:{}});return map.get(d)};
