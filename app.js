@@ -1366,12 +1366,14 @@ document.querySelectorAll(".nav[data-page]").forEach(b=>b.addEventListener("clic
 $("wellnessNextBtn").addEventListener("click",nextOnboarding);
 $("wellnessBackBtn").addEventListener("click",prevOnboarding);
 
-(async()=>{
-  if(!initClient())return;
-  await loadConsultants();
-  const {data}=await sb.auth.getSession();
-  if(data.session){me=data.session.user;await bootstrap()}else showScreen("authScreen");
-  if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-})();
+document.addEventListener("DOMContentLoaded",()=>{
+  (async()=>{
+    if(!initClient())return;
+    await loadConsultants();
+    const {data}=await sb.auth.getSession();
+    if(data.session){me=data.session.user;await bootstrap()}else showScreen("authScreen");
+    if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  })().catch(e=>console.error("PROTEIN STUDIO startup:",e));
+});
 
 
