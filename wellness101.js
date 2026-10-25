@@ -95,13 +95,13 @@ function cardMarkup(){
  '<div class="w101-current"><div id="w101Summary">Загружаем результаты…</div></div>'+
  '<details class="w101-details" open><summary>✍️ Записать Wellness-замер</summary>'+
  '<label class="w101-date">Дата измерения<input id="w101Date" type="date" max="'+profileToday()+'" value="'+profileToday()+'"></label>'+
- '<details class="w101-nested"><summary>1. О себе и телосложении</summary><div class="w101-input-grid">'+
+ '<details class="w101-nested"><summary id="w101ProfileSummary">1. Мои данные · заполнить один раз</summary><div class="w101-input-grid">'+
  '<label class="w101-field">Пол<select id="w101Sex">'+opts+'</select></label>'+
  '<label class="w101-field">Возраст <small>лет</small><input id="w101Age" type="number" step="1" min="18" max="100" inputmode="numeric" placeholder="—"></label>'+
  '<label class="w101-field">Рост <small>см</small><input id="w101Height" type="number" step="0.01" min="100" max="250" inputmode="decimal" placeholder="—"></label>'+
  '<label class="w101-field">Телосложение<select id="w101Frame">'+frame+'</select></label>'+
  '<label class="w101-field">Запястье <small>см, необязательно</small><input id="w101Wrist" type="number" step="0.01" min="8" max="35" inputmode="decimal" placeholder="—"></label>'+
- '</div><p class="w101-note" id="w101FrameInfo">Тип телосложения — характеристика комплекции, а не диагноз.</p><p class="w101-note" id="w101FrameWeight"></p></details>'+
+ '</div><p class="w101-note">Пол, возраст, рост и телосложение сохраняются после первого Wellness-замера. Откройте этот раздел, только если нужно изменить данные.</p><p class="w101-note" id="w101FrameInfo">Тип телосложения — характеристика комплекции, а не диагноз.</p><p class="w101-note" id="w101FrameWeight"></p></details>'+
  '<details class="w101-nested" open><summary>2. Полное сканирование состава тела</summary><div class="w101-input-grid">'+
  METRICS.filter(x=>x.group==="body").map(inputFor).join("")+'</div>'+
  '<p class="w101-note" id="w101Bmi">ИМТ рассчитывается автоматически по весу и росту.</p></details>'+
@@ -206,13 +206,23 @@ function setInfo(d){
  updateInfo();
 }
 function latestMeta(){
- return [...wellnessRows101].sort((a,b)=>a.entry_date.localeCompare(b.entry_date)).at(-1)?.profile||metaDefaults();
+ // The latest nonempty value of each field is used for every measurement date.
+ // Empty fields in old entries must not clear a previously saved personal profile.
+ const result=metaDefaults();
+ for(const row of [...wellnessRows101].sort((a,b)=>a.entry_date.localeCompare(b.entry_date))){
+  const data=row.profile||{};
+  for(const key of ["sex","age","height","frame","wrist"]){
+   const value=data[key];
+   if(value!==null&&value!==undefined&&value!=="")result[key]=value;
+  }
+ }
+ return result;
 }
 function fillDate(){
  const d=$w("w101Date")?.value;
  if(!d)return;
  const r=mergeRows().find(x=>x.entry_date===d);
- setInfo({...metaDefaults(),...latestMeta(),...(r?.profile||{})});
+ setInfo(latestMeta());
  for(const m of METRICS){
   const input=$w("wellness101")?.querySelector('[data-w101-key="'+m.key+'"]');
   if(input)input.value=(r?.[m.group]?.[m.key]??"");
@@ -221,6 +231,9 @@ function fillDate(){
 }
 function updateInfo(){
  const m=readInfo(),weight=nValue($w("wellness101")?.querySelector('[data-w101-key="weight"]')?.value);
+ const parts=[m.sex==="female"?"женщина":m.sex==="male"?"мужчина":null,m.age!=null?m.age+" лет":null,m.height!=null?format(m.height)+" см":null,m.frame?({small:"мелкое",medium:"среднее",large:"крупное"}[m.frame]):null].filter(Boolean);
+ const heading=$w("w101ProfileSummary");
+ if(heading)heading.textContent=parts.length===4?"1. Мои данные · "+parts.join(" · ")+" (изменить)":"1. Мои данные · заполнить один раз";
  if($w("w101Bmi"))$w("w101Bmi").textContent=weight&&m.height?"ИМТ по росту и весу: "+format(weight/Math.pow(m.height/100,2))+". Ориентир для взрослых: 18,5–24,9.":"ИМТ рассчитывается по введённым весу и росту. Для взрослых ориентир: 18,5–24,9.";
  const names={small:"мелкое",medium:"среднее",large:"крупное"};
  let wristHint="";
