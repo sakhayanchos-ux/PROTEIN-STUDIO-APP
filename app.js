@@ -902,9 +902,8 @@ function deltaText(v,unit){
 }
 
 async function getProgressSummary(){
-  const {data,error}=await sb.from("ps_progress_entries").select("*").eq("user_id",me.id).order("entry_date",{ascending:true});
-  if(error)throw error;
-  const rows=data||[];
+  // Wellness corrections override old diary measurements for the same date.
+  const rows=await psLoadUnifiedMeasurements();
 
   const fallbackDates=[(assessment?.completed_at||"").slice(0,10),plan?.start_date,rows[0]?.entry_date].filter(Boolean).sort();
   const startDate=assessment?.progress_start_date || fallbackDates[0] || null;
