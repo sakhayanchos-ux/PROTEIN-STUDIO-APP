@@ -11,9 +11,7 @@ function cm83Chart(rows,key,label,unit){
 async function cm83LoadClientCharts(){
   const host=document.getElementById('clientMeasurementCharts83');if(!host||!me)return;
   try{
-    const q=await sb.from('ps_progress_entries').select('entry_date,weight_kg,waist_cm').eq('user_id',me.id).order('entry_date',{ascending:true});
-    if(q.error)throw q.error;
-    const rows=q.data||[];
+    const rows=await psLoadUnifiedMeasurements();
     host.innerHTML=cm83Chart(rows,'weight_kg','Вес','кг')+cm83Chart(rows,'waist_cm','Талия','см')+
       '<details class="cm83-history"><summary>Все замеры</summary><div class="cm83-table"><div><b>Дата</b><b>Вес</b><b>Талия</b></div>'+rows.map(r=>'<div><span>'+escapeHtml(r.entry_date)+'</span><span>'+(r.weight_kg==null?'—':ruNumber(r.weight_kg)+' кг')+'</span><span>'+(r.waist_cm==null?'—':ruNumber(r.waist_cm)+' см')+'</span></div>').join('')+'</div></details>';
   }catch(e){host.innerHTML='<p class="message">Не удалось загрузить график.</p>'}
